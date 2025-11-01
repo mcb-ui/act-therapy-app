@@ -102,7 +102,7 @@ A comprehensive web-based interactive tool for practicing Acceptance and Commitm
 
    This starts:
    - Frontend: http://localhost:3000
-   - Backend: http://localhost:5000
+   - Backend: http://localhost:5001
 
 ## Usage
 
