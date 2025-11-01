@@ -1,31 +1,31 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import { useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
+import axios from 'axios'
 
 interface LoginProps {
-  setAuth: (value: boolean) => void;
+  setAuth: (value: boolean) => void
 }
 
 export default function Login({ setAuth }: LoginProps) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
+    e.preventDefault()
+    setError('')
 
     try {
-      const response = await axios.post('/api/auth/login', { email, password });
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
-      setAuth(true);
-      navigate('/');
+      const response = await axios.post('/api/auth/login', { email, password })
+      localStorage.setItem('token', response.data.token)
+      localStorage.setItem('user', JSON.stringify(response.data.user))
+      setAuth(true)
+      navigate('/')
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Login failed');
+      setError(err.response?.data?.error || 'Login failed')
     }
-  };
+  }
 
   return (
     <div className="min-h-screen bg-parchment flex items-center justify-center p-4">
@@ -73,11 +73,14 @@ export default function Login({ setAuth }: LoginProps) {
 
         <p className="mt-6 text-center text-gray-600 font-body">
           Don't have an account?{' '}
-          <Link to="/register" className="text-electric-blue font-semibold hover:text-electric-blue-600">
+          <Link
+            to="/register"
+            className="text-electric-blue font-semibold hover:text-electric-blue-600"
+          >
             Sign up
           </Link>
         </p>
       </div>
     </div>
-  );
+  )
 }

@@ -1,20 +1,20 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { Home, Target, Brain, Heart, Zap, CheckSquare, Hexagon, LogOut } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom'
+import { Home, Hexagon, LogOut } from 'lucide-react'
 
 interface LayoutProps {
-  children: React.ReactNode;
-  setAuth: (value: boolean) => void;
+  children: React.ReactNode
+  setAuth: (value: boolean) => void
 }
 
 export default function Layout({ children, setAuth }: LayoutProps) {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setAuth(false);
-    navigate('/login');
-  };
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    setAuth(false)
+    navigate('/login')
+  }
 
   return (
     <div className="min-h-screen bg-parchment">
@@ -27,11 +27,17 @@ export default function Layout({ children, setAuth }: LayoutProps) {
               </Link>
 
               <div className="hidden md:flex space-x-4">
-                <Link to="/" className="flex items-center space-x-2 text-gray-700 hover:text-electric-blue px-3 py-2 rounded-md font-subheader uppercase text-sm">
+                <Link
+                  to="/"
+                  className="flex items-center space-x-2 text-gray-700 hover:text-electric-blue px-3 py-2 rounded-md font-subheader uppercase text-sm"
+                >
                   <Home size={18} />
                   <span>Dashboard</span>
                 </Link>
-                <Link to="/hexaflex" className="flex items-center space-x-2 text-gray-700 hover:text-electric-blue px-3 py-2 rounded-md font-subheader uppercase text-sm">
+                <Link
+                  to="/hexaflex"
+                  className="flex items-center space-x-2 text-gray-700 hover:text-electric-blue px-3 py-2 rounded-md font-subheader uppercase text-sm"
+                >
                   <Hexagon size={18} />
                   <span>Hexaflex</span>
                 </Link>
@@ -49,9 +55,7 @@ export default function Layout({ children, setAuth }: LayoutProps) {
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {children}
-      </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">{children}</div>
     </div>
-  );
+  )
 }

@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import { Brain, RefreshCw } from 'lucide-react';
-import axios from 'axios';
+import { useState } from 'react'
+import { Brain, RefreshCw } from 'lucide-react'
+import axios from 'axios'
 
 export default function DefusionExercise() {
-  const [thought, setThought] = useState('');
-  const [currentExercise, setCurrentExercise] = useState<number | null>(null);
-  const [defusedThought, setDefusedThought] = useState('');
+  const [thought, setThought] = useState('')
+  const [currentExercise, setCurrentExercise] = useState<number | null>(null)
+  const [defusedThought, setDefusedThought] = useState('')
 
   const exercises = [
     {
@@ -29,7 +29,7 @@ export default function DefusionExercise() {
     {
       id: 4,
       title: 'Say It in a Silly Voice',
-      description: 'Imagine saying it in a cartoon character\'s voice',
+      description: "Imagine saying it in a cartoon character's voice",
       transform: (t: string) => `Imagine saying this in Donald Duck's voice: "${t}"`,
     },
     {
@@ -44,22 +44,22 @@ export default function DefusionExercise() {
       description: 'Give the recurring thought pattern a name',
       transform: (t: string) => `Ah, this is the "${t.substring(0, 30)}..." story again.`,
     },
-  ];
+  ]
 
   const handleExercise = async (exerciseId: number) => {
     if (!thought.trim()) {
-      alert('Please enter a thought first!');
-      return;
+      alert('Please enter a thought first!')
+      return
     }
 
-    const exercise = exercises.find((e) => e.id === exerciseId);
+    const exercise = exercises.find((e) => e.id === exerciseId)
     if (exercise) {
-      setDefusedThought(exercise.transform(thought));
-      setCurrentExercise(exerciseId);
+      setDefusedThought(exercise.transform(thought))
+      setCurrentExercise(exerciseId)
 
       // Save progress
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token')
         await axios.post(
           '/api/progress',
           {
@@ -69,13 +69,13 @@ export default function DefusionExercise() {
           },
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+          },
+        )
       } catch (error) {
-        console.error('Failed to save progress:', error);
+        console.error('Failed to save progress:', error)
       }
     }
-  };
+  }
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -92,9 +92,9 @@ export default function DefusionExercise() {
       <div className="card bg-purple-50 border-purple-200">
         <h3 className="font-semibold text-purple-900 mb-2">What is Cognitive Defusion?</h3>
         <p className="text-purple-800 mb-2">
-          Cognitive defusion helps you step back from your thoughts rather than getting caught
-          up in them. Instead of trying to change or eliminate thoughts, you learn to see them
-          as just thoughts - mental events that come and go.
+          Cognitive defusion helps you step back from your thoughts rather than getting caught up in
+          them. Instead of trying to change or eliminate thoughts, you learn to see them as just
+          thoughts - mental events that come and go.
         </p>
         <p className="text-purple-800">
           Try these exercises with a thought that's been troubling you.
@@ -120,8 +120,8 @@ export default function DefusionExercise() {
             <h3 className="text-lg font-semibold">Defused Version:</h3>
             <button
               onClick={() => {
-                setDefusedThought('');
-                setCurrentExercise(null);
+                setDefusedThought('')
+                setCurrentExercise(null)
               }}
               className="text-purple-200 hover:text-white"
             >
@@ -142,9 +142,7 @@ export default function DefusionExercise() {
             <div
               key={exercise.id}
               className={`card cursor-pointer hover:shadow-lg transition-all ${
-                currentExercise === exercise.id
-                  ? 'ring-2 ring-purple-500 bg-purple-50'
-                  : ''
+                currentExercise === exercise.id ? 'ring-2 ring-purple-500 bg-purple-50' : ''
               }`}
               onClick={() => handleExercise(exercise.id)}
             >
@@ -177,5 +175,5 @@ export default function DefusionExercise() {
         </ul>
       </div>
     </div>
-  );
+  )
 }
