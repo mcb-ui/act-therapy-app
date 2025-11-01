@@ -29,20 +29,20 @@ export default function Register({ setAuth }: RegisterProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-midnight-purple-50 to-electric-blue-50 flex items-center justify-center p-4">
       <div className="card max-w-md w-full">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Get Started</h1>
-        <p className="text-gray-600 mb-6">Create your account to begin your ACT journey</p>
+        <h1 className="text-3xl font-header text-midnight-purple mb-2">Get Started</h1>
+        <p className="text-gray-600 font-body mb-6">Create your account to begin your ACT journey</p>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+          <div className="bg-inferno-red-50 border border-inferno-red-200 text-inferno-red-700 px-4 py-3 rounded-lg mb-4">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-subheader text-gray-700 mb-2 uppercase">
               Name
             </label>
             <input
@@ -55,7 +55,7 @@ export default function Register({ setAuth }: RegisterProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-subheader text-gray-700 mb-2 uppercase">
               Email
             </label>
             <input
@@ -68,7 +68,7 @@ export default function Register({ setAuth }: RegisterProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-subheader text-gray-700 mb-2 uppercase">
               Password
             </label>
             <input
@@ -86,9 +86,9 @@ export default function Register({ setAuth }: RegisterProps) {
           </button>
         </form>
 
-        <p className="mt-6 text-center text-gray-600">
+        <p className="mt-6 text-center text-gray-600 font-body">
           Already have an account?{' '}
-          <Link to="/login" className="text-primary-600 font-semibold hover:text-primary-700">
+          <Link to="/login" className="text-electric-blue font-semibold hover:text-electric-blue-600">
             Sign in
           </Link>
         </p>

@@ -19,7 +19,7 @@ export default function Dashboard() {
       title: 'Values Clarification',
       description: 'Identify and explore what truly matters to you in life',
       icon: Target,
-      color: 'from-blue-500 to-blue-600',
+      color: 'from-electric-blue-500 to-electric-blue-600',
       path: '/exercises/values',
     },
     {
@@ -27,7 +27,7 @@ export default function Dashboard() {
       title: 'Cognitive Defusion',
       description: 'Learn to observe thoughts without being controlled by them',
       icon: Brain,
-      color: 'from-purple-500 to-purple-600',
+      color: 'from-midnight-purple-400 to-midnight-purple-600',
       path: '/exercises/defusion',
     },
     {
@@ -35,7 +35,7 @@ export default function Dashboard() {
       title: 'Acceptance',
       description: 'Practice opening up to difficult emotions and experiences',
       icon: Heart,
-      color: 'from-pink-500 to-pink-600',
+      color: 'from-brand-pink-400 to-brand-pink-600',
       path: '/exercises/acceptance',
     },
     {
@@ -43,7 +43,7 @@ export default function Dashboard() {
       title: 'Present Moment',
       description: 'Develop awareness and connection to the here and now',
       icon: Zap,
-      color: 'from-yellow-500 to-orange-500',
+      color: 'from-lime-green-400 to-lime-green-600',
       path: '/exercises/mindfulness',
     },
     {
@@ -51,7 +51,7 @@ export default function Dashboard() {
       title: 'Committed Action',
       description: 'Set goals and take steps aligned with your values',
       icon: CheckSquare,
-      color: 'from-green-500 to-green-600',
+      color: 'from-inferno-red-400 to-inferno-red-600',
       path: '/exercises/action',
     },
   ];
@@ -59,35 +59,35 @@ export default function Dashboard() {
   return (
     <div className="space-y-8">
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">
+        <h1 className="text-4xl font-header text-midnight-purple mb-2">
           Welcome back, {userName}!
         </h1>
-        <p className="text-xl text-gray-600">
+        <p className="text-xl text-gray-600 font-body">
           Continue your journey toward psychological flexibility
         </p>
       </div>
 
-      <div className="card bg-gradient-to-r from-primary-500 to-primary-600 text-white">
+      <div className="card bg-gradient-to-r from-midnight-purple to-electric-blue text-white">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold mb-2">ACT Hexaflex Model</h2>
-            <p className="text-primary-100 mb-4">
+            <h2 className="text-2xl font-header mb-2">ACT Hexaflex Model</h2>
+            <p className="text-parchment-100 mb-4 font-body">
               Explore the six core processes of ACT
             </p>
             <Link
               to="/hexaflex"
-              className="inline-flex items-center space-x-2 bg-white text-primary-600 px-6 py-3 rounded-lg font-semibold hover:bg-primary-50 transition-colors"
+              className="inline-flex items-center space-x-2 bg-white text-midnight-purple px-6 py-3 rounded-lg font-subheader uppercase tracking-wide hover:bg-parchment-50 transition-colors"
             >
               <Hexagon size={20} />
               <span>View Hexaflex</span>
             </Link>
           </div>
-          <Hexagon size={120} className="text-primary-300 opacity-20" />
+          <Hexagon size={120} className="text-parchment-200 opacity-20" />
         </div>
       </div>
 
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Interactive Exercises</h2>
+        <h2 className="text-2xl font-header text-midnight-purple mb-6">Interactive Exercises</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {exercises.map((exercise) => {
             const Icon = exercise.icon;
@@ -100,10 +100,10 @@ export default function Dashboard() {
                 <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${exercise.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200`}>
                   <Icon size={28} className="text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                <h3 className="text-xl font-subheader text-midnight-purple mb-2 uppercase tracking-wide">
                   {exercise.title}
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-600 font-body">
                   {exercise.description}
                 </p>
               </Link>
@@ -112,9 +112,9 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="card bg-gradient-to-r from-gray-50 to-gray-100">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">About ACT</h3>
-        <p className="text-gray-700">
+      <div className="card bg-gradient-to-r from-parchment-100 to-parchment-200">
+        <h3 className="text-lg font-subheader text-midnight-purple mb-2 uppercase">About ACT</h3>
+        <p className="text-gray-700 font-body">
           Acceptance and Commitment Therapy (ACT) helps you build psychological flexibility
           through six core processes. Each exercise on this platform is designed to help you
           develop these skills and live a more valued life.
