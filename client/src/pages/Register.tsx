@@ -29,13 +29,13 @@ export default function Register({ setAuth }: RegisterProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-midnight-purple-50 to-electric-blue-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-parchment flex items-center justify-center p-4">
       <div className="card max-w-md w-full">
         <h1 className="text-3xl font-header text-midnight-purple mb-2">Get Started</h1>
         <p className="text-gray-600 font-body mb-6">Create your account to begin your ACT journey</p>
 
         {error && (
-          <div className="bg-inferno-red-50 border border-inferno-red-200 text-inferno-red-700 px-4 py-3 rounded-lg mb-4">
+          <div className="bg-white border-2 border-inferno-red text-inferno-red px-4 py-3 rounded-lg mb-4 font-body">
             {error}
           </div>
         )}
