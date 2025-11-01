@@ -92,8 +92,13 @@ A comprehensive web-based interactive tool for practicing Acceptance and Commitm
    ```
 
 4. **Configure environment variables**
-   - Update `server/.env` with your settings
-   - Change `JWT_SECRET` to a secure random string in production
+   ```bash
+   cd server
+   cp .env.example .env
+   cd ..
+   ```
+   - Edit `server/.env` and change `JWT_SECRET` to a secure random string
+   - For production, generate a strong secret with: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
 
 5. **Start the development servers**
    ```bash
