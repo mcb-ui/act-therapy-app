@@ -6,7 +6,6 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
   const code = (err as any)?.code ?? 'INTERNAL_ERROR'
 
   if (process.env.NODE_ENV !== 'production') {
-     
     console.error(err)
   }
 
