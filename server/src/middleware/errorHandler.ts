@@ -4,6 +4,7 @@ export function errorHandler(
   err: unknown,
   _req: Request,
   res: Response,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _next: NextFunction,
 ) {
   const status = typeof (err as { status?: number })?.status === 'number' ? (err as { status: number }).status : 500
