@@ -1,25 +1,25 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Target, Plus, Edit2, Trash2 } from 'lucide-react';
+import { useState, useEffect } from 'react'
+import axios from 'axios'
+import { Target, Plus, Edit2, Trash2 } from 'lucide-react'
 
 interface Value {
-  id: string;
-  category: string;
-  description: string;
-  importance: number;
-  alignment: number;
+  id: string
+  category: string
+  description: string
+  importance: number
+  alignment: number
 }
 
 export default function ValuesExercise() {
-  const [values, setValues] = useState<Value[]>([]);
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [values, setValues] = useState<Value[]>([])
+  const [showForm, setShowForm] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     category: '',
     description: '',
     importance: 5,
     alignment: 5,
-  });
+  })
 
   const categories = [
     'Family',
@@ -32,47 +32,47 @@ export default function ValuesExercise() {
     'Recreation',
     'Creativity',
     'Environment',
-  ];
+  ]
 
   useEffect(() => {
-    fetchValues();
-  }, []);
+    fetchValues()
+  }, [])
 
   const fetchValues = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token')
       const response = await axios.get('/api/values', {
         headers: { Authorization: `Bearer ${token}` },
-      });
-      setValues(response.data);
+      })
+      setValues(response.data)
     } catch (error) {
-      console.error('Failed to fetch values:', error);
+      console.error('Failed to fetch values:', error)
     }
-  };
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const token = localStorage.getItem('token');
+    e.preventDefault()
+    const token = localStorage.getItem('token')
 
     try {
       if (editingId) {
         await axios.put(`/api/values/${editingId}`, formData, {
           headers: { Authorization: `Bearer ${token}` },
-        });
+        })
       } else {
         await axios.post('/api/values', formData, {
           headers: { Authorization: `Bearer ${token}` },
-        });
+        })
       }
 
-      setFormData({ category: '', description: '', importance: 5, alignment: 5 });
-      setShowForm(false);
-      setEditingId(null);
-      fetchValues();
+      setFormData({ category: '', description: '', importance: 5, alignment: 5 })
+      setShowForm(false)
+      setEditingId(null)
+      fetchValues()
     } catch (error) {
-      console.error('Failed to save value:', error);
+      console.error('Failed to save value:', error)
     }
-  };
+  }
 
   const handleEdit = (value: Value) => {
     setFormData({
@@ -80,24 +80,24 @@ export default function ValuesExercise() {
       description: value.description,
       importance: value.importance,
       alignment: value.alignment,
-    });
-    setEditingId(value.id);
-    setShowForm(true);
-  };
+    })
+    setEditingId(value.id)
+    setShowForm(true)
+  }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this value?')) return;
+    if (!confirm('Are you sure you want to delete this value?')) return
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token')
       await axios.delete(`/api/values/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
-      });
-      fetchValues();
+      })
+      fetchValues()
     } catch (error) {
-      console.error('Failed to delete value:', error);
+      console.error('Failed to delete value:', error)
     }
-  };
+  }
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -113,9 +113,9 @@ export default function ValuesExercise() {
         </div>
         <button
           onClick={() => {
-            setShowForm(!showForm);
-            setEditingId(null);
-            setFormData({ category: '', description: '', importance: 5, alignment: 5 });
+            setShowForm(!showForm)
+            setEditingId(null)
+            setFormData({ category: '', description: '', importance: 5, alignment: 5 })
           }}
           className="btn-primary flex items-center space-x-2"
         >
@@ -128,8 +128,8 @@ export default function ValuesExercise() {
         <h3 className="font-semibold text-blue-900 mb-2">What are values?</h3>
         <p className="text-blue-800">
           Values are chosen life directions. They're not goals you can complete, but ongoing
-          qualities you want to bring to your actions. For example, "being a loving parent" is
-          a value, while "spending an hour with my kids today" is a goal aligned with that value.
+          qualities you want to bring to your actions. For example, "being a loving parent" is a
+          value, while "spending an hour with my kids today" is a goal aligned with that value.
         </p>
       </div>
 
@@ -140,9 +140,7 @@ export default function ValuesExercise() {
           </h3>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Life Category
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Life Category</label>
               <select
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
@@ -207,9 +205,9 @@ export default function ValuesExercise() {
               <button
                 type="button"
                 onClick={() => {
-                  setShowForm(false);
-                  setEditingId(null);
-                  setFormData({ category: '', description: '', importance: 5, alignment: 5 });
+                  setShowForm(false)
+                  setEditingId(null)
+                  setFormData({ category: '', description: '', importance: 5, alignment: 5 })
                 }}
                 className="btn-secondary"
               >
@@ -290,5 +288,5 @@ export default function ValuesExercise() {
         )}
       </div>
     </div>
-  );
+  )
 }

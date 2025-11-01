@@ -9,12 +9,26 @@
     "build": "npm run build:client && npm run build:server",
     "build:client": "cd client && npm run build",
     "build:server": "cd server && npm run build",
-    "install:all": "npm install && cd client && npm install && cd ../server && npm install"
+    "install:all": "npm install && cd client && npm install && cd ../server && npm install",
+    "lint": "eslint . --max-warnings=20",
+    "format": "prettier --write .",
+    "typecheck": "npm run -s typecheck:client && npm run -s typecheck:server",
+    "typecheck:client": "cd client && tsc --noEmit",
+    "typecheck:server": "cd server && tsc --noEmit"
   },
   "keywords": ["ACT", "therapy", "mental-health", "interactive"],
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "eslint": "^9.0.0",
+    "@eslint/js": "^9.0.0",
+    "prettier": "^3.2.0",
+    "eslint-plugin-react": "^7.35.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-unused-imports": "^4.0.0",
+    "typescript-eslint": "^8.0.0",
+    "globals": "^15.0.0"
   }
 }

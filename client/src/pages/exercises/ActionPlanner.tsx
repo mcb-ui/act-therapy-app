@@ -1,115 +1,115 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { CheckSquare, Plus, Check, X, Calendar } from 'lucide-react';
+import { useState, useEffect } from 'react'
+import axios from 'axios'
+import { CheckSquare, Plus, Check, X, Calendar } from 'lucide-react'
 
 interface Action {
-  id: string;
-  valueId?: string;
-  title: string;
-  description?: string;
-  completed: boolean;
-  dueDate?: string;
+  id: string
+  valueId?: string
+  title: string
+  description?: string
+  completed: boolean
+  dueDate?: string
 }
 
 interface Value {
-  id: string;
-  category: string;
-  description: string;
+  id: string
+  category: string
+  description: string
 }
 
 export default function ActionPlanner() {
-  const [actions, setActions] = useState<Action[]>([]);
-  const [values, setValues] = useState<Value[]>([]);
-  const [showForm, setShowForm] = useState(false);
+  const [actions, setActions] = useState<Action[]>([])
+  const [values, setValues] = useState<Value[]>([])
+  const [showForm, setShowForm] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     valueId: '',
     dueDate: '',
-  });
+  })
 
   useEffect(() => {
-    fetchActions();
-    fetchValues();
-  }, []);
+    fetchActions()
+    fetchValues()
+  }, [])
 
   const fetchActions = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token')
       const response = await axios.get('/api/actions', {
         headers: { Authorization: `Bearer ${token}` },
-      });
-      setActions(response.data);
+      })
+      setActions(response.data)
     } catch (error) {
-      console.error('Failed to fetch actions:', error);
+      console.error('Failed to fetch actions:', error)
     }
-  };
+  }
 
   const fetchValues = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token')
       const response = await axios.get('/api/values', {
         headers: { Authorization: `Bearer ${token}` },
-      });
-      setValues(response.data);
+      })
+      setValues(response.data)
     } catch (error) {
-      console.error('Failed to fetch values:', error);
+      console.error('Failed to fetch values:', error)
     }
-  };
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const token = localStorage.getItem('token');
+    e.preventDefault()
+    const token = localStorage.getItem('token')
 
     try {
       await axios.post('/api/actions', formData, {
         headers: { Authorization: `Bearer ${token}` },
-      });
+      })
 
-      setFormData({ title: '', description: '', valueId: '', dueDate: '' });
-      setShowForm(false);
-      fetchActions();
+      setFormData({ title: '', description: '', valueId: '', dueDate: '' })
+      setShowForm(false)
+      fetchActions()
     } catch (error) {
-      console.error('Failed to create action:', error);
+      console.error('Failed to create action:', error)
     }
-  };
+  }
 
   const toggleComplete = async (action: Action) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token')
       await axios.put(
         `/api/actions/${action.id}`,
         { ...action, completed: !action.completed },
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      fetchActions();
+        },
+      )
+      fetchActions()
     } catch (error) {
-      console.error('Failed to update action:', error);
+      console.error('Failed to update action:', error)
     }
-  };
+  }
 
   const deleteAction = async (id: string) => {
-    if (!confirm('Delete this action?')) return;
+    if (!confirm('Delete this action?')) return
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token')
       await axios.delete(`/api/actions/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
-      });
-      fetchActions();
+      })
+      fetchActions()
     } catch (error) {
-      console.error('Failed to delete action:', error);
+      console.error('Failed to delete action:', error)
     }
-  };
+  }
 
   const getValueForAction = (valueId?: string) => {
-    return values.find((v) => v.id === valueId);
-  };
+    return values.find((v) => v.id === valueId)
+  }
 
-  const pendingActions = actions.filter((a) => !a.completed);
-  const completedActions = actions.filter((a) => a.completed);
+  const pendingActions = actions.filter((a) => !a.completed)
+  const completedActions = actions.filter((a) => a.completed)
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -207,8 +207,8 @@ export default function ActionPlanner() {
               <button
                 type="button"
                 onClick={() => {
-                  setShowForm(false);
-                  setFormData({ title: '', description: '', valueId: '', dueDate: '' });
+                  setShowForm(false)
+                  setFormData({ title: '', description: '', valueId: '', dueDate: '' })
                 }}
                 className="btn-secondary"
               >
@@ -231,7 +231,7 @@ export default function ActionPlanner() {
         ) : (
           <div className="space-y-3">
             {pendingActions.map((action) => {
-              const linkedValue = getValueForAction(action.valueId);
+              const linkedValue = getValueForAction(action.valueId)
               return (
                 <div key={action.id} className="card hover:shadow-lg transition-shadow">
                   <div className="flex items-start space-x-4">
@@ -268,7 +268,7 @@ export default function ActionPlanner() {
                     </button>
                   </div>
                 </div>
-              );
+              )
             })}
           </div>
         )}
@@ -281,7 +281,7 @@ export default function ActionPlanner() {
           </h2>
           <div className="space-y-3">
             {completedActions.map((action) => {
-              const linkedValue = getValueForAction(action.valueId);
+              const linkedValue = getValueForAction(action.valueId)
               return (
                 <div key={action.id} className="card bg-gray-50 opacity-75">
                   <div className="flex items-start space-x-4">
@@ -309,7 +309,7 @@ export default function ActionPlanner() {
                     </button>
                   </div>
                 </div>
-              );
+              )
             })}
           </div>
         </div>
@@ -337,5 +337,5 @@ export default function ActionPlanner() {
         </ul>
       </div>
     </div>
-  );
+  )
 }

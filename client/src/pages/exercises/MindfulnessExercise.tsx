@@ -1,50 +1,50 @@
-import { useState, useEffect } from 'react';
-import { Zap, Play, Pause, RotateCcw } from 'lucide-react';
-import axios from 'axios';
+import { useState, useEffect } from 'react'
+import { Zap, Play, Pause, RotateCcw } from 'lucide-react'
+import axios from 'axios'
 
 export default function MindfulnessExercise() {
-  const [activeExercise, setActiveExercise] = useState<string | null>(null);
-  const [timer, setTimer] = useState(0);
-  const [isRunning, setIsRunning] = useState(false);
-  const [breathPhase, setBreathPhase] = useState<'inhale' | 'hold' | 'exhale'>('inhale');
+  const [activeExercise, setActiveExercise] = useState<string | null>(null)
+  const [timer, setTimer] = useState(0)
+  const [isRunning, setIsRunning] = useState(false)
+  const [breathPhase, setBreathPhase] = useState<'inhale' | 'hold' | 'exhale'>('inhale')
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: number | undefined
 
     if (isRunning) {
       interval = setInterval(() => {
-        setTimer((prev) => prev + 1);
-      }, 1000);
+        setTimer((prev) => prev + 1)
+      }, 1000)
     }
 
-    return () => clearInterval(interval);
-  }, [isRunning]);
+    return () => clearInterval(interval)
+  }, [isRunning])
 
   useEffect(() => {
     if (activeExercise === 'breathing' && isRunning) {
       const phaseTimer = setInterval(() => {
         setBreathPhase((current) => {
-          if (current === 'inhale') return 'hold';
-          if (current === 'hold') return 'exhale';
-          return 'inhale';
-        });
-      }, 4000);
+          if (current === 'inhale') return 'hold'
+          if (current === 'hold') return 'exhale'
+          return 'inhale'
+        })
+      }, 4000)
 
-      return () => clearInterval(phaseTimer);
+      return () => clearInterval(phaseTimer)
     }
-  }, [activeExercise, isRunning]);
+  }, [activeExercise, isRunning])
 
   const startExercise = async (exerciseId: string) => {
-    setActiveExercise(exerciseId);
-    setTimer(0);
-    setIsRunning(true);
-  };
+    setActiveExercise(exerciseId)
+    setTimer(0)
+    setIsRunning(true)
+  }
 
   const stopExercise = async () => {
-    setIsRunning(false);
+    setIsRunning(false)
     if (activeExercise && timer > 10) {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token')
         await axios.post(
           '/api/progress',
           {
@@ -54,26 +54,26 @@ export default function MindfulnessExercise() {
           },
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+          },
+        )
       } catch (error) {
-        console.error('Failed to save progress:', error);
+        console.error('Failed to save progress:', error)
       }
     }
-  };
+  }
 
   const resetExercise = () => {
-    setIsRunning(false);
-    setTimer(0);
-    setActiveExercise(null);
-    setBreathPhase('inhale');
-  };
+    setIsRunning(false)
+    setTimer(0)
+    setActiveExercise(null)
+    setBreathPhase('inhale')
+  }
 
   const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
 
   const exercises = [
     {
@@ -110,9 +110,9 @@ export default function MindfulnessExercise() {
         'Observe what you feel with curiosity, not judgment',
       ],
     },
-  ];
+  ]
 
-  const currentExerciseData = exercises.find((e) => e.id === activeExercise);
+  const currentExerciseData = exercises.find((e) => e.id === activeExercise)
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -129,9 +129,9 @@ export default function MindfulnessExercise() {
       <div className="card bg-orange-50 border-orange-200">
         <h3 className="font-semibold text-orange-900 mb-2">Why Practice Mindfulness?</h3>
         <p className="text-orange-800">
-          Mindfulness helps you engage fully with the present moment rather than getting lost
-          in thoughts about the past or future. It's a foundation for psychological flexibility
-          and helps you respond to life rather than react automatically.
+          Mindfulness helps you engage fully with the present moment rather than getting lost in
+          thoughts about the past or future. It's a foundation for psychological flexibility and
+          helps you respond to life rather than react automatically.
         </p>
       </div>
 
@@ -147,8 +147,8 @@ export default function MindfulnessExercise() {
                     breathPhase === 'inhale'
                       ? 'scale-100'
                       : breathPhase === 'hold'
-                      ? 'scale-100'
-                      : 'scale-75'
+                        ? 'scale-100'
+                        : 'scale-75'
                   }`}
                   style={{ transitionDuration: '4000ms' }}
                 >
@@ -157,8 +157,8 @@ export default function MindfulnessExercise() {
                       {breathPhase === 'inhale'
                         ? 'Breathe In'
                         : breathPhase === 'hold'
-                        ? 'Hold'
-                        : 'Breathe Out'}
+                          ? 'Hold'
+                          : 'Breathe Out'}
                     </span>
                   </div>
                 </div>
@@ -254,5 +254,5 @@ export default function MindfulnessExercise() {
         </ul>
       </div>
     </div>
-  );
+  )
 }

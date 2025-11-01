@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Hexagon, Target, Brain, Zap, Heart, Eye, CheckSquare } from 'lucide-react';
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { Hexagon, Target, Brain, Zap, Heart, Eye, CheckSquare } from 'lucide-react'
 
 export default function Hexaflex() {
-  const [selectedProcess, setSelectedProcess] = useState<number | null>(null);
+  const [selectedProcess, setSelectedProcess] = useState<number | null>(null)
 
   const processes = [
     {
@@ -66,7 +66,7 @@ export default function Hexaflex() {
         'Acceptance means opening up and making room for painful feelings, sensations, and urges, allowing them to come and go without struggling.',
       path: '/exercises/acceptance',
     },
-  ];
+  ]
 
   const hexagonPoints = [
     { x: 50, y: 5 }, // Top
@@ -75,7 +75,7 @@ export default function Hexaflex() {
     { x: 50, y: 95 }, // Bottom
     { x: 6.7, y: 72.5 }, // Bottom left
     { x: 6.7, y: 27.5 }, // Top left
-  ];
+  ]
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
@@ -92,9 +92,7 @@ export default function Hexaflex() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="card">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-            The Six Processes
-          </h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">The Six Processes</h2>
 
           <div className="relative w-full aspect-square max-w-md mx-auto">
             <svg viewBox="0 0 100 100" className="w-full h-full">
@@ -157,8 +155,7 @@ export default function Hexaflex() {
 
               {/* Process nodes */}
               {processes.map((process, index) => {
-                const point = hexagonPoints[index];
-                const Icon = process.icon;
+                const point = hexagonPoints[index]
                 return (
                   <g
                     key={process.id}
@@ -188,14 +185,12 @@ export default function Hexaflex() {
                       {process.title}
                     </text>
                   </g>
-                );
+                )
               })}
             </svg>
           </div>
 
-          <p className="text-center text-gray-600 text-sm mt-4">
-            Click on a process to learn more
-          </p>
+          <p className="text-center text-gray-600 text-sm mt-4">Click on a process to learn more</p>
         </div>
 
         <div className="space-y-4">
@@ -203,8 +198,8 @@ export default function Hexaflex() {
 
           {selectedProcess ? (
             (() => {
-              const process = processes.find((p) => p.id === selectedProcess)!;
-              const Icon = process.icon;
+              const process = processes.find((p) => p.id === selectedProcess)!
+              const Icon = process.icon
               return (
                 <div className="card">
                   <div
@@ -221,7 +216,7 @@ export default function Hexaflex() {
                     </Link>
                   )}
                 </div>
-              );
+              )
             })()
           ) : (
             <div className="card text-center py-12">
@@ -233,14 +228,12 @@ export default function Hexaflex() {
           )}
 
           <div className="card bg-primary-50 border-primary-200">
-            <h3 className="font-semibold text-primary-900 mb-2">
-              How the Processes Work Together
-            </h3>
+            <h3 className="font-semibold text-primary-900 mb-2">How the Processes Work Together</h3>
             <p className="text-primary-800 text-sm">
-              The six processes are interconnected. The top three (Acceptance, Defusion,
-              Present Moment) help you be more open and aware. The bottom three (Self-as-Context,
-              Values, Committed Action) help you be more engaged and purposeful. Together, they
-              build psychological flexibility.
+              The six processes are interconnected. The top three (Acceptance, Defusion, Present
+              Moment) help you be more open and aware. The bottom three (Self-as-Context, Values,
+              Committed Action) help you be more engaged and purposeful. Together, they build
+              psychological flexibility.
             </p>
           </div>
         </div>
@@ -248,7 +241,7 @@ export default function Hexaflex() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {processes.map((process) => {
-          const Icon = process.icon;
+          const Icon = process.icon
           return (
             <div
               key={process.id}
@@ -263,9 +256,9 @@ export default function Hexaflex() {
               <h3 className="text-lg font-bold text-gray-900 mb-2">{process.title}</h3>
               <p className="text-gray-600 text-sm">{process.description}</p>
             </div>
-          );
+          )
         })}
       </div>
     </div>
-  );
+  )
 }

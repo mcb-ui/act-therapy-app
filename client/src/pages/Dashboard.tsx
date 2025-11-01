@@ -1,17 +1,17 @@
-import { Link } from 'react-router-dom';
-import { Target, Brain, Heart, Zap, CheckSquare, Hexagon } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom'
+import { Target, Brain, Heart, Zap, CheckSquare, Hexagon } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 export default function Dashboard() {
-  const [userName, setUserName] = useState('');
+  const [userName, setUserName] = useState('')
 
   useEffect(() => {
-    const user = localStorage.getItem('user');
+    const user = localStorage.getItem('user')
     if (user) {
-      const userData = JSON.parse(user);
-      setUserName(userData.name);
+      const userData = JSON.parse(user)
+      setUserName(userData.name)
     }
-  }, []);
+  }, [])
 
   const exercises = [
     {
@@ -54,7 +54,7 @@ export default function Dashboard() {
       color: 'bg-inferno-red',
       path: '/exercises/action',
     },
-  ];
+  ]
 
   return (
     <div className="space-y-8">
@@ -71,9 +71,7 @@ export default function Dashboard() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-header mb-2">ACT Hexaflex Model</h2>
-            <p className="text-white mb-4 font-body">
-              Explore the six core processes of ACT
-            </p>
+            <p className="text-white mb-4 font-body">Explore the six core processes of ACT</p>
             <Link
               to="/hexaflex"
               className="inline-flex items-center space-x-2 bg-white text-midnight-purple px-6 py-3 rounded-lg font-subheader uppercase tracking-wide hover:bg-parchment transition-colors"
@@ -90,24 +88,24 @@ export default function Dashboard() {
         <h2 className="text-2xl font-header text-midnight-purple mb-6">Interactive Exercises</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {exercises.map((exercise) => {
-            const Icon = exercise.icon;
+            const Icon = exercise.icon
             return (
               <Link
                 key={exercise.id}
                 to={exercise.path}
                 className="card hover:shadow-xl transition-shadow duration-200 group"
               >
-                <div className={`w-14 h-14 rounded-xl ${exercise.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200`}>
+                <div
+                  className={`w-14 h-14 rounded-xl ${exercise.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200`}
+                >
                   <Icon size={28} className="text-white" />
                 </div>
                 <h3 className="text-xl font-subheader text-midnight-purple mb-2 uppercase tracking-wide">
                   {exercise.title}
                 </h3>
-                <p className="text-gray-600 font-body">
-                  {exercise.description}
-                </p>
+                <p className="text-gray-600 font-body">{exercise.description}</p>
               </Link>
-            );
+            )
           })}
         </div>
       </div>
@@ -115,11 +113,11 @@ export default function Dashboard() {
       <div className="card bg-parchment">
         <h3 className="text-lg font-subheader text-midnight-purple mb-2 uppercase">About ACT</h3>
         <p className="text-gray-700 font-body">
-          Acceptance and Commitment Therapy (ACT) helps you build psychological flexibility
-          through six core processes. Each exercise on this platform is designed to help you
-          develop these skills and live a more valued life.
+          Acceptance and Commitment Therapy (ACT) helps you build psychological flexibility through
+          six core processes. Each exercise on this platform is designed to help you develop these
+          skills and live a more valued life.
         </p>
       </div>
     </div>
-  );
+  )
 }
