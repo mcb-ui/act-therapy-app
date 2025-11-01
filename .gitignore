@@ -8,3 +8,4 @@ server/dist
 *.sqlite
 *.db
 .vite
+package-lock.json
