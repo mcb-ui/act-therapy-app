@@ -8,7 +8,7 @@ export default function Expansion() {
     {
       title: 'Notice the Feeling',
       instruction: 'Bring to mind something that triggers a difficult emotion. Notice where you feel it in your body.',
-      body: 'Scan your body. Where do you notice tension, tightness, heaviness, or discomfort? Don't try to change it - just notice.',
+      body: 'Scan your body. Where do you notice tension, tightness, heaviness, or discomfort? Do not try to change it - just notice.',
     },
     {
       title: 'Breathe Into It',
@@ -18,12 +18,12 @@ export default function Expansion() {
     {
       title: 'Make Space',
       instruction: 'Open up and make room for the sensation.',
-      body: 'Instead of tensing around it, soften. Imagine the feeling has all the space it needs. You're not trying to like it - just making room for it to be there.',
+      body: 'Instead of tensing around it, soften. Imagine the feeling has all the space it needs. You are not trying to like it - just making room for it to be there.',
     },
     {
       title: 'Allow',
       instruction: 'Allow it to be there, exactly as it is.',
-      body: 'Stop fighting. Let it be. This doesn't mean you want it or like it. It means you're willing to have it while you do what matters.',
+      body: 'Stop fighting. Let it be. This does not mean you want it or like it. It means you are willing to have it while you do what matters.',
     },
   ];
 
