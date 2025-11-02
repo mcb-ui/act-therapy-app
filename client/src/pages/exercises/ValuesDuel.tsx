@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Trophy, Sparkles, Target } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { markExerciseComplete, saveExerciseData } from '../../utils/exerciseTracking';
+import FavoriteButton from '../../components/FavoriteButton';
 
 interface Value {
   name: string;
@@ -197,9 +199,21 @@ const ValuesDuel: React.FC = () => {
   };
 
   // Save top 5 to profile
-  const saveTopFive = () => {
+  const saveTopFive = async () => {
+    // Save to localStorage for quick access
     localStorage.setItem('topFiveValues', JSON.stringify(topFive));
     localStorage.setItem('topFiveValuesDate', new Date().toISOString());
+
+    // Save to database
+    await saveExerciseData('values-duel', 'Values Duel', {
+      topFiveValues: topFive,
+      allSelectedValues: selectedValues,
+      completedAt: new Date().toISOString(),
+    });
+
+    // Mark as complete
+    await markExerciseComplete('values-duel', 100, 'Completed Values Duel');
+
     setPhase('complete');
   };
 
@@ -219,6 +233,7 @@ const ValuesDuel: React.FC = () => {
             <ArrowLeft size={20} />
             <span>Back to Exercises</span>
           </Link>
+          <FavoriteButton exerciseId="values-duel" exerciseName="Values Duel" className="text-white" />
         </div>
 
         <AnimatePresence mode="wait">

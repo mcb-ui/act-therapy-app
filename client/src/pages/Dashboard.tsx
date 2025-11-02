@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
-import { Target, Brain, Heart, Zap, CheckSquare, Hexagon, Sparkles } from 'lucide-react';
+import { Target, Brain, Heart, Zap, CheckSquare, Hexagon, Sparkles, CheckCircle, Star } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { getProgress, getFavorites } from '../utils/exerciseTracking';
+import FavoriteButton from '../components/FavoriteButton';
 
 interface Value {
   name: string;
@@ -11,6 +13,8 @@ interface Value {
 export default function Dashboard() {
   const [userName, setUserName] = useState('');
   const [topFiveValues, setTopFiveValues] = useState<Value[]>([]);
+  const [completedExerciseIds, setCompletedExerciseIds] = useState<string[]>([]);
+  const [favoriteExerciseIds, setFavoriteExerciseIds] = useState<string[]>([]);
 
   useEffect(() => {
     const user = localStorage.getItem('user');
@@ -24,7 +28,22 @@ export default function Dashboard() {
     if (savedValues) {
       setTopFiveValues(JSON.parse(savedValues));
     }
+
+    // Load progress and favorites
+    loadProgressAndFavorites();
   }, []);
+
+  const loadProgressAndFavorites = async () => {
+    const progress = await getProgress();
+    const completed = progress
+      .filter((p: any) => p.completed)
+      .map((p: any) => p.exerciseId);
+    setCompletedExerciseIds(completed);
+
+    const favorites = await getFavorites();
+    const favoriteIds = favorites.map((f: any) => f.exerciseId);
+    setFavoriteExerciseIds(favoriteIds);
+  };
 
   const exerciseCategories = [
     {
@@ -193,28 +212,48 @@ export default function Dashboard() {
 
                 {/* Exercise Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ml-0 md:ml-15">
-                  {category.exercises.map((exercise, exIndex) => (
-                    <Link
-                      key={exercise.path}
-                      to={exercise.path}
-                      className="card hover-lift group bg-white border-l-4 transition-all"
-                      style={{
-                        borderColor: category.color.replace('bg-', ''),
-                        animationDelay: `${(catIndex * 0.1) + (exIndex * 0.05)}s`
-                      }}
-                    >
-                      <h4 className="font-subheader text-midnight-purple mb-2 uppercase text-sm group-hover:text-electric-blue transition-colors">
-                        {exercise.name}
-                      </h4>
-                      <p className="text-xs text-gray-600 font-body leading-relaxed">
-                        {exercise.description}
-                      </p>
-                      <div className="mt-3 text-electric-blue font-subheader text-xs uppercase flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span>Start</span>
-                        <span>→</span>
+                  {category.exercises.map((exercise, exIndex) => {
+                    const exerciseId = exercise.path.replace('/exercises/', '');
+                    const isCompleted = completedExerciseIds.includes(exerciseId);
+                    const isFavorite = favoriteExerciseIds.includes(exerciseId);
+
+                    return (
+                      <div
+                        key={exercise.path}
+                        className="card hover-lift group bg-white border-l-4 transition-all relative"
+                        style={{
+                          borderColor: category.color.replace('bg-', ''),
+                          animationDelay: `${(catIndex * 0.1) + (exIndex * 0.05)}s`
+                        }}
+                      >
+                        {/* Favorite & Completed Icons */}
+                        <div className="absolute top-3 right-3 flex items-center space-x-2">
+                          {isCompleted && (
+                            <CheckCircle size={18} className="text-lime-green" title="Completed" />
+                          )}
+                          <div onClick={(e) => e.preventDefault()}>
+                            <FavoriteButton
+                              exerciseId={exerciseId}
+                              exerciseName={exercise.name}
+                            />
+                          </div>
+                        </div>
+
+                        <Link to={exercise.path} className="block">
+                          <h4 className="font-subheader text-midnight-purple mb-2 uppercase text-sm group-hover:text-electric-blue transition-colors pr-16">
+                            {exercise.name}
+                          </h4>
+                          <p className="text-xs text-gray-600 font-body leading-relaxed">
+                            {exercise.description}
+                          </p>
+                          <div className="mt-3 text-electric-blue font-subheader text-xs uppercase flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span>{isCompleted ? 'Redo' : 'Start'}</span>
+                            <span>→</span>
+                          </div>
+                        </Link>
                       </div>
-                    </Link>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             );

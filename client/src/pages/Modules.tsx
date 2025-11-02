@@ -1,9 +1,23 @@
 import { Link } from 'react-router-dom';
 import { BookOpen, Lock, CheckCircle, PlayCircle } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getProgress } from '../utils/exerciseTracking';
 
 export default function Modules() {
   const [completedModules] = useState<number[]>([]); // Track completed modules
+  const [completedExerciseIds, setCompletedExerciseIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetchCompletedExercises();
+  }, []);
+
+  const fetchCompletedExercises = async () => {
+    const progress = await getProgress();
+    const completed = progress
+      .filter((p: any) => p.completed)
+      .map((p: any) => p.exerciseId);
+    setCompletedExerciseIds(completed);
+  };
 
   const modules = [
     {
@@ -188,40 +202,43 @@ export default function Modules() {
 
                   {/* Exercises List */}
                   <div className="space-y-2">
-                    {module.exercises.map((exercise, exIndex) => (
-                      <Link
-                        key={exercise.id}
-                        to={isLocked ? '#' : exercise.path}
-                        className={`flex items-center space-x-3 p-3 rounded-lg transition-all ${
-                          isLocked
-                            ? 'cursor-not-allowed bg-gray-50'
-                            : 'hover:bg-parchment hover:scale-102 cursor-pointer'
-                        }`}
-                        onClick={(e) => isLocked && e.preventDefault()}
-                      >
-                        {exercise.completed ? (
-                          <CheckCircle size={20} className="text-lime-green flex-shrink-0" />
-                        ) : isLocked ? (
-                          <Lock size={20} className="text-gray-400 flex-shrink-0" />
-                        ) : (
-                          <PlayCircle size={20} className="text-electric-blue flex-shrink-0" />
-                        )}
-                        <span className={`font-body ${
-                          exercise.completed
-                            ? 'text-gray-500 line-through'
-                            : isLocked
-                            ? 'text-gray-400'
-                            : 'text-gray-800'
-                        }`}>
-                          {exercise.name}
-                        </span>
-                        {!isLocked && !exercise.completed && (
-                          <span className="text-xs text-electric-blue font-subheader uppercase ml-auto">
-                            Start →
+                    {module.exercises.map((exercise) => {
+                      const isExerciseCompleted = completedExerciseIds.includes(exercise.id);
+                      return (
+                        <Link
+                          key={exercise.id}
+                          to={isLocked ? '#' : exercise.path}
+                          className={`flex items-center space-x-3 p-3 rounded-lg transition-all ${
+                            isLocked
+                              ? 'cursor-not-allowed bg-gray-50'
+                              : 'hover:bg-parchment hover:scale-102 cursor-pointer'
+                          }`}
+                          onClick={(e) => isLocked && e.preventDefault()}
+                        >
+                          {isExerciseCompleted ? (
+                            <CheckCircle size={20} className="text-lime-green flex-shrink-0" />
+                          ) : isLocked ? (
+                            <Lock size={20} className="text-gray-400 flex-shrink-0" />
+                          ) : (
+                            <PlayCircle size={20} className="text-electric-blue flex-shrink-0" />
+                          )}
+                          <span className={`font-body ${
+                            isExerciseCompleted
+                              ? 'text-gray-500 line-through'
+                              : isLocked
+                              ? 'text-gray-400'
+                              : 'text-gray-800'
+                          }`}>
+                            {exercise.name}
                           </span>
-                        )}
-                      </Link>
-                    ))}
+                          {!isLocked && !isExerciseCompleted && (
+                            <span className="text-xs text-electric-blue font-subheader uppercase ml-auto">
+                              Start →
+                            </span>
+                          )}
+                        </Link>
+                      );
+                    })}
                   </div>
 
                   {/* Lock Message */}

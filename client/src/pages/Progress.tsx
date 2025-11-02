@@ -45,19 +45,22 @@ export default function Progress() {
   const fetchProgress = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('/api/progress', {
+      const statsResponse = await axios.get('http://localhost:5000/api/progress/stats', {
         headers: { Authorization: `Bearer ${token}` },
       });
-      // Process progress data when backend is ready
-      // For now, stats remain at zero until exercises are completed
-      if (response.data && response.data.length > 0) {
+
+      if (statsResponse.data) {
         setStats({
-          totalExercises: 24,
-          completedExercises: response.data.length,
-          currentStreak: 0, // Will be calculated from data
-          longestStreak: 0, // Will be calculated from data
-          totalMinutes: 0, // Will be calculated from data
+          totalExercises: statsResponse.data.totalExercises || 24,
+          completedExercises: statsResponse.data.completedCount || 0,
+          currentStreak: statsResponse.data.currentStreak || 0,
+          longestStreak: statsResponse.data.longestStreak || 0,
+          totalMinutes: 0, // Can be added later
         });
+
+        if (statsResponse.data.weeklyData) {
+          setWeeklyData(statsResponse.data.weeklyData);
+        }
       }
     } catch (error) {
       console.error('Failed to fetch progress:', error);
