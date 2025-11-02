@@ -13,14 +13,20 @@ export default function Dashboard() {
     }
   }, []);
 
-  const exercises = [
+  const exerciseCategories = [
     {
       id: 'values',
       title: 'Values Clarification',
       description: 'Identify and explore what truly matters to you in life',
       icon: Target,
       color: 'bg-electric-blue',
-      path: '/exercises/values',
+      exercises: [
+        { name: 'Values Compass', path: '/exercises/values-compass', description: 'Rate 8 life directions with interactive compass' },
+        { name: 'Bull\'s Eye', path: '/exercises/bulls-eye', description: 'Visualize your values alignment on a target' },
+        { name: 'Life Domains', path: '/exercises/life-domains', description: 'Assess satisfaction across 10 life areas' },
+        { name: 'What Matters Most', path: '/exercises/what-matters', description: 'Select and rank your core values' },
+        { name: 'Values in Action', path: '/exercises/values-in-action', description: 'Connect values to concrete actions' },
+      ],
     },
     {
       id: 'defusion',
@@ -28,15 +34,13 @@ export default function Dashboard() {
       description: 'Learn to observe thoughts without being controlled by them',
       icon: Brain,
       color: 'bg-midnight-purple',
-      path: '/exercises/defusion',
-    },
-    {
-      id: 'acceptance',
-      title: 'Acceptance',
-      description: 'Practice opening up to difficult emotions and experiences',
-      icon: Heart,
-      color: 'bg-brand-pink',
-      path: '/exercises/acceptance',
+      exercises: [
+        { name: 'Silly Voice', path: '/exercises/silly-voice', description: 'Transform thoughts with playful voices' },
+        { name: 'Thought Labels', path: '/exercises/thought-labels', description: 'Categorize thoughts to create distance' },
+        { name: 'Thank Your Mind', path: '/exercises/thank-your-mind', description: 'Gratitude practice for difficult thoughts' },
+        { name: 'Passengers on Bus', path: '/exercises/passengers-on-bus', description: 'ACT metaphor with animated journey' },
+        { name: 'Clouds in Sky', path: '/exercises/clouds-in-sky', description: 'Watch thoughts drift like clouds' },
+      ],
     },
     {
       id: 'mindfulness',
@@ -44,7 +48,27 @@ export default function Dashboard() {
       description: 'Develop awareness and connection to the here and now',
       icon: Zap,
       color: 'bg-lime-green',
-      path: '/exercises/mindfulness',
+      exercises: [
+        { name: 'Mindful Walking', path: '/exercises/mindful-walking', description: 'Step-by-step walking meditation' },
+        { name: 'Eating Meditation', path: '/exercises/eating-meditation', description: '8-phase sensory eating practice' },
+        { name: 'Sound Awareness', path: '/exercises/sound-awareness', description: 'Notice and log sounds around you' },
+        { name: 'Breath Counting', path: '/exercises/breath-counting', description: 'Count breaths with animated circle' },
+        { name: 'Progressive Muscle Relaxation', path: '/exercises/progressive-muscle-relaxation', description: 'Tense and release 12 muscle groups' },
+      ],
+    },
+    {
+      id: 'acceptance',
+      title: 'Acceptance',
+      description: 'Practice opening up to difficult emotions and experiences',
+      icon: Heart,
+      color: 'bg-brand-pink',
+      exercises: [
+        { name: 'Tug of War', path: '/exercises/tug-of-war', description: 'Interactive metaphor about dropping struggle' },
+        { name: 'Willingness Scale', path: '/exercises/willingness-scale', description: 'Assess willingness to feel for values' },
+        { name: 'Expansion', path: '/exercises/expansion', description: '4-step process to make space for emotions' },
+        { name: 'Emotional Surfing', path: '/exercises/emotional-surfing', description: 'Ride the wave of emotion' },
+        { name: 'Guest House', path: '/exercises/guest-house', description: 'Welcome all emotional visitors' },
+      ],
     },
     {
       id: 'action',
@@ -52,7 +76,13 @@ export default function Dashboard() {
       description: 'Set goals and take steps aligned with your values',
       icon: CheckSquare,
       color: 'bg-inferno-red',
-      path: '/exercises/action',
+      exercises: [
+        { name: 'SMART Goals', path: '/exercises/smart-goals', description: 'Create specific, measurable goals' },
+        { name: 'Barrier Busting', path: '/exercises/barrier-busting', description: 'Plan for obstacles with if-then strategies' },
+        { name: 'Values-Based Scheduling', path: '/exercises/values-based-scheduling', description: 'Schedule time for what matters' },
+        { name: 'Committed Action Tracker', path: '/exercises/committed-action-tracker', description: 'Track valued actions and celebrate progress' },
+        { name: 'Valued Living Questionnaire', path: '/exercises/valued-living-questionnaire', description: 'Assess importance vs. consistency' },
+      ],
     },
   ];
 
@@ -89,30 +119,52 @@ export default function Dashboard() {
 
       <div>
         <h2 className="text-2xl font-header text-midnight-purple mb-6 animate-slide-in-up">Interactive Exercises</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {exercises.map((exercise, index) => {
-            const Icon = exercise.icon;
+        <div className="space-y-8">
+          {exerciseCategories.map((category, catIndex) => {
+            const Icon = category.icon;
             return (
-              <Link
-                key={exercise.id}
-                to={exercise.path}
-                className="card hover-lift group animate-slide-in-up"
-                style={{ animationDelay: `${index * 0.1}s` }}
+              <div
+                key={category.id}
+                className="animate-slide-in-up"
+                style={{ animationDelay: `${catIndex * 0.1}s` }}
               >
-                <div className={`w-16 h-16 rounded-2xl ${exercise.color} flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg`}>
-                  <Icon size={32} className="text-white" />
+                {/* Category Header */}
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className={`w-12 h-12 rounded-xl ${category.color} flex items-center justify-center shadow-lg`}>
+                    <Icon size={24} className="text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-subheader text-midnight-purple uppercase">{category.title}</h3>
+                    <p className="text-sm text-gray-600 font-body">{category.description}</p>
+                  </div>
                 </div>
-                <h3 className="text-xl font-subheader text-midnight-purple mb-2 uppercase tracking-wide group-hover:text-electric-blue transition-colors">
-                  {exercise.title}
-                </h3>
-                <p className="text-gray-600 font-body leading-relaxed">
-                  {exercise.description}
-                </p>
-                <div className="mt-4 text-electric-blue font-subheader text-sm uppercase flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span>Start Exercise</span>
-                  <span>→</span>
+
+                {/* Exercise Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ml-0 md:ml-15">
+                  {category.exercises.map((exercise, exIndex) => (
+                    <Link
+                      key={exercise.path}
+                      to={exercise.path}
+                      className="card hover-lift group bg-white border-l-4 transition-all"
+                      style={{
+                        borderColor: category.color.replace('bg-', ''),
+                        animationDelay: `${(catIndex * 0.1) + (exIndex * 0.05)}s`
+                      }}
+                    >
+                      <h4 className="font-subheader text-midnight-purple mb-2 uppercase text-sm group-hover:text-electric-blue transition-colors">
+                        {exercise.name}
+                      </h4>
+                      <p className="text-xs text-gray-600 font-body leading-relaxed">
+                        {exercise.description}
+                      </p>
+                      <div className="mt-3 text-electric-blue font-subheader text-xs uppercase flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span>Start</span>
+                        <span>→</span>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
-              </Link>
+              </div>
             );
           })}
         </div>
