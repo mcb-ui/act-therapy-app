@@ -5,37 +5,37 @@ import axios from 'axios';
 
 export default function Progress() {
   const [stats, setStats] = useState({
-    totalExercises: 0,
+    totalExercises: 24,
     completedExercises: 0,
-    currentStreak: 7,
-    longestStreak: 14,
-    totalMinutes: 245,
+    currentStreak: 0,
+    longestStreak: 0,
+    totalMinutes: 0,
   });
 
   const [weeklyData, setWeeklyData] = useState([
-    { day: 'Mon', completed: 2 },
-    { day: 'Tue', completed: 3 },
-    { day: 'Wed', completed: 1 },
-    { day: 'Thu', completed: 4 },
-    { day: 'Fri', completed: 2 },
-    { day: 'Sat', completed: 3 },
-    { day: 'Sun', completed: 5 },
+    { day: 'Mon', completed: 0 },
+    { day: 'Tue', completed: 0 },
+    { day: 'Wed', completed: 0 },
+    { day: 'Thu', completed: 0 },
+    { day: 'Fri', completed: 0 },
+    { day: 'Sat', completed: 0 },
+    { day: 'Sun', completed: 0 },
   ]);
 
   const categoryData = [
-    { name: 'Values', value: 8, color: '#2344E7' },
-    { name: 'Defusion', value: 12, color: '#784A9F' },
-    { name: 'Acceptance', value: 6, color: '#FE97BB' },
-    { name: 'Mindfulness', value: 15, color: '#93F357' },
-    { name: 'Action', value: 10, color: '#EC4625' },
+    { name: 'Values', value: 0, color: '#2344E7' },
+    { name: 'Defusion', value: 0, color: '#784A9F' },
+    { name: 'Acceptance', value: 0, color: '#FE97BB' },
+    { name: 'Mindfulness', value: 0, color: '#93F357' },
+    { name: 'Action', value: 0, color: '#EC4625' },
   ];
 
   const achievements = [
-    { id: 1, title: 'First Step', description: 'Completed your first exercise', icon: '🎯', unlocked: true },
-    { id: 2, title: 'Week Warrior', description: '7-day streak achieved', icon: '🔥', unlocked: true },
-    { id: 3, title: 'Values Champion', description: 'Completed all Values exercises', icon: '⭐', unlocked: false },
-    { id: 4, title: 'Mindful Master', description: '100 minutes of mindfulness', icon: '🧘', unlocked: false },
-    { id: 5, title: 'ACT Expert', description: 'Completed all exercises', icon: '🏆', unlocked: false },
+    { id: 1, title: 'First Step', description: 'Complete your first exercise', icon: '🎯', unlocked: false },
+    { id: 2, title: 'Week Warrior', description: 'Achieve a 7-day streak', icon: '🔥', unlocked: false },
+    { id: 3, title: 'Values Champion', description: 'Complete all Values exercises', icon: '⭐', unlocked: false },
+    { id: 4, title: 'Mindful Master', description: 'Practice 100 minutes of mindfulness', icon: '🧘', unlocked: false },
+    { id: 5, title: 'ACT Expert', description: 'Complete all exercises', icon: '🏆', unlocked: false },
   ];
 
   useEffect(() => {
@@ -48,16 +48,20 @@ export default function Progress() {
       const response = await axios.get('/api/progress', {
         headers: { Authorization: `Bearer ${token}` },
       });
-      // Process progress data
-      setStats({
-        totalExercises: 15,
-        completedExercises: response.data.length,
-        currentStreak: 7,
-        longestStreak: 14,
-        totalMinutes: 245,
-      });
+      // Process progress data when backend is ready
+      // For now, stats remain at zero until exercises are completed
+      if (response.data && response.data.length > 0) {
+        setStats({
+          totalExercises: 24,
+          completedExercises: response.data.length,
+          currentStreak: 0, // Will be calculated from data
+          longestStreak: 0, // Will be calculated from data
+          totalMinutes: 0, // Will be calculated from data
+        });
+      }
     } catch (error) {
       console.error('Failed to fetch progress:', error);
+      // Keep initial zero state
     }
   };
 

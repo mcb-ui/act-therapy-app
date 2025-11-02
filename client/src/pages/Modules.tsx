@@ -87,8 +87,8 @@ export default function Modules() {
 
   const getModuleStatus = (moduleId: number) => {
     if (completedModules.includes(moduleId)) return 'completed';
-    if (moduleId === 1 || completedModules.includes(moduleId - 1)) return 'unlocked';
-    return 'locked';
+    // All modules are unlocked - users can explore freely
+    return 'unlocked';
   };
 
   return (
