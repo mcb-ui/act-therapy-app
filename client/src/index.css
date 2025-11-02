@@ -20,18 +20,107 @@ h1, h2, h3 {
 
 @layer components {
   .btn-primary {
-    @apply bg-midnight-purple text-white px-6 py-3 rounded-lg font-semibold hover:bg-midnight-purple-600 transition-colors duration-200 font-subheader uppercase tracking-wide;
+    @apply bg-midnight-purple text-white px-6 py-3 rounded-lg font-semibold hover:bg-midnight-purple-600 hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200 font-subheader uppercase tracking-wide;
   }
 
   .btn-secondary {
-    @apply bg-parchment text-midnight-purple-800 px-6 py-3 rounded-lg font-semibold hover:bg-parchment-400 transition-colors duration-200 font-subheader uppercase tracking-wide;
+    @apply bg-parchment text-midnight-purple-800 px-6 py-3 rounded-lg font-semibold hover:bg-parchment-400 hover:shadow-md hover:scale-105 active:scale-95 transition-all duration-200 font-subheader uppercase tracking-wide;
   }
 
   .card {
-    @apply bg-white rounded-xl shadow-lg p-6 border border-gray-100;
+    @apply bg-white rounded-xl shadow-lg p-6 border border-gray-100 transition-all duration-300;
+  }
+
+  .card-hover {
+    @apply card hover:shadow-2xl hover:-translate-y-1;
   }
 
   .input-field {
-    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-midnight-purple focus:border-transparent font-body;
+    @apply w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-midnight-purple focus:border-midnight-purple transition-all duration-200 font-body;
+  }
+}
+
+@layer utilities {
+  /* Animations */
+  @keyframes slide-in-right {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slide-in-up {
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes pulse-slow {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  @keyframes bounce-subtle {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-5px);
+    }
+  }
+
+  .animate-slide-in-right {
+    animation: slide-in-right 0.3s ease-out;
+  }
+
+  .animate-slide-in-up {
+    animation: slide-in-up 0.4s ease-out;
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-in;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 2s ease-in-out infinite;
+  }
+
+  .animate-bounce-subtle {
+    animation: bounce-subtle 1s ease-in-out infinite;
+  }
+
+  /* Hover effects */
+  .hover-lift {
+    @apply transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl;
+  }
+
+  .hover-glow {
+    @apply transition-all duration-300;
+  }
+
+  .hover-glow:hover {
+    filter: drop-shadow(0 0 10px rgba(120, 74, 159, 0.5));
   }
 }

@@ -58,8 +58,8 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
-      <div className="text-center">
-        <h1 className="text-4xl font-header text-midnight-purple mb-2">
+      <div className="text-center animate-fade-in">
+        <h1 className="text-4xl md:text-5xl font-header text-midnight-purple mb-2 hover-glow">
           Welcome back, {userName}!
         </h1>
         <p className="text-xl text-gray-600 font-body">
@@ -67,54 +67,63 @@ export default function Dashboard() {
         </p>
       </div>
 
-      <div className="card bg-midnight-purple text-white">
-        <div className="flex items-center justify-between">
+      <div className="card bg-midnight-purple text-white hover-lift animate-slide-in-up overflow-hidden relative">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-electric-blue opacity-10 rounded-full -mr-32 -mt-32"></div>
+        <div className="flex items-center justify-between relative z-10">
           <div>
-            <h2 className="text-2xl font-header mb-2">ACT Hexaflex Model</h2>
-            <p className="text-white mb-4 font-body">
+            <h2 className="text-2xl md:text-3xl font-header mb-2">ACT Hexaflex Model</h2>
+            <p className="text-white mb-4 font-body opacity-90">
               Explore the six core processes of ACT
             </p>
             <Link
               to="/hexaflex"
-              className="inline-flex items-center space-x-2 bg-white text-midnight-purple px-6 py-3 rounded-lg font-subheader uppercase tracking-wide hover:bg-parchment transition-colors"
+              className="inline-flex items-center space-x-2 bg-white text-midnight-purple px-6 py-3 rounded-lg font-subheader uppercase tracking-wide hover:bg-parchment hover:scale-105 active:scale-95 transition-all shadow-lg"
             >
               <Hexagon size={20} />
               <span>View Hexaflex</span>
             </Link>
           </div>
-          <Hexagon size={120} className="text-white opacity-20" />
+          <Hexagon size={120} className="text-white opacity-20 hidden md:block animate-pulse-slow" />
         </div>
       </div>
 
       <div>
-        <h2 className="text-2xl font-header text-midnight-purple mb-6">Interactive Exercises</h2>
+        <h2 className="text-2xl font-header text-midnight-purple mb-6 animate-slide-in-up">Interactive Exercises</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {exercises.map((exercise) => {
+          {exercises.map((exercise, index) => {
             const Icon = exercise.icon;
             return (
               <Link
                 key={exercise.id}
                 to={exercise.path}
-                className="card hover:shadow-xl transition-shadow duration-200 group"
+                className="card hover-lift group animate-slide-in-up"
+                style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <div className={`w-14 h-14 rounded-xl ${exercise.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200`}>
-                  <Icon size={28} className="text-white" />
+                <div className={`w-16 h-16 rounded-2xl ${exercise.color} flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg`}>
+                  <Icon size={32} className="text-white" />
                 </div>
-                <h3 className="text-xl font-subheader text-midnight-purple mb-2 uppercase tracking-wide">
+                <h3 className="text-xl font-subheader text-midnight-purple mb-2 uppercase tracking-wide group-hover:text-electric-blue transition-colors">
                   {exercise.title}
                 </h3>
-                <p className="text-gray-600 font-body">
+                <p className="text-gray-600 font-body leading-relaxed">
                   {exercise.description}
                 </p>
+                <div className="mt-4 text-electric-blue font-subheader text-sm uppercase flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span>Start Exercise</span>
+                  <span>→</span>
+                </div>
               </Link>
             );
           })}
         </div>
       </div>
 
-      <div className="card bg-parchment">
-        <h3 className="text-lg font-subheader text-midnight-purple mb-2 uppercase">About ACT</h3>
-        <p className="text-gray-700 font-body">
+      <div className="card bg-parchment border-2 border-midnight-purple animate-slide-in-up">
+        <h3 className="text-lg font-subheader text-midnight-purple mb-3 uppercase flex items-center space-x-2">
+          <span className="w-2 h-2 bg-midnight-purple rounded-full"></span>
+          <span>About ACT</span>
+        </h3>
+        <p className="text-gray-700 font-body leading-relaxed">
           Acceptance and Commitment Therapy (ACT) helps you build psychological flexibility
           through six core processes. Each exercise on this platform is designed to help you
           develop these skills and live a more valued life.
