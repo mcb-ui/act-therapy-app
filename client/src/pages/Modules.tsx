@@ -13,6 +13,7 @@ export default function Modules() {
       duration: '45 mins',
       exercises: [
         { id: 'intro-act', name: 'Introduction to ACT', path: '/exercises/intro-act', completed: false },
+        { id: 'values-duel', name: 'Values Duel', path: '/exercises/values-duel', completed: false },
         { id: 'values-compass', name: 'Values Compass', path: '/exercises/values-compass', completed: false },
         { id: 'life-domains', name: 'Life Domains Assessment', path: '/exercises/life-domains', completed: false },
         { id: 'hexaflex', name: 'The ACT Hexaflex', path: '/hexaflex', completed: false },

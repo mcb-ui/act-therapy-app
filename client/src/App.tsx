@@ -22,6 +22,7 @@ import BullsEye from './pages/exercises/BullsEye';
 import LifeDomains from './pages/exercises/LifeDomains';
 import WhatMatters from './pages/exercises/WhatMatters';
 import ValuesInAction from './pages/exercises/ValuesInAction';
+import ValuesDuel from './pages/exercises/ValuesDuel';
 
 // Defusion exercises
 import SillyVoice from './pages/exercises/SillyVoice';
@@ -198,6 +199,13 @@ function App() {
           <ProtectedRoute>
             <Layout setAuth={setIsAuthenticated}>
               <ValuesInAction />
+            </Layout>
+          </ProtectedRoute>
+        } />
+        <Route path="/exercises/values-duel" element={
+          <ProtectedRoute>
+            <Layout setAuth={setIsAuthenticated}>
+              <ValuesDuel />
             </Layout>
           </ProtectedRoute>
         } />
