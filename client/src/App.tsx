@@ -3,11 +3,16 @@ import { useState, useEffect } from 'react';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import Progress from './pages/Progress';
+import Modules from './pages/Modules';
+import Coach from './pages/Coach';
 import ValuesExercise from './pages/exercises/ValuesExercise';
 import DefusionExercise from './pages/exercises/DefusionExercise';
 import MindfulnessExercise from './pages/exercises/MindfulnessExercise';
 import AcceptanceExercise from './pages/exercises/AcceptanceExercise';
 import ActionPlanner from './pages/exercises/ActionPlanner';
+import IntroACT from './pages/exercises/IntroACT';
+import LeavesStream from './pages/exercises/LeavesStream';
 import Hexaflex from './pages/Hexaflex';
 import Layout from './components/Layout';
 
@@ -81,6 +86,46 @@ function App() {
           <ProtectedRoute>
             <Layout setAuth={setIsAuthenticated}>
               <Hexaflex />
+            </Layout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/progress" element={
+          <ProtectedRoute>
+            <Layout setAuth={setIsAuthenticated}>
+              <Progress />
+            </Layout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/modules" element={
+          <ProtectedRoute>
+            <Layout setAuth={setIsAuthenticated}>
+              <Modules />
+            </Layout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/coach" element={
+          <ProtectedRoute>
+            <Layout setAuth={setIsAuthenticated}>
+              <Coach />
+            </Layout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/exercises/intro-act" element={
+          <ProtectedRoute>
+            <Layout setAuth={setIsAuthenticated}>
+              <IntroACT />
+            </Layout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/exercises/leaves-stream" element={
+          <ProtectedRoute>
+            <Layout setAuth={setIsAuthenticated}>
+              <LeavesStream />
             </Layout>
           </ProtectedRoute>
         } />

@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Home, Target, Brain, Heart, Zap, CheckSquare, Hexagon, LogOut } from 'lucide-react';
+import { Home, Hexagon, LogOut, TrendingUp, BookOpen, MessageCircle, Sparkles } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -26,12 +26,25 @@ export default function Layout({ children, setAuth }: LayoutProps) {
                 ACT Therapy
               </Link>
 
-              <div className="hidden md:flex space-x-4">
-                <Link to="/" className="flex items-center space-x-2 text-gray-700 hover:text-electric-blue px-3 py-2 rounded-md font-subheader uppercase text-sm">
+              <div className="hidden md:flex space-x-1">
+                <Link to="/" className="flex items-center space-x-2 text-gray-700 hover:text-electric-blue hover:bg-electric-blue hover:bg-opacity-10 px-3 py-2 rounded-md font-subheader uppercase text-sm transition-all">
                   <Home size={18} />
-                  <span>Dashboard</span>
+                  <span>Home</span>
                 </Link>
-                <Link to="/hexaflex" className="flex items-center space-x-2 text-gray-700 hover:text-electric-blue px-3 py-2 rounded-md font-subheader uppercase text-sm">
+                <Link to="/modules" className="flex items-center space-x-2 text-gray-700 hover:text-midnight-purple hover:bg-midnight-purple hover:bg-opacity-10 px-3 py-2 rounded-md font-subheader uppercase text-sm transition-all">
+                  <BookOpen size={18} />
+                  <span>Modules</span>
+                </Link>
+                <Link to="/progress" className="flex items-center space-x-2 text-gray-700 hover:text-lime-green hover:bg-lime-green hover:bg-opacity-10 px-3 py-2 rounded-md font-subheader uppercase text-sm transition-all">
+                  <TrendingUp size={18} />
+                  <span>Progress</span>
+                </Link>
+                <Link to="/coach" className="flex items-center space-x-2 text-gray-700 hover:text-inferno-red hover:bg-inferno-red hover:bg-opacity-10 px-3 py-2 rounded-md font-subheader uppercase text-sm transition-all relative">
+                  <MessageCircle size={18} />
+                  <span>Coach</span>
+                  <Sparkles size={14} className="text-electric-blue absolute -top-1 -right-1" />
+                </Link>
+                <Link to="/hexaflex" className="flex items-center space-x-2 text-gray-700 hover:text-brand-pink hover:bg-brand-pink hover:bg-opacity-10 px-3 py-2 rounded-md font-subheader uppercase text-sm transition-all">
                   <Hexagon size={18} />
                   <span>Hexaflex</span>
                 </Link>
