@@ -78,7 +78,7 @@ export default function EmotionalSurfing() {
         </div>
       ) : (
         <>
-          <div className="card bg-midnight-purple style={{ height: '300px', position: 'relative', overflow: 'hidden' }}>
+          <div className="card bg-midnight-purple" style={{ height: '300px', position: 'relative', overflow: 'hidden' }}>
             <div className="absolute top-4 left-4 bg-white bg-opacity-90 px-4 py-2 rounded-lg">
               <div className="text-sm font-subheader uppercase text-gray-600">Surfing: {emotion}</div>
               <div className="text-xs text-gray-600">{(time / 10).toFixed(1)}s</div>
