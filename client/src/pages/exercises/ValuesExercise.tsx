@@ -103,7 +103,7 @@ export default function ValuesExercise() {
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-xl bg-midnight-purple flex items-center justify-center">
             <Target size={24} className="text-white" />
           </div>
           <div>

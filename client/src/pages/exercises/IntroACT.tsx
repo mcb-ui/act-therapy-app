@@ -39,7 +39,7 @@ export default function IntroACT() {
   if (completed) {
     return (
       <div className="max-w-2xl mx-auto">
-        <div className="card bg-gradient-to-br from-lime-green to-electric-blue text-white text-center py-16 animate-slide-in-up">
+        <div className="card bg-lime-green text-white text-center py-16 animate-slide-in-up">
           <CheckCircle size={80} className="mx-auto mb-6" />
           <h1 className="text-4xl font-header mb-4">Great Start!</h1>
           <p className="text-xl font-body mb-8 opacity-90">
@@ -59,7 +59,7 @@ export default function IntroACT() {
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
       <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-electric-blue to-midnight-purple flex items-center justify-center">
+        <div className="w-12 h-12 rounded-xl bg-electric-blue flex items-center justify-center">
           <BookOpen size={24} className="text-white" />
         </div>
         <div>

@@ -10,7 +10,7 @@ export default function Hexaflex() {
       id: 1,
       title: 'Values',
       icon: Target,
-      color: 'from-blue-500 to-blue-600',
+      color: 'bg-electric-blue',
       description: 'Clarifying what truly matters in your life',
       details:
         'Values are chosen life directions - the qualities you want to bring to your actions. They guide your behavior and give meaning to your life.',
@@ -20,7 +20,7 @@ export default function Hexaflex() {
       id: 2,
       title: 'Committed Action',
       icon: CheckSquare,
-      color: 'from-green-500 to-green-600',
+      color: 'bg-lime-green',
       description: 'Taking effective action guided by values',
       details:
         'Committed action involves setting goals based on values and taking concrete steps toward them, even in the presence of obstacles.',
@@ -30,7 +30,7 @@ export default function Hexaflex() {
       id: 3,
       title: 'Present Moment',
       icon: Zap,
-      color: 'from-yellow-500 to-orange-500',
+      color: 'bg-lime-green',
       description: 'Flexible awareness of the here and now',
       details:
         'Being psychologically present means having flexible awareness of the present moment without excessive attachment to thoughts or feelings.',
@@ -40,7 +40,7 @@ export default function Hexaflex() {
       id: 4,
       title: 'Self-as-Context',
       icon: Eye,
-      color: 'from-indigo-500 to-indigo-600',
+      color: 'bg-midnight-purple',
       description: 'The observing self - your perspective-taking ability',
       details:
         'This is your ability to take perspective on your own experiences - the "you" that notices your thoughts and feelings without being defined by them.',
@@ -50,7 +50,7 @@ export default function Hexaflex() {
       id: 5,
       title: 'Defusion',
       icon: Brain,
-      color: 'from-purple-500 to-purple-600',
+      color: 'bg-midnight-purple',
       description: 'Stepping back from thoughts',
       details:
         'Cognitive defusion means seeing thoughts as what they are - just words and pictures - rather than what they say they are.',
@@ -60,7 +60,7 @@ export default function Hexaflex() {
       id: 6,
       title: 'Acceptance',
       icon: Heart,
-      color: 'from-pink-500 to-pink-600',
+      color: 'bg-inferno-red',
       description: 'Making room for difficult experiences',
       details:
         'Acceptance means opening up and making room for painful feelings, sensations, and urges, allowing them to come and go without struggling.',
@@ -69,12 +69,12 @@ export default function Hexaflex() {
   ];
 
   const hexagonPoints = [
-    { x: 50, y: 5 }, // Top
-    { x: 93.3, y: 27.5 }, // Top right
-    { x: 93.3, y: 72.5 }, // Bottom right
-    { x: 50, y: 95 }, // Bottom
-    { x: 6.7, y: 72.5 }, // Bottom left
-    { x: 6.7, y: 27.5 }, // Top left
+    { x: 100, y: 20 }, // Top
+    { x: 170, y: 60 }, // Top right
+    { x: 170, y: 140 }, // Bottom right
+    { x: 100, y: 180 }, // Bottom
+    { x: 30, y: 140 }, // Bottom left
+    { x: 30, y: 60 }, // Top left
   ];
 
   return (
@@ -96,8 +96,8 @@ export default function Hexaflex() {
             The Six Processes
           </h2>
 
-          <div className="relative w-full aspect-square max-w-md mx-auto">
-            <svg viewBox="0 0 100 100" className="w-full h-full">
+          <div className="relative w-full aspect-square max-w-2xl mx-auto">
+            <svg viewBox="0 0 200 200" className="w-full h-full" preserveAspectRatio="xMidYMid meet">
               {/* Draw hexagon */}
               <polygon
                 points={hexagonPoints.map((p) => `${p.x},${p.y}`).join(' ')}
@@ -110,39 +110,39 @@ export default function Hexaflex() {
               {hexagonPoints.map((point, i) => (
                 <line
                   key={i}
-                  x1="50"
-                  y1="50"
+                  x1="100"
+                  y1="100"
                   x2={point.x}
                   y2={point.y}
                   stroke="#e5e7eb"
-                  strokeWidth="0.3"
+                  strokeWidth="1"
                 />
               ))}
 
               {/* Central circle */}
               <circle
-                cx="50"
-                cy="50"
-                r="15"
+                cx="100"
+                cy="100"
+                r="30"
                 fill="url(#gradient)"
                 stroke="#0ea5e9"
-                strokeWidth="0.5"
+                strokeWidth="2"
               />
               <text
-                x="50"
-                y="47"
+                x="100"
+                y="95"
                 textAnchor="middle"
-                className="text-xs fill-white font-bold"
-                fontSize="5"
+                className="fill-white font-bold"
+                fontSize="12"
               >
                 Psychological
               </text>
               <text
-                x="50"
-                y="53"
+                x="100"
+                y="110"
                 textAnchor="middle"
-                className="text-xs fill-white font-bold"
-                fontSize="5"
+                className="fill-white font-bold"
+                fontSize="12"
               >
                 Flexibility
               </text>
@@ -158,32 +158,41 @@ export default function Hexaflex() {
               {/* Process nodes */}
               {processes.map((process, index) => {
                 const point = hexagonPoints[index];
-                const Icon = process.icon;
+                // Calculate text position based on node position
+                let textY = point.y;
+                if (point.y < 100) {
+                  textY = point.y - 22; // Above for top nodes
+                } else {
+                  textY = point.y + 28; // Below for bottom nodes
+                }
+
                 return (
                   <g
                     key={process.id}
                     onClick={() => setSelectedProcess(process.id)}
-                    className="cursor-pointer"
+                    className="cursor-pointer hover:opacity-80 transition-opacity"
                   >
+                    {/* Node circle */}
                     <circle
                       cx={point.x}
                       cy={point.y}
-                      r="8"
+                      r="16"
                       className={`transition-all ${
                         selectedProcess === process.id
                           ? 'fill-primary-600'
-                          : 'fill-white stroke-gray-300'
+                          : 'fill-white stroke-gray-400'
                       }`}
-                      strokeWidth="0.5"
+                      strokeWidth="2"
                     />
+                    {/* Label text */}
                     <text
                       x={point.x}
-                      y={point.y > 50 ? point.y + 15 : point.y - 10}
+                      y={textY}
                       textAnchor="middle"
-                      className={`text-xs font-semibold ${
+                      className={`font-bold ${
                         selectedProcess === process.id ? 'fill-primary-700' : 'fill-gray-700'
                       }`}
-                      fontSize="4"
+                      fontSize="11"
                     >
                       {process.title}
                     </text>
@@ -208,7 +217,7 @@ export default function Hexaflex() {
               return (
                 <div className="card">
                   <div
-                    className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${process.color} flex items-center justify-center mb-4`}
+                    className={`w-16 h-16 rounded-2xl ${process.color} flex items-center justify-center mb-4`}
                   >
                     <Icon size={32} className="text-white" />
                   </div>
@@ -256,7 +265,7 @@ export default function Hexaflex() {
               onClick={() => setSelectedProcess(process.id)}
             >
               <div
-                className={`w-12 h-12 rounded-xl bg-gradient-to-br ${process.color} flex items-center justify-center mb-3`}
+                className={`w-12 h-12 rounded-xl ${process.color} flex items-center justify-center mb-3`}
               >
                 <Icon size={24} className="text-white" />
               </div>

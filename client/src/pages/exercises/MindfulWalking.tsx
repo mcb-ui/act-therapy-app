@@ -85,7 +85,7 @@ export default function MindfulWalking() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
       <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-lime-green to-electric-blue flex items-center justify-center">
+        <div className="w-12 h-12 rounded-xl bg-lime-green flex items-center justify-center">
           <Footprints size={24} className="text-white" />
         </div>
         <div>
@@ -121,7 +121,7 @@ export default function MindfulWalking() {
       </div>
 
       {/* Main Practice Card */}
-      <div className="card bg-gradient-to-br from-parchment to-white border-2 border-midnight-purple animate-slide-in-up">
+      <div className="card bg-white border-2 border-midnight-purple animate-slide-in-up">
         <div className="text-center mb-6">
           <div className="inline-block bg-lime-green text-white px-4 py-1 rounded-full text-sm font-subheader uppercase mb-4">
             {current.phase}
@@ -210,7 +210,7 @@ export default function MindfulWalking() {
       </div>
 
       {completedSteps >= 20 && (
-        <div className="card bg-gradient-to-br from-lime-green to-electric-blue text-white animate-slide-in-up">
+        <div className="card bg-lime-green text-white animate-slide-in-up">
           <div className="flex items-center space-x-3 mb-3">
             <CheckCircle size={32} />
             <h3 className="font-subheader uppercase text-xl">Excellent Practice!</h3>

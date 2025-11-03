@@ -57,7 +57,7 @@ export default function PassengersOnBus() {
   if (journeyProgress === 100) {
     return (
       <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-        <div className="card bg-gradient-to-br from-electric-blue to-midnight-purple text-white text-center py-12">
+        <div className="card bg-electric-blue text-white text-center py-12">
           <MapPin size={80} className="mx-auto mb-6 animate-pulse-slow" />
           <h1 className="text-4xl font-header mb-4">You've Arrived!</h1>
           <p className="text-xl opacity-90 font-body mb-8">You reached your valued destination: {destination}</p>
@@ -112,7 +112,7 @@ export default function PassengersOnBus() {
   if (isJourneyStarted) {
     return (
       <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-        <div className="card bg-gradient-to-br from-parchment to-white text-center py-8">
+        <div className="card bg-white text-center py-8">
           <Bus size={80} className="mx-auto mb-4 text-electric-blue animate-bounce-subtle" />
           <h1 className="text-3xl font-header text-midnight-purple mb-2">Driving to: {destination}</h1>
           <p className="text-gray-600 font-body">Keep driving, even with difficult passengers aboard...</p>
@@ -167,7 +167,7 @@ export default function PassengersOnBus() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
       <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-electric-blue to-midnight-purple flex items-center justify-center">
+        <div className="w-12 h-12 rounded-xl bg-electric-blue flex items-center justify-center">
           <Bus size={24} className="text-white" />
         </div>
         <div>

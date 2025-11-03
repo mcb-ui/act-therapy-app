@@ -1,9 +1,20 @@
 import { Link } from 'react-router-dom';
-import { Target, Brain, Heart, Zap, CheckSquare, Hexagon } from 'lucide-react';
+import { Target, Brain, Heart, Zap, CheckSquare, Hexagon, Sparkles, CheckCircle, Star } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { getProgress, getFavorites } from '../utils/exerciseTracking';
+import FavoriteButton from '../components/FavoriteButton';
+
+interface Value {
+  name: string;
+  description: string;
+  example: string;
+}
 
 export default function Dashboard() {
   const [userName, setUserName] = useState('');
+  const [topFiveValues, setTopFiveValues] = useState<Value[]>([]);
+  const [completedExerciseIds, setCompletedExerciseIds] = useState<string[]>([]);
+  const [favoriteExerciseIds, setFavoriteExerciseIds] = useState<string[]>([]);
 
   useEffect(() => {
     const user = localStorage.getItem('user');
@@ -11,7 +22,28 @@ export default function Dashboard() {
       const userData = JSON.parse(user);
       setUserName(userData.name);
     }
+
+    // Load top 5 values if they exist
+    const savedValues = localStorage.getItem('topFiveValues');
+    if (savedValues) {
+      setTopFiveValues(JSON.parse(savedValues));
+    }
+
+    // Load progress and favorites
+    loadProgressAndFavorites();
   }, []);
+
+  const loadProgressAndFavorites = async () => {
+    const progress = await getProgress();
+    const completed = progress
+      .filter((p: any) => p.completed)
+      .map((p: any) => p.exerciseId);
+    setCompletedExerciseIds(completed);
+
+    const favorites = await getFavorites();
+    const favoriteIds = favorites.map((f: any) => f.exerciseId);
+    setFavoriteExerciseIds(favoriteIds);
+  };
 
   const exerciseCategories = [
     {
@@ -21,6 +53,7 @@ export default function Dashboard() {
       icon: Target,
       color: 'bg-electric-blue',
       exercises: [
+        { name: 'Values Duel', path: '/exercises/values-duel', description: 'Discover your top 5 core values through choices' },
         { name: 'Values Compass', path: '/exercises/values-compass', description: 'Rate 8 life directions with interactive compass' },
         { name: 'Bull\'s Eye', path: '/exercises/bulls-eye', description: 'Visualize your values alignment on a target' },
         { name: 'Life Domains', path: '/exercises/life-domains', description: 'Assess satisfaction across 10 life areas' },
@@ -97,6 +130,44 @@ export default function Dashboard() {
         </p>
       </div>
 
+      {/* Top 5 Core Values Display */}
+      {topFiveValues.length === 5 && (
+        <div className="card bg-midnight-purple text-white hover-lift animate-slide-in-up">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                <Sparkles size={24} className="text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-header">Your Core Values</h2>
+                <p className="text-white/80 text-sm">What matters most to you</p>
+              </div>
+            </div>
+            <Link
+              to="/exercises/values-duel"
+              className="text-sm bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-all"
+            >
+              Retake
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            {topFiveValues.map((value, index) => (
+              <div
+                key={value.name}
+                className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/20 transition-all group"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-bold text-white/60">#{index + 1}</span>
+                  <Target size={16} className="text-lime-green group-hover:scale-110 transition-transform" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-1">{value.name}</h3>
+                <p className="text-xs text-white/70 line-clamp-2">{value.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="card bg-midnight-purple text-white hover-lift animate-slide-in-up overflow-hidden relative">
         <div className="absolute top-0 right-0 w-64 h-64 bg-electric-blue opacity-10 rounded-full -mr-32 -mt-32"></div>
         <div className="flex items-center justify-between relative z-10">
@@ -141,28 +212,48 @@ export default function Dashboard() {
 
                 {/* Exercise Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ml-0 md:ml-15">
-                  {category.exercises.map((exercise, exIndex) => (
-                    <Link
-                      key={exercise.path}
-                      to={exercise.path}
-                      className="card hover-lift group bg-white border-l-4 transition-all"
-                      style={{
-                        borderColor: category.color.replace('bg-', ''),
-                        animationDelay: `${(catIndex * 0.1) + (exIndex * 0.05)}s`
-                      }}
-                    >
-                      <h4 className="font-subheader text-midnight-purple mb-2 uppercase text-sm group-hover:text-electric-blue transition-colors">
-                        {exercise.name}
-                      </h4>
-                      <p className="text-xs text-gray-600 font-body leading-relaxed">
-                        {exercise.description}
-                      </p>
-                      <div className="mt-3 text-electric-blue font-subheader text-xs uppercase flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span>Start</span>
-                        <span>→</span>
+                  {category.exercises.map((exercise, exIndex) => {
+                    const exerciseId = exercise.path.replace('/exercises/', '');
+                    const isCompleted = completedExerciseIds.includes(exerciseId);
+                    const isFavorite = favoriteExerciseIds.includes(exerciseId);
+
+                    return (
+                      <div
+                        key={exercise.path}
+                        className="card hover-lift group bg-white border-l-4 transition-all relative"
+                        style={{
+                          borderColor: category.color.replace('bg-', ''),
+                          animationDelay: `${(catIndex * 0.1) + (exIndex * 0.05)}s`
+                        }}
+                      >
+                        {/* Favorite & Completed Icons */}
+                        <div className="absolute top-3 right-3 flex items-center space-x-2">
+                          {isCompleted && (
+                            <CheckCircle size={18} className="text-lime-green" title="Completed" />
+                          )}
+                          <div onClick={(e) => e.preventDefault()}>
+                            <FavoriteButton
+                              exerciseId={exerciseId}
+                              exerciseName={exercise.name}
+                            />
+                          </div>
+                        </div>
+
+                        <Link to={exercise.path} className="block">
+                          <h4 className="font-subheader text-midnight-purple mb-2 uppercase text-sm group-hover:text-electric-blue transition-colors pr-16">
+                            {exercise.name}
+                          </h4>
+                          <p className="text-xs text-gray-600 font-body leading-relaxed">
+                            {exercise.description}
+                          </p>
+                          <div className="mt-3 text-electric-blue font-subheader text-xs uppercase flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span>{isCompleted ? 'Redo' : 'Start'}</span>
+                            <span>→</span>
+                          </div>
+                        </Link>
                       </div>
-                    </Link>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             );

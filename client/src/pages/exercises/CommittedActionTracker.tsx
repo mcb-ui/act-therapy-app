@@ -36,7 +36,7 @@ export default function CommittedActionTracker() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
       <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-lime-green to-electric-blue flex items-center justify-center">
+        <div className="w-12 h-12 rounded-xl bg-lime-green flex items-center justify-center">
           <ListChecks size={24} className="text-white" />
         </div>
         <div>
@@ -140,7 +140,7 @@ export default function CommittedActionTracker() {
       )}
 
       {completed >= 3 && (
-        <div className="card bg-gradient-to-br from-lime-green to-electric-blue text-white">
+        <div className="card bg-lime-green text-white">
           <h3 className="font-subheader mb-2 uppercase">Momentum Building! 🎉</h3>
           <p className="font-body">
             You've completed {completed} valued actions. Each action, no matter how small,

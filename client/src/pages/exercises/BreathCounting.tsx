@@ -47,7 +47,7 @@ export default function BreathCounting() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
       <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-electric-blue to-lime-green flex items-center justify-center">
+        <div className="w-12 h-12 rounded-xl bg-midnight-purple flex items-center justify-center">
           <Wind size={24} className="text-white" />
         </div>
         <div>
@@ -88,7 +88,7 @@ export default function BreathCounting() {
       </div>
 
       {/* Breathing Visualization */}
-      <div className="card bg-gradient-to-br from-parchment to-white border-2 border-midnight-purple relative overflow-hidden" style={{ minHeight: '400px' }}>
+      <div className="card bg-white border-2 border-midnight-purple relative overflow-hidden" style={{ minHeight: '400px' }}>
         <div className="text-center">
           {/* Breathing circle animation */}
           <div className="flex items-center justify-center mb-8" style={{ height: '200px' }}>
@@ -188,7 +188,7 @@ export default function BreathCounting() {
       </div>
 
       {cycles >= 3 && (
-        <div className="card bg-gradient-to-br from-electric-blue to-lime-green text-white animate-slide-in-up">
+        <div className="card bg-midnight-purple text-white animate-slide-in-up">
           <h3 className="font-subheader mb-2 uppercase">Excellent Practice! 🌬️</h3>
           <p className="font-body mb-3">
             You've completed {cycles} full cycles of 10 breaths ({totalBreaths} total breaths) in {minutes} minutes.

@@ -45,19 +45,22 @@ export default function Progress() {
   const fetchProgress = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('/api/progress', {
+      const statsResponse = await axios.get('http://localhost:5000/api/progress/stats', {
         headers: { Authorization: `Bearer ${token}` },
       });
-      // Process progress data when backend is ready
-      // For now, stats remain at zero until exercises are completed
-      if (response.data && response.data.length > 0) {
+
+      if (statsResponse.data) {
         setStats({
-          totalExercises: 24,
-          completedExercises: response.data.length,
-          currentStreak: 0, // Will be calculated from data
-          longestStreak: 0, // Will be calculated from data
-          totalMinutes: 0, // Will be calculated from data
+          totalExercises: statsResponse.data.totalExercises || 24,
+          completedExercises: statsResponse.data.completedCount || 0,
+          currentStreak: statsResponse.data.currentStreak || 0,
+          longestStreak: statsResponse.data.longestStreak || 0,
+          totalMinutes: 0, // Can be added later
         });
+
+        if (statsResponse.data.weeklyData) {
+          setWeeklyData(statsResponse.data.weeklyData);
+        }
       }
     } catch (error) {
       console.error('Failed to fetch progress:', error);
@@ -80,7 +83,7 @@ export default function Progress() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="card hover-lift bg-gradient-to-br from-electric-blue to-midnight-purple text-white">
+        <div className="card hover-lift bg-electric-blue text-white">
           <div className="flex items-center justify-between mb-2">
             <TrendingUp size={32} />
             <span className="text-4xl font-header">{completionRate}%</span>
@@ -89,7 +92,7 @@ export default function Progress() {
           <p className="text-xs opacity-75 mt-1">{stats.completedExercises}/{stats.totalExercises} exercises done</p>
         </div>
 
-        <div className="card hover-lift bg-gradient-to-br from-inferno-red to-brand-pink text-white">
+        <div className="card hover-lift bg-inferno-red text-white">
           <div className="flex items-center justify-between mb-2">
             <Flame size={32} className="animate-pulse-slow" />
             <span className="text-4xl font-header">{stats.currentStreak}</span>
@@ -98,7 +101,7 @@ export default function Progress() {
           <p className="text-xs opacity-75 mt-1">Longest: {stats.longestStreak} days</p>
         </div>
 
-        <div className="card hover-lift bg-gradient-to-br from-lime-green to-electric-blue text-white">
+        <div className="card hover-lift bg-lime-green text-white">
           <div className="flex items-center justify-between mb-2">
             <Calendar size={32} />
             <span className="text-4xl font-header">{stats.totalMinutes}</span>
@@ -107,7 +110,7 @@ export default function Progress() {
           <p className="text-xs opacity-75 mt-1">Time invested in growth</p>
         </div>
 
-        <div className="card hover-lift bg-gradient-to-br from-brand-pink to-parchment text-midnight-purple">
+        <div className="card hover-lift bg-midnight-purple text-midnight-purple">
           <div className="flex items-center justify-between mb-2">
             <Award size={32} />
             <span className="text-4xl font-header">3/5</span>
@@ -223,7 +226,7 @@ export default function Progress() {
       </div>
 
       {/* Motivational Quote */}
-      <div className="card bg-gradient-to-r from-midnight-purple to-electric-blue text-white text-center py-12">
+      <div className="card bg-midnight-purple text-white text-center py-12">
         <p className="text-2xl md:text-3xl font-alt-header mb-4">
           "The curious paradox is that when I accept myself just as I am, then I can change."
         </p>

@@ -32,7 +32,7 @@ export default function Expansion() {
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
       <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-pink to-lime-green flex items-center justify-center">
+        <div className="w-12 h-12 rounded-xl bg-lime-green flex items-center justify-center">
           <Maximize2 size={24} className="text-white" />
         </div>
         <div>

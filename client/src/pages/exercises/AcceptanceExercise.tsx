@@ -158,7 +158,7 @@ export default function AcceptanceExercise() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 to-pink-600 flex items-center justify-center">
+        <div className="w-12 h-12 rounded-xl bg-midnight-purple flex items-center justify-center">
           <Heart size={24} className="text-white" />
         </div>
         <div>
@@ -230,7 +230,7 @@ export default function AcceptanceExercise() {
           </div>
         </>
       ) : (
-        <div className="card bg-gradient-to-r from-pink-500 to-pink-600 text-white text-center py-12">
+        <div className="card bg-midnight-purple text-white text-center py-12">
           <Heart size={64} className="mx-auto mb-4" />
           <h2 className="text-3xl font-bold mb-2">Exercise Complete!</h2>
           <p className="text-pink-100 mb-6 max-w-md mx-auto">

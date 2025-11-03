@@ -50,7 +50,7 @@ export default function CloudsInSky() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
       <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-electric-blue to-parchment flex items-center justify-center">
+        <div className="w-12 h-12 rounded-xl bg-midnight-purple flex items-center justify-center">
           <Cloud size={24} className="text-white" />
         </div>
         <div>
@@ -68,9 +68,9 @@ export default function CloudsInSky() {
       </div>
 
       {/* Sky Visualization */}
-      <div className="card bg-gradient-to-b from-electric-blue via-parchment to-lime-green overflow-hidden relative" style={{ height: '450px' }}>
+      <div className="card bg-midnight-purple overflow-hidden relative" style={{ height: '450px' }}>
         {/* Sky background effects */}
-        <div className="absolute inset-0 bg-gradient-to-b from-electric-blue-200 via-parchment-100 to-white opacity-40"></div>
+        <div className="absolute inset-0 bg-midnight-purple opacity-40"></div>
 
         {/* Sun */}
         <div className="absolute top-8 right-12 w-20 h-20 bg-parchment rounded-full opacity-80 animate-pulse-slow"></div>
@@ -102,7 +102,7 @@ export default function CloudsInSky() {
         ))}
 
         {/* Ground/horizon */}
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-lime-green to-transparent opacity-40"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-midnight-purple opacity-40"></div>
 
         {/* Wind indicator */}
         {isRunning && (
@@ -205,7 +205,7 @@ export default function CloudsInSky() {
       </div>
 
       {nextId >= 10 && (
-        <div className="card bg-gradient-to-br from-electric-blue to-midnight-purple text-white animate-slide-in-up">
+        <div className="card bg-electric-blue text-white animate-slide-in-up">
           <h3 className="font-subheader mb-2 uppercase">Beautiful Practice! 🌤️</h3>
           <p className="font-body mb-3">
             You've released {nextId} thoughts into the sky. Notice how each thought, no matter how heavy it felt,
