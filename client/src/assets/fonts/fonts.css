@@ -1,0 +1,36 @@
+/* Commuter Sans Extra Bold - Heading Header */
+@font-face {
+  font-family: 'Commuter Sans';
+  src: url('./CommutersSans_ExtraBold_v1.otf') format('opentype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Bookmania Light - Alt Header */
+@font-face {
+  font-family: 'Bookmania';
+  src: url('./bookmania_light_v1.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Stratos Medium - Subheader */
+@font-face {
+  font-family: 'Stratos';
+  src: url('./stratosweb_medium_v2.woff2') format('woff2'),
+       url('./stratosweb_medium_v1.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Archivo Regular - Body Copy */
+@font-face {
+  font-family: 'Archivo';
+  src: url('./Archivo_Regular_v1.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}

@@ -132,7 +132,7 @@ export default function Dashboard() {
 
       {/* Top 5 Core Values Display */}
       {topFiveValues.length === 5 && (
-        <div className="card bg-gradient-to-br from-electric-blue to-brand-pink text-white hover-lift animate-slide-in-up">
+        <div className="card bg-midnight-purple text-white hover-lift animate-slide-in-up">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-3">
               <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">

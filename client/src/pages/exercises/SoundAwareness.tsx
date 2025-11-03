@@ -54,7 +54,7 @@ export default function SoundAwareness() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
       <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-electric-blue to-brand-pink flex items-center justify-center">
+        <div className="w-12 h-12 rounded-xl bg-electric-blue flex items-center justify-center">
           <Ear size={24} className="text-white" />
         </div>
         <div>
@@ -99,7 +99,7 @@ export default function SoundAwareness() {
       </div>
 
       {/* Listening Control */}
-      <div className="card bg-gradient-to-br from-parchment to-white border-2 border-midnight-purple">
+      <div className="card bg-white border-2 border-midnight-purple">
         <div className="text-center mb-4">
           {!isListening && sounds.length === 0 && (
             <>
@@ -233,7 +233,7 @@ export default function SoundAwareness() {
       </div>
 
       {sounds.length >= 10 && (
-        <div className="card bg-gradient-to-br from-electric-blue to-brand-pink text-white animate-slide-in-up">
+        <div className="card bg-electric-blue text-white animate-slide-in-up">
           <h3 className="font-subheader mb-2 uppercase">Excellent Awareness! 👂</h3>
           <p className="font-body mb-3">
             You've noticed {sounds.length} sounds in {minutes} minutes and {seconds} seconds.

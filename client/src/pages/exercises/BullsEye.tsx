@@ -43,7 +43,7 @@ export default function BullsEye() {
   if (completed) {
     return (
       <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-        <div className="card bg-gradient-to-br from-electric-blue to-midnight-purple text-white text-center py-12">
+        <div className="card bg-electric-blue text-white text-center py-12">
           <Target size={80} className="mx-auto mb-6 animate-pulse-slow" />
           <h1 className="text-4xl font-header mb-4">Your Bull's Eye</h1>
           <p className="text-xl opacity-90 font-body mb-8">See how close you are to living your values</p>
@@ -158,7 +158,7 @@ export default function BullsEye() {
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
       <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-electric-blue to-midnight-purple flex items-center justify-center">
+        <div className="w-12 h-12 rounded-xl bg-electric-blue flex items-center justify-center">
           <Target size={24} className="text-white" />
         </div>
         <div>
@@ -184,7 +184,7 @@ export default function BullsEye() {
         </div>
       </div>
 
-      <div className="card bg-gradient-to-br from-white to-parchment border-2 border-midnight-purple animate-slide-in-up">
+      <div className="card bg-midnight-purple border-2 border-midnight-purple animate-slide-in-up">
         <div className="text-center mb-8">
           <div className={`w-24 h-24 rounded-full ${current.color} mx-auto mb-4 flex items-center justify-center shadow-xl animate-bounce-subtle`}>
             <Target size={48} className="text-white" />

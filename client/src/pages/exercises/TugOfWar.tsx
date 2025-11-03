@@ -20,7 +20,7 @@ export default function TugOfWar() {
   if (phase === 'dropped') {
     return (
       <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-        <div className="card bg-gradient-to-br from-lime-green to-electric-blue text-white text-center py-12">
+        <div className="card bg-lime-green text-white text-center py-12">
           <Anchor size={80} className="mx-auto mb-6 animate-pulse-slow" />
           <h1 className="text-4xl font-header mb-4">You Dropped the Rope</h1>
           <p className="text-xl opacity-90 font-body">Now you're free to move toward what matters</p>
@@ -112,7 +112,7 @@ export default function TugOfWar() {
     return (
       <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
         <div className="flex items-center space-x-3">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-inferno-red to-midnight-purple flex items-center justify-center">
+          <div className="w-12 h-12 rounded-xl bg-midnight-purple flex items-center justify-center">
             <AlertCircle size={24} className="text-white" />
           </div>
           <div>
@@ -122,7 +122,7 @@ export default function TugOfWar() {
         </div>
 
         {/* Visualization */}
-        <div className="card bg-gradient-to-br from-parchment to-white overflow-hidden relative" style={{ minHeight: '400px' }}>
+        <div className="card bg-white overflow-hidden relative" style={{ minHeight: '400px' }}>
           <div className="flex items-center justify-between px-8 py-12">
             {/* You */}
             <div className="text-center flex-1">
@@ -218,7 +218,7 @@ export default function TugOfWar() {
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
       <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-inferno-red to-midnight-purple flex items-center justify-center">
+        <div className="w-12 h-12 rounded-xl bg-midnight-purple flex items-center justify-center">
           <AlertCircle size={24} className="text-white" />
         </div>
         <div>

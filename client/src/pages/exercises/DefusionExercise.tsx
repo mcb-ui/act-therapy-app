@@ -80,7 +80,7 @@ export default function DefusionExercise() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+        <div className="w-12 h-12 rounded-xl bg-midnight-purple flex items-center justify-center">
           <Brain size={24} className="text-white" />
         </div>
         <div>
@@ -115,7 +115,7 @@ export default function DefusionExercise() {
       </div>
 
       {defusedThought && (
-        <div className="card bg-gradient-to-r from-purple-500 to-purple-600 text-white">
+        <div className="card bg-midnight-purple text-white">
           <div className="flex items-start justify-between mb-2">
             <h3 className="text-lg font-semibold">Defused Version:</h3>
             <button

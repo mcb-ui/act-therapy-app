@@ -23,7 +23,7 @@ export default function EmotionalSurfing() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
       <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-electric-blue to-lime-green flex items-center justify-center">
+        <div className="w-12 h-12 rounded-xl bg-midnight-purple flex items-center justify-center">
           <Waves size={24} className="text-white" />
         </div>
         <div>
@@ -78,7 +78,7 @@ export default function EmotionalSurfing() {
         </div>
       ) : (
         <>
-          <div className="card bg-gradient-to-b from-electric-blue via-brand-pink to-lime-green" style={{ height: '300px', position: 'relative', overflow: 'hidden' }}>
+          <div className="card bg-midnight-purple style={{ height: '300px', position: 'relative', overflow: 'hidden' }}>
             <div className="absolute top-4 left-4 bg-white bg-opacity-90 px-4 py-2 rounded-lg">
               <div className="text-sm font-subheader uppercase text-gray-600">Surfing: {emotion}</div>
               <div className="text-xs text-gray-600">{(time / 10).toFixed(1)}s</div>

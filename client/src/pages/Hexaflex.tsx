@@ -10,7 +10,7 @@ export default function Hexaflex() {
       id: 1,
       title: 'Values',
       icon: Target,
-      color: 'from-blue-500 to-blue-600',
+      color: 'bg-electric-blue',
       description: 'Clarifying what truly matters in your life',
       details:
         'Values are chosen life directions - the qualities you want to bring to your actions. They guide your behavior and give meaning to your life.',
@@ -20,7 +20,7 @@ export default function Hexaflex() {
       id: 2,
       title: 'Committed Action',
       icon: CheckSquare,
-      color: 'from-green-500 to-green-600',
+      color: 'bg-lime-green',
       description: 'Taking effective action guided by values',
       details:
         'Committed action involves setting goals based on values and taking concrete steps toward them, even in the presence of obstacles.',
@@ -30,7 +30,7 @@ export default function Hexaflex() {
       id: 3,
       title: 'Present Moment',
       icon: Zap,
-      color: 'from-yellow-500 to-orange-500',
+      color: 'bg-lime-green',
       description: 'Flexible awareness of the here and now',
       details:
         'Being psychologically present means having flexible awareness of the present moment without excessive attachment to thoughts or feelings.',
@@ -40,7 +40,7 @@ export default function Hexaflex() {
       id: 4,
       title: 'Self-as-Context',
       icon: Eye,
-      color: 'from-indigo-500 to-indigo-600',
+      color: 'bg-midnight-purple',
       description: 'The observing self - your perspective-taking ability',
       details:
         'This is your ability to take perspective on your own experiences - the "you" that notices your thoughts and feelings without being defined by them.',
@@ -50,7 +50,7 @@ export default function Hexaflex() {
       id: 5,
       title: 'Defusion',
       icon: Brain,
-      color: 'from-purple-500 to-purple-600',
+      color: 'bg-midnight-purple',
       description: 'Stepping back from thoughts',
       details:
         'Cognitive defusion means seeing thoughts as what they are - just words and pictures - rather than what they say they are.',
@@ -60,7 +60,7 @@ export default function Hexaflex() {
       id: 6,
       title: 'Acceptance',
       icon: Heart,
-      color: 'from-pink-500 to-pink-600',
+      color: 'bg-inferno-red',
       description: 'Making room for difficult experiences',
       details:
         'Acceptance means opening up and making room for painful feelings, sensations, and urges, allowing them to come and go without struggling.',
@@ -217,7 +217,7 @@ export default function Hexaflex() {
               return (
                 <div className="card">
                   <div
-                    className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${process.color} flex items-center justify-center mb-4`}
+                    className={`w-16 h-16 rounded-2xl ${process.color} flex items-center justify-center mb-4`}
                   >
                     <Icon size={32} className="text-white" />
                   </div>
@@ -265,7 +265,7 @@ export default function Hexaflex() {
               onClick={() => setSelectedProcess(process.id)}
             >
               <div
-                className={`w-12 h-12 rounded-xl bg-gradient-to-br ${process.color} flex items-center justify-center mb-3`}
+                className={`w-12 h-12 rounded-xl ${process.color} flex items-center justify-center mb-3`}
               >
                 <Icon size={24} className="text-white" />
               </div>

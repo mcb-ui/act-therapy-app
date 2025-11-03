@@ -117,7 +117,7 @@ export default function MindfulnessExercise() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center">
+        <div className="w-12 h-12 rounded-xl bg-midnight-purple flex items-center justify-center">
           <Zap size={24} className="text-white" />
         </div>
         <div>
@@ -136,7 +136,7 @@ export default function MindfulnessExercise() {
       </div>
 
       {activeExercise && currentExerciseData && (
-        <div className="card bg-gradient-to-br from-yellow-500 to-orange-500 text-white">
+        <div className="card bg-midnight-purple text-white">
           <h2 className="text-2xl font-bold mb-4">{currentExerciseData.title}</h2>
 
           {activeExercise === 'breathing' && (

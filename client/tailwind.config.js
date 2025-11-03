@@ -89,10 +89,10 @@ export default {
         },
       },
       fontFamily: {
-        'header': ['Montserrat', 'sans-serif'], // Alternative to Commuter Sans
-        'alt-header': ['Playfair Display', 'serif'], // Alternative to Bookmania
-        'subheader': ['Inter', 'sans-serif'], // Alternative to Stratos
-        'body': ['Archivo', 'sans-serif'], // Archivo is available on Google Fonts
+        'header': ['Commuter Sans', 'sans-serif'], // Heading Header - All Caps
+        'alt-header': ['Bookmania', 'serif'], // Alt Header - All Caps
+        'subheader': ['Stratos', 'sans-serif'], // Subheader - All Caps
+        'body': ['Archivo', 'sans-serif'], // Body Copy
       },
     },
   },

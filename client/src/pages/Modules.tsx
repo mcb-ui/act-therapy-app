@@ -118,7 +118,7 @@ export default function Modules() {
       </div>
 
       {/* Progress Overview */}
-      <div className="card bg-gradient-to-r from-midnight-purple to-electric-blue text-white">
+      <div className="card bg-midnight-purple text-white">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl md:text-3xl font-header mb-2">Your Learning Journey</h2>
@@ -154,7 +154,7 @@ export default function Modules() {
             >
               <div className="flex items-start space-x-4">
                 {/* Module Icon */}
-                <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${module.color} flex items-center justify-center flex-shrink-0 shadow-lg ${
+                <div className={`w-20 h-20 rounded-2xl ${module.color} flex items-center justify-center flex-shrink-0 shadow-lg ${
                   isLocked ? 'grayscale' : ''
                 }`}>
                   {isLocked ? (
@@ -192,7 +192,7 @@ export default function Modules() {
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div
-                        className={`bg-gradient-to-r ${module.color} h-2 rounded-full transition-all duration-500`}
+                        className={`${module.color} h-2 rounded-full transition-all duration-500`}
                         style={{
                           width: `${(completedCount / module.exercises.length) * 100}%`,
                         }}

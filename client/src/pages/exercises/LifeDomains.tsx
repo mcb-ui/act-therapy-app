@@ -118,7 +118,7 @@ export default function LifeDomains() {
 
     return (
       <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-        <div className="card bg-gradient-to-br from-electric-blue to-midnight-purple text-white text-center py-12">
+        <div className="card bg-electric-blue text-white text-center py-12">
           <LayoutGrid size={80} className="mx-auto mb-6 animate-pulse-slow" />
           <h1 className="text-4xl font-header mb-4">Life Domains Assessment</h1>
           <p className="text-xl opacity-90 font-body mb-4">Your satisfaction across all life areas</p>
@@ -212,7 +212,7 @@ export default function LifeDomains() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
       <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-electric-blue to-midnight-purple flex items-center justify-center">
+        <div className="w-12 h-12 rounded-xl bg-electric-blue flex items-center justify-center">
           <LayoutGrid size={24} className="text-white" />
         </div>
         <div>

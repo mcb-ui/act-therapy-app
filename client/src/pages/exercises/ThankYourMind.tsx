@@ -38,7 +38,7 @@ export default function ThankYourMind() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
       <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-pink to-lime-green flex items-center justify-center">
+        <div className="w-12 h-12 rounded-xl bg-lime-green flex items-center justify-center">
           <MessageCircle size={24} className="text-white" />
         </div>
         <div>
@@ -152,7 +152,7 @@ export default function ThankYourMind() {
       )}
 
       {messages.length >= 5 && (
-        <div className="card bg-gradient-to-br from-lime-green to-brand-pink text-white animate-slide-in-up">
+        <div className="card bg-lime-green text-white animate-slide-in-up">
           <h3 className="font-subheader mb-2 uppercase">Great Practice!</h3>
           <p className="font-body mb-3">
             You've thanked your mind {messages.length} times! Notice how this creates a playful, friendly

@@ -41,7 +41,7 @@ export default function SillyVoice() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
       <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-pink to-electric-blue flex items-center justify-center">
+        <div className="w-12 h-12 rounded-xl bg-midnight-purple flex items-center justify-center">
           <Smile size={24} className="text-white" />
         </div>
         <div>
@@ -82,7 +82,7 @@ export default function SillyVoice() {
 
       {/* Voice Display */}
       {thought && currentVoice && (
-        <div className="card bg-gradient-to-br from-parchment to-white border-2 border-midnight-purple animate-slide-in-up">
+        <div className="card bg-white border-2 border-midnight-purple animate-slide-in-up">
           <div className="text-center mb-4">
             <h3 className="font-subheader uppercase text-midnight-purple mb-2">
               {voices.find(v => v.id === currentVoice)?.name} Voice
@@ -163,7 +163,7 @@ export default function SillyVoice() {
       )}
 
       {practiced.length === voices.length && (
-        <div className="card bg-gradient-to-br from-electric-blue to-midnight-purple text-white text-center py-8 animate-slide-in-up">
+        <div className="card bg-electric-blue text-white text-center py-8 animate-slide-in-up">
           <Smile size={60} className="mx-auto mb-4" />
           <h2 className="text-2xl font-header mb-2">Great Job!</h2>
           <p className="font-body mb-4">

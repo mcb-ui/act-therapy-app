@@ -39,7 +39,7 @@ export default function LeavesStream() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
       <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-electric-blue to-lime-green flex items-center justify-center">
+        <div className="w-12 h-12 rounded-xl bg-midnight-purple flex items-center justify-center">
           <Waves size={24} className="text-white" />
         </div>
         <div>
@@ -57,7 +57,7 @@ export default function LeavesStream() {
       </div>
 
       {/* Stream Visualization */}
-      <div className="card bg-gradient-to-b from-electric-blue-50 to-lime-green-50 overflow-hidden relative" style={{ height: '400px' }}>
+      <div className="card bg-midnight-purple overflow-hidden relative" style={{ height: '400px' }}>
         <div className="absolute inset-0 bg-electric-blue opacity-10 animate-pulse-slow"></div>
 
         {/* Stream */}
@@ -79,8 +79,8 @@ export default function LeavesStream() {
         </div>
 
         {/* River banks */}
-        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-lime-green to-transparent opacity-30"></div>
-        <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-lime-green to-transparent opacity-30"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-16 bg-midnight-purple opacity-30"></div>
+        <div className="absolute top-0 left-0 right-0 h-16 bg-midnight-purple opacity-30"></div>
       </div>
 
       {/* Controls */}

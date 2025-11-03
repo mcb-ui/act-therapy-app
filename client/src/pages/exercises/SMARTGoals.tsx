@@ -14,7 +14,7 @@ export default function SMARTGoals() {
   if (completed) {
     return (
       <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-        <div className="card bg-gradient-to-br from-lime-green to-electric-blue text-white text-center py-12">
+        <div className="card bg-lime-green text-white text-center py-12">
           <CheckCircle size={80} className="mx-auto mb-6" />
           <h1 className="text-4xl font-header mb-4">SMART Goal Created!</h1>
         </div>
@@ -42,7 +42,7 @@ export default function SMARTGoals() {
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
       <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-lime-green to-electric-blue flex items-center justify-center">
+        <div className="w-12 h-12 rounded-xl bg-lime-green flex items-center justify-center">
           <Target size={24} className="text-white" />
         </div>
         <div>

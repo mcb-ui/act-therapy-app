@@ -120,7 +120,7 @@ export default function Coach() {
       {/* Header */}
       <div className="card mb-4">
         <div className="flex items-center space-x-4">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-electric-blue to-midnight-purple flex items-center justify-center shadow-lg animate-pulse-slow">
+          <div className="w-16 h-16 rounded-2xl bg-electric-blue flex items-center justify-center shadow-lg animate-pulse-slow">
             <Bot size={32} className="text-white" />
           </div>
           <div className="flex-1">
@@ -152,7 +152,7 @@ export default function Coach() {
             <div
               className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
                 message.role === 'coach'
-                  ? 'bg-gradient-to-br from-electric-blue to-midnight-purple'
+                  ? 'bg-electric-blue'
                   : 'bg-parchment'
               }`}
             >
@@ -166,7 +166,7 @@ export default function Coach() {
             <div
               className={`max-w-[70%] rounded-2xl px-4 py-3 ${
                 message.role === 'coach'
-                  ? 'bg-gradient-to-br from-electric-blue-50 to-midnight-purple-50 border-2 border-electric-blue'
+                  ? 'bg-midnight-purple border-2 border-electric-blue'
                   : 'bg-parchment border-2 border-midnight-purple'
               }`}
             >
@@ -183,10 +183,10 @@ export default function Coach() {
 
         {isTyping && (
           <div className="flex items-start space-x-3 animate-slide-in-up">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-electric-blue to-midnight-purple flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-electric-blue flex items-center justify-center">
               <Bot size={20} className="text-white" />
             </div>
-            <div className="bg-gradient-to-br from-electric-blue-50 to-midnight-purple-50 border-2 border-electric-blue rounded-2xl px-4 py-3">
+            <div className="bg-midnight-purple border-2 border-electric-blue rounded-2xl px-4 py-3">
               <div className="flex space-x-2">
                 <div className="w-2 h-2 bg-electric-blue rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
                 <div className="w-2 h-2 bg-electric-blue rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>

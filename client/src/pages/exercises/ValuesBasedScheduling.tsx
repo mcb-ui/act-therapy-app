@@ -27,7 +27,7 @@ export default function ValuesBasedScheduling() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
       <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-electric-blue to-brand-pink flex items-center justify-center">
+        <div className="w-12 h-12 rounded-xl bg-electric-blue flex items-center justify-center">
           <Calendar size={24} className="text-white" />
         </div>
         <div>

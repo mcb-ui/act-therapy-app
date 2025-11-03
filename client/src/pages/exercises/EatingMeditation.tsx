@@ -89,7 +89,7 @@ export default function EatingMeditation() {
   if (completed) {
     return (
       <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-        <div className="card bg-gradient-to-br from-lime-green to-electric-blue text-white text-center py-12">
+        <div className="card bg-lime-green text-white text-center py-12">
           <CheckCircle size={80} className="mx-auto mb-6 animate-pulse-slow" />
           <h1 className="text-4xl font-header mb-4">Mindful Eating Complete</h1>
           <p className="text-xl opacity-90 font-body">You've just eaten one bite mindfully</p>
@@ -145,7 +145,7 @@ export default function EatingMeditation() {
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
       <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-lime-green to-inferno-red flex items-center justify-center">
+        <div className="w-12 h-12 rounded-xl bg-midnight-purple flex items-center justify-center">
           <Apple size={24} className="text-white" />
         </div>
         <div>
@@ -179,7 +179,7 @@ export default function EatingMeditation() {
       </div>
 
       {/* Main Step Card */}
-      <div className="card bg-gradient-to-br from-parchment to-white border-2 border-midnight-purple animate-slide-in-up">
+      <div className="card bg-white border-2 border-midnight-purple animate-slide-in-up">
         <div className="text-center mb-6">
           <div className={`inline-block ${current.color} text-white px-4 py-1 rounded-full text-sm font-subheader uppercase mb-4`}>
             {current.sense}

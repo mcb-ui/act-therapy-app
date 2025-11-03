@@ -222,7 +222,7 @@ const ValuesDuel: React.FC = () => {
   const progress = (currentComparison / totalComparisons) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-midnight-purple via-electric-blue to-inferno-red p-6">
+    <div className="min-h-screen bg-midnight-purple p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -252,7 +252,7 @@ const ValuesDuel: React.FC = () => {
                 transition={{ duration: 0.5 }}
                 className="inline-block mb-6"
               >
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-brand-pink to-lime-green flex items-center justify-center mx-auto">
+                <div className="w-24 h-24 rounded-full bg-lime-green flex items-center justify-center mx-auto">
                   <Sparkles size={48} className="text-white" />
                 </div>
               </motion.div>
@@ -296,7 +296,7 @@ const ValuesDuel: React.FC = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={startDuel}
-                className="px-12 py-4 bg-gradient-to-r from-lime-green to-brand-pink text-white font-bold text-xl rounded-full shadow-2xl hover:shadow-lime-green/50 transition-all"
+                className="px-12 py-4 bg-lime-green text-white font-bold text-xl rounded-full shadow-2xl hover:shadow-lime-green/50 transition-all"
               >
                 Start Values Duel
               </motion.button>
@@ -321,7 +321,7 @@ const ValuesDuel: React.FC = () => {
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${progress}%` }}
-                    className="h-full bg-gradient-to-r from-lime-green to-brand-pink"
+                    className="h-full bg-lime-green"
                   />
                 </div>
               </div>
@@ -382,7 +382,7 @@ const ValuesDuel: React.FC = () => {
                   transition={{ duration: 0.5 }}
                   className="inline-block mb-6"
                 >
-                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-lime-green to-electric-blue flex items-center justify-center mx-auto">
+                  <div className="w-24 h-24 rounded-full bg-lime-green flex items-center justify-center mx-auto">
                     <Trophy size={48} className="text-white" />
                   </div>
                 </motion.div>
@@ -409,7 +409,7 @@ const ValuesDuel: React.FC = () => {
                       onClick={() => toggleTop5(value)}
                       className={`rounded-2xl p-6 text-left transition-all border-2 ${
                         isSelected
-                          ? 'bg-gradient-to-br from-lime-green to-brand-pink border-white shadow-2xl shadow-brand-pink/50'
+                          ? 'bg-lime-green border-white shadow-2xl shadow-brand-pink/50'
                           : 'bg-white/10 backdrop-blur-md border-transparent hover:border-electric-blue'
                       }`}
                     >
@@ -432,7 +432,7 @@ const ValuesDuel: React.FC = () => {
                   disabled={topFive.length !== 5}
                   className={`px-12 py-4 font-bold text-xl rounded-full shadow-2xl transition-all ${
                     topFive.length === 5
-                      ? 'bg-gradient-to-r from-lime-green to-brand-pink text-white hover:shadow-lime-green/50'
+                      ? 'bg-lime-green text-white hover:shadow-lime-green/50'
                       : 'bg-gray-500 text-gray-300 cursor-not-allowed'
                   }`}
                 >
@@ -456,7 +456,7 @@ const ValuesDuel: React.FC = () => {
                 transition={{ duration: 1, ease: "easeOut" }}
                 className="inline-block mb-8"
               >
-                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-lime-green via-brand-pink to-electric-blue flex items-center justify-center mx-auto">
+                <div className="w-32 h-32 rounded-full bg-midnight-purple flex items-center justify-center mx-auto">
                   <Trophy size={64} className="text-white" />
                 </div>
               </motion.div>
@@ -473,7 +473,7 @@ const ValuesDuel: React.FC = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className="bg-gradient-to-r from-midnight-purple/80 to-electric-blue/80 backdrop-blur-md rounded-2xl p-8 text-left border-2 border-white/20"
+                    className="bg-midnight-purple backdrop-blur-md rounded-2xl p-8 text-left border-2 border-white/20"
                   >
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center space-x-4">
@@ -498,7 +498,7 @@ const ValuesDuel: React.FC = () => {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="px-8 py-4 bg-gradient-to-r from-lime-green to-brand-pink text-white font-bold text-lg rounded-full shadow-2xl hover:shadow-lime-green/50 transition-all"
+                    className="px-8 py-4 bg-lime-green text-white font-bold text-lg rounded-full shadow-2xl hover:shadow-lime-green/50 transition-all"
                   >
                     View Dashboard
                   </motion.button>
