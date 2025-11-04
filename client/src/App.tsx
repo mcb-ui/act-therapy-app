@@ -1,56 +1,62 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import Progress from './pages/Progress';
-import Modules from './pages/Modules';
-import Coach from './pages/Coach';
-import ValuesExercise from './pages/exercises/ValuesExercise';
-import DefusionExercise from './pages/exercises/DefusionExercise';
-import MindfulnessExercise from './pages/exercises/MindfulnessExercise';
-import AcceptanceExercise from './pages/exercises/AcceptanceExercise';
-import ActionPlanner from './pages/exercises/ActionPlanner';
-import IntroACT from './pages/exercises/IntroACT';
-import LeavesStream from './pages/exercises/LeavesStream';
-import Hexaflex from './pages/Hexaflex';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import Layout from './components/Layout';
 
+// Eager load auth pages for faster initial load
+import Login from './pages/Login';
+import Register from './pages/Register';
+
+// Lazy load main pages
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Progress = lazy(() => import('./pages/Progress'));
+const Modules = lazy(() => import('./pages/Modules'));
+const Coach = lazy(() => import('./pages/Coach'));
+const Hexaflex = lazy(() => import('./pages/Hexaflex'));
+
+// Lazy load core exercises
+const ValuesExercise = lazy(() => import('./pages/exercises/ValuesExercise'));
+const DefusionExercise = lazy(() => import('./pages/exercises/DefusionExercise'));
+const MindfulnessExercise = lazy(() => import('./pages/exercises/MindfulnessExercise'));
+const AcceptanceExercise = lazy(() => import('./pages/exercises/AcceptanceExercise'));
+const ActionPlanner = lazy(() => import('./pages/exercises/ActionPlanner'));
+const IntroACT = lazy(() => import('./pages/exercises/IntroACT'));
+const LeavesStream = lazy(() => import('./pages/exercises/LeavesStream'));
+
 // Values exercises
-import ValuesCompass from './pages/exercises/ValuesCompass';
-import BullsEye from './pages/exercises/BullsEye';
-import LifeDomains from './pages/exercises/LifeDomains';
-import WhatMatters from './pages/exercises/WhatMatters';
-import ValuesInAction from './pages/exercises/ValuesInAction';
-import ValuesDuel from './pages/exercises/ValuesDuel';
+const ValuesCompass = lazy(() => import('./pages/exercises/ValuesCompass'));
+const BullsEye = lazy(() => import('./pages/exercises/BullsEye'));
+const LifeDomains = lazy(() => import('./pages/exercises/LifeDomains'));
+const WhatMatters = lazy(() => import('./pages/exercises/WhatMatters'));
+const ValuesInAction = lazy(() => import('./pages/exercises/ValuesInAction'));
+const ValuesDuel = lazy(() => import('./pages/exercises/ValuesDuel'));
 
 // Defusion exercises
-import SillyVoice from './pages/exercises/SillyVoice';
-import ThoughtLabels from './pages/exercises/ThoughtLabels';
-import ThankYourMind from './pages/exercises/ThankYourMind';
-import PassengersOnBus from './pages/exercises/PassengersOnBus';
-import CloudsInSky from './pages/exercises/CloudsInSky';
+const SillyVoice = lazy(() => import('./pages/exercises/SillyVoice'));
+const ThoughtLabels = lazy(() => import('./pages/exercises/ThoughtLabels'));
+const ThankYourMind = lazy(() => import('./pages/exercises/ThankYourMind'));
+const PassengersOnBus = lazy(() => import('./pages/exercises/PassengersOnBus'));
+const CloudsInSky = lazy(() => import('./pages/exercises/CloudsInSky'));
 
 // Mindfulness exercises
-import MindfulWalking from './pages/exercises/MindfulWalking';
-import EatingMeditation from './pages/exercises/EatingMeditation';
-import SoundAwareness from './pages/exercises/SoundAwareness';
-import BreathCounting from './pages/exercises/BreathCounting';
-import ProgressiveMuscleRelaxation from './pages/exercises/ProgressiveMuscleRelaxation';
+const MindfulWalking = lazy(() => import('./pages/exercises/MindfulWalking'));
+const EatingMeditation = lazy(() => import('./pages/exercises/EatingMeditation'));
+const SoundAwareness = lazy(() => import('./pages/exercises/SoundAwareness'));
+const BreathCounting = lazy(() => import('./pages/exercises/BreathCounting'));
+const ProgressiveMuscleRelaxation = lazy(() => import('./pages/exercises/ProgressiveMuscleRelaxation'));
 
 // Acceptance exercises
-import TugOfWar from './pages/exercises/TugOfWar';
-import WillingnessScale from './pages/exercises/WillingnessScale';
-import Expansion from './pages/exercises/Expansion';
-import EmotionalSurfing from './pages/exercises/EmotionalSurfing';
-import GuestHouse from './pages/exercises/GuestHouse';
+const TugOfWar = lazy(() => import('./pages/exercises/TugOfWar'));
+const WillingnessScale = lazy(() => import('./pages/exercises/WillingnessScale'));
+const Expansion = lazy(() => import('./pages/exercises/Expansion'));
+const EmotionalSurfing = lazy(() => import('./pages/exercises/EmotionalSurfing'));
+const GuestHouse = lazy(() => import('./pages/exercises/GuestHouse'));
 
 // Action exercises
-import SMARTGoals from './pages/exercises/SMARTGoals';
-import BarrierBusting from './pages/exercises/BarrierBusting';
-import ValuesBasedScheduling from './pages/exercises/ValuesBasedScheduling';
-import CommittedActionTracker from './pages/exercises/CommittedActionTracker';
-import ValuedLivingQuestionnaire from './pages/exercises/ValuedLivingQuestionnaire';
+const SMARTGoals = lazy(() => import('./pages/exercises/SMARTGoals'));
+const BarrierBusting = lazy(() => import('./pages/exercises/BarrierBusting'));
+const ValuesBasedScheduling = lazy(() => import('./pages/exercises/ValuesBasedScheduling'));
+const CommittedActionTracker = lazy(() => import('./pages/exercises/CommittedActionTracker'));
+const ValuedLivingQuestionnaire = lazy(() => import('./pages/exercises/ValuedLivingQuestionnaire'));
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -66,7 +72,8 @@ function App() {
 
   return (
     <Router>
-      <Routes>
+      <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
+        <Routes>
         <Route path="/login" element={<Login setAuth={setIsAuthenticated} />} />
         <Route path="/register" element={<Register setAuth={setIsAuthenticated} />} />
 
@@ -358,6 +365,7 @@ function App() {
           </ProtectedRoute>
         } />
       </Routes>
+      </Suspense>
     </Router>
   );
 }

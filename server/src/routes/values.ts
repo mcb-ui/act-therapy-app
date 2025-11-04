@@ -1,9 +1,10 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../db.js';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
+import { validate } from '../middleware/validate.js';
+import { createValueSchema, updateValueSchema } from '../schemas/values.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Get user values
 router.get('/', authMiddleware, async (req: AuthRequest, res) => {
@@ -19,7 +20,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
 });
 
 // Create value
-router.post('/', authMiddleware, async (req: AuthRequest, res) => {
+router.post('/', authMiddleware, validate(createValueSchema), async (req: AuthRequest, res) => {
   try {
     const { category, description, importance, alignment } = req.body;
 
@@ -40,7 +41,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
 });
 
 // Update value
-router.put('/:id', authMiddleware, async (req: AuthRequest, res) => {
+router.put('/:id', authMiddleware, validate(updateValueSchema), async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
     const { category, description, importance, alignment } = req.body;
