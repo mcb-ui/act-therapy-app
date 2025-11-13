@@ -15,6 +15,7 @@ import IntroACT from './pages/exercises/IntroACT';
 import LeavesStream from './pages/exercises/LeavesStream';
 import Hexaflex from './pages/Hexaflex';
 import Layout from './components/Layout';
+import ObserverSelfJourney from './pages/exercises/ObserverSelfJourney';
 
 // Values exercises
 import ValuesCompass from './pages/exercises/ValuesCompass';
@@ -106,6 +107,15 @@ function App() {
           <ProtectedRoute>
             <Layout setAuth={setIsAuthenticated}>
               <AcceptanceExercise />
+            </Layout>
+          </ProtectedRoute>
+        } />
+
+        {/* Self-as-Context */}
+        <Route path="/exercises/observer-self" element={
+          <ProtectedRoute>
+            <Layout setAuth={setIsAuthenticated}>
+              <ObserverSelfJourney />
             </Layout>
           </ProtectedRoute>
         } />

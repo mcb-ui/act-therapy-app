@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
-import { Target, Brain, Heart, Zap, CheckSquare, Hexagon, Sparkles, CheckCircle, Star } from 'lucide-react';
+import { Target, Brain, Heart, Zap, CheckSquare, Hexagon, Sparkles, CheckCircle, Eye } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { getProgress, getFavorites } from '../utils/exerciseTracking';
+import { getProgress } from '../utils/exerciseTracking';
 import FavoriteButton from '../components/FavoriteButton';
 
 interface Value {
@@ -14,7 +14,6 @@ export default function Dashboard() {
   const [userName, setUserName] = useState('');
   const [topFiveValues, setTopFiveValues] = useState<Value[]>([]);
   const [completedExerciseIds, setCompletedExerciseIds] = useState<string[]>([]);
-  const [favoriteExerciseIds, setFavoriteExerciseIds] = useState<string[]>([]);
 
   useEffect(() => {
     const user = localStorage.getItem('user');
@@ -30,19 +29,15 @@ export default function Dashboard() {
     }
 
     // Load progress and favorites
-    loadProgressAndFavorites();
+    loadProgress();
   }, []);
 
-  const loadProgressAndFavorites = async () => {
+  const loadProgress = async () => {
     const progress = await getProgress();
     const completed = progress
       .filter((p: any) => p.completed)
       .map((p: any) => p.exerciseId);
     setCompletedExerciseIds(completed);
-
-    const favorites = await getFavorites();
-    const favoriteIds = favorites.map((f: any) => f.exerciseId);
-    setFavoriteExerciseIds(favoriteIds);
   };
 
   const exerciseCategories = [
@@ -101,6 +96,17 @@ export default function Dashboard() {
         { name: 'Expansion', path: '/exercises/expansion', description: '4-step process to make space for emotions' },
         { name: 'Emotional Surfing', path: '/exercises/emotional-surfing', description: 'Ride the wave of emotion' },
         { name: 'Guest House', path: '/exercises/guest-house', description: 'Welcome all emotional visitors' },
+      ],
+    },
+    {
+      id: 'self-as-context',
+      title: 'Self-as-Context',
+      description: 'Strengthen the observing self and flexible perspective-taking',
+      icon: Eye,
+      color: 'bg-electric-blue',
+      exercises: [
+        { name: 'Observer Self Journey', path: '/exercises/observer-self', description: 'Guided practice to embody the observing self' },
+        { name: 'Leaves on a Stream', path: '/exercises/leaves-stream', description: 'Watch experiences float by from the observer seat' },
       ],
     },
     {
@@ -215,8 +221,6 @@ export default function Dashboard() {
                   {category.exercises.map((exercise, exIndex) => {
                     const exerciseId = exercise.path.replace('/exercises/', '');
                     const isCompleted = completedExerciseIds.includes(exerciseId);
-                    const isFavorite = favoriteExerciseIds.includes(exerciseId);
-
                     return (
                       <div
                         key={exercise.path}
@@ -229,7 +233,7 @@ export default function Dashboard() {
                         {/* Favorite & Completed Icons */}
                         <div className="absolute top-3 right-3 flex items-center space-x-2">
                           {isCompleted && (
-                            <CheckCircle size={18} className="text-lime-green" title="Completed" />
+                            <CheckCircle size={18} className="text-lime-green" aria-label="Completed" />
                           )}
                           <div onClick={(e) => e.preventDefault()}>
                             <FavoriteButton
