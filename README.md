@@ -94,8 +94,8 @@ A comprehensive web-based interactive tool for practicing Acceptance and Commitm
    ```
 
 4. **Configure environment variables**
-   - Update `server/.env` with your settings
-   - Change `JWT_SECRET` to a secure random string in production
+   - Copy `server/.env.example` to `server/.env`
+   - For quick local testing you can keep the defaults; before sharing or deploying, change `JWT_SECRET` to a secure random string
 
 5. **Start the development servers**
    ```bash
