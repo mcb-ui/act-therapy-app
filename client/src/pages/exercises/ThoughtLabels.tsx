@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Tag, Plus, X } from 'lucide-react';
+import { Tag, X } from 'lucide-react';
 
 interface LabeledThought {
   id: string;

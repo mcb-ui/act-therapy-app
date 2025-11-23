@@ -83,7 +83,20 @@ export default function Modules() {
     },
     {
       id: 5,
-      title: 'Module 4: Values & Committed Action',
+      title: 'Module 4: Self-as-Context & Perspective',
+      description: 'Practice taking the observer stance and widening perspective',
+      duration: '45 mins',
+      exercises: [
+        { id: 'observer-self', name: 'Observer Self Journey', path: '/exercises/observer-self', completed: false },
+        { id: 'leaves-stream', name: 'Leaves on a Stream', path: '/exercises/leaves-stream', completed: false },
+        { id: 'breath-counting', name: 'Observer Breath Practice', path: '/exercises/breath-counting', completed: false },
+      ],
+      color: 'from-electric-blue to-midnight-purple',
+      icon: '👁️',
+    },
+    {
+      id: 6,
+      title: 'Module 5: Values & Committed Action',
       description: 'Clarify values and take meaningful action',
       duration: '65 mins',
       exercises: [
@@ -100,7 +113,7 @@ export default function Modules() {
     },
   ];
 
-  const getModuleStatus = (moduleId: number) => {
+  const getModuleStatus = (moduleId: number): 'completed' | 'unlocked' | 'locked' => {
     if (completedModules.includes(moduleId)) return 'completed';
     // All modules are unlocked - users can explore freely
     return 'unlocked';
@@ -142,7 +155,7 @@ export default function Modules() {
           const status = getModuleStatus(module.id);
           const isLocked = status === 'locked';
           const isCompleted = status === 'completed';
-          const completedCount = module.exercises.filter(e => e.completed).length;
+          const completedCount = module.exercises.filter(e => completedExerciseIds.includes(e.id)).length;
 
           return (
             <div

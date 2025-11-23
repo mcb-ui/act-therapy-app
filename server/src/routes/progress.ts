@@ -126,7 +126,7 @@ router.get('/stats', authMiddleware, async (req: AuthRequest, res) => {
       currentStreak,
       longestStreak,
       weeklyData,
-      totalExercises: 24,
+      totalExercises: 25,
     });
   } catch (error) {
     console.error(error);

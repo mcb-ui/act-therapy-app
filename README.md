@@ -73,6 +73,8 @@ A comprehensive web-based interactive tool for practicing Acceptance and Commitm
 
 ### Setup Instructions
 
+> 💡 **New to running JavaScript projects?** The commands below go right into your terminal. When you see a block that starts with `cd`, copy the whole block line by line and press **Enter** after each one.
+
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
@@ -92,8 +94,8 @@ A comprehensive web-based interactive tool for practicing Acceptance and Commitm
    ```
 
 4. **Configure environment variables**
-   - Update `server/.env` with your settings
-   - Change `JWT_SECRET` to a secure random string in production
+   - Copy `server/.env.example` to `server/.env`
+   - For quick local testing you can keep the defaults; before sharing or deploying, change `JWT_SECRET` to a secure random string
 
 5. **Start the development servers**
    ```bash
@@ -103,6 +105,50 @@ A comprehensive web-based interactive tool for practicing Acceptance and Commitm
    This starts:
    - Frontend: http://localhost:3000
    - Backend: http://localhost:5001
+
+### Beginner-Friendly Testing Walkthrough
+
+Follow these exact steps any time you want to try the Observer Self Journey exercise locally. Each step builds on the previous one, so move to the next bullet only after the current one finishes.
+
+1. **Open the project folder ("repo root")**
+   - On macOS/Linux, right-click the folder named `act-therapy-app` and choose **"Open in Terminal"** or **"Open in New Terminal at Folder"**.
+   - On Windows, right-click the folder and choose **"Open in Terminal"** or open PowerShell and run `cd path\to\act-therapy-app`.
+   - When you run `ls` (macOS/Linux) or `dir` (Windows) and see both `client` and `server` folders together, you're in the right place.
+
+2. **Install everything the app needs** *(only required after cloning or pulling new dependencies)*
+   ```bash
+   npm run install:all
+   ```
+   This single command installs packages for the root project, the React client, and the Express server. Wait until it stops printing text before moving on.
+
+3. **Prepare the database** *(run again whenever the Prisma schema changes)*
+   ```bash
+   cd server
+   npm run db:push
+   cd ..
+   ```
+   These three lines create/update the SQLite database so progress can be saved. The `cd ..` line brings you back to the repo root afterwards.
+
+4. **Start both servers in development mode**
+   ```bash
+   npm run dev
+   ```
+   Keep this command running. A browser window will usually open automatically; if not, go to http://localhost:3000 manually. Leave the terminal window open in the background.
+
+5. **Create an account or log in**
+   - New user? Click **Register**, fill in the form, and submit.
+   - Returning user? Click **Log In** and enter your email/password.
+
+6. **Launch the Observer Self Journey exercise**
+   - From the dashboard, click the card labeled **Observer Self Journey**; or
+   - Use the Hexaflex navigation and choose the **Self-as-Context** spoke.
+   - Follow the on-screen prompts and complete the steps. Progress saves automatically.
+
+7. **Stop the servers when finished**
+   - Return to the terminal where `npm run dev` is running.
+   - Press **Ctrl + C** (or **Cmd + C** on macOS) once to shut everything down cleanly.
+
+Repeat only steps 4–7 when you want to test again later.
 
 ## Usage
 
