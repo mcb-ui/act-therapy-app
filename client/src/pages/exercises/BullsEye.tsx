@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Target, ChevronRight } from 'lucide-react';
+import { Target } from 'lucide-react';
 
 interface DomainRating {
   domain: string;

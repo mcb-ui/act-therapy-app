@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Heart, Star, Check, X } from 'lucide-react';
+import { Heart, Star, Check } from 'lucide-react';
 
 interface Value {
   id: string;

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Compass, ChevronRight } from 'lucide-react';
+import { Compass } from 'lucide-react';
 
 export default function ValuesCompass() {
   const [currentDirection, setCurrentDirection] = useState(0);

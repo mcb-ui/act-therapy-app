@@ -44,7 +44,7 @@ export default function Hexaflex() {
       description: 'The observing self - your perspective-taking ability',
       details:
         'This is your ability to take perspective on your own experiences - the "you" that notices your thoughts and feelings without being defined by them.',
-      path: '/',
+      path: '/exercises/observer-self',
     },
     {
       id: 5,

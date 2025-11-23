@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LayoutGrid, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { LayoutGrid, TrendingUp, TrendingDown } from 'lucide-react';
 
 interface Domain {
   id: string;

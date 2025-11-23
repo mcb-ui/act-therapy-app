@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ListChecks, Plus, Check, X } from 'lucide-react';
+import { ListChecks, Plus, Check } from 'lucide-react';
 
 interface Action {
   id: string;

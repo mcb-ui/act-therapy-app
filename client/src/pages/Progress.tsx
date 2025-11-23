@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { TrendingUp, Award, Calendar, Target, Flame } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { TrendingUp, Award, Calendar, Flame } from 'lucide-react';
 import axios from 'axios';
 
 export default function Progress() {
   const [stats, setStats] = useState({
-    totalExercises: 24,
+    totalExercises: 25,
     completedExercises: 0,
     currentStreak: 0,
     longestStreak: 0,
@@ -26,6 +26,7 @@ export default function Progress() {
     { name: 'Values', value: 0, color: '#2344E7' },
     { name: 'Defusion', value: 0, color: '#784A9F' },
     { name: 'Acceptance', value: 0, color: '#FE97BB' },
+    { name: 'Self-as-Context', value: 0, color: '#0EA5E9' },
     { name: 'Mindfulness', value: 0, color: '#93F357' },
     { name: 'Action', value: 0, color: '#EC4625' },
   ];
@@ -34,8 +35,9 @@ export default function Progress() {
     { id: 1, title: 'First Step', description: 'Complete your first exercise', icon: '🎯', unlocked: false },
     { id: 2, title: 'Week Warrior', description: 'Achieve a 7-day streak', icon: '🔥', unlocked: false },
     { id: 3, title: 'Values Champion', description: 'Complete all Values exercises', icon: '⭐', unlocked: false },
-    { id: 4, title: 'Mindful Master', description: 'Practice 100 minutes of mindfulness', icon: '🧘', unlocked: false },
-    { id: 5, title: 'ACT Expert', description: 'Complete all exercises', icon: '🏆', unlocked: false },
+    { id: 4, title: 'Perspective Pilot', description: 'Complete the Self-as-Context journey', icon: '👁️', unlocked: false },
+    { id: 5, title: 'Mindful Master', description: 'Practice 100 minutes of mindfulness', icon: '🧘', unlocked: false },
+    { id: 6, title: 'ACT Expert', description: 'Complete all exercises', icon: '🏆', unlocked: false },
   ];
 
   useEffect(() => {
@@ -51,7 +53,7 @@ export default function Progress() {
 
       if (statsResponse.data) {
         setStats({
-          totalExercises: statsResponse.data.totalExercises || 24,
+          totalExercises: statsResponse.data.totalExercises || 25,
           completedExercises: statsResponse.data.completedCount || 0,
           currentStreak: statsResponse.data.currentStreak || 0,
           longestStreak: statsResponse.data.longestStreak || 0,
