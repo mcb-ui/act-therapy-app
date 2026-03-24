@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { LayoutGrid, TrendingUp, TrendingDown } from 'lucide-react';
+import ExerciseHeader from '../../components/ExerciseHeader';
 
 interface Domain {
   id: string;
@@ -94,6 +96,8 @@ export default function LifeDomains() {
     },
   ]);
   const [completed, setCompleted] = useState(false);
+
+  useEffect(() => { document.title = 'Life Domains | ACT Therapy'; }, []);
 
   const handleSliderChange = (id: string, value: number) => {
     setDomains(domains.map(d => d.id === id ? { ...d, satisfaction: value } : d));
@@ -202,24 +206,22 @@ export default function LifeDomains() {
           </ul>
         </div>
 
-        <button onClick={() => window.history.back()} className="btn-primary w-full">
+        <Link to="/" className="btn-primary w-full">
           Complete Exercise
-        </button>
+        </Link>
       </div>
     );
   }
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-      <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 rounded-xl bg-electric-blue flex items-center justify-center">
-          <LayoutGrid size={24} className="text-white" />
-        </div>
-        <div>
-          <h1 className="text-3xl font-header text-midnight-purple">Life Domains Assessment</h1>
-          <p className="text-gray-600 font-body">Rate your satisfaction across all life areas</p>
-        </div>
-      </div>
+      <ExerciseHeader
+        icon={<LayoutGrid size={24} className="text-white" />}
+        title="Life Domains"
+        subtitle="Rate your satisfaction across all life areas"
+        exerciseId="life-domains"
+        exerciseName="Life Domains"
+      />
 
       <div className="card bg-electric-blue bg-opacity-10 border-2 border-electric-blue">
         <h3 className="font-subheader text-midnight-purple mb-2 uppercase">Instructions</h3>

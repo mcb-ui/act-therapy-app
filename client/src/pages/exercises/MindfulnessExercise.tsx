@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Zap, Play, Pause, RotateCcw } from 'lucide-react';
-import axios from 'axios';
+import { markExerciseComplete } from '../../utils/exerciseTracking';
+import ExerciseHeader from '../../components/ExerciseHeader';
 
 export default function MindfulnessExercise() {
+  useEffect(() => { document.title = 'Mindfulness Exercise | ACT Therapy'; }, []);
   const [activeExercise, setActiveExercise] = useState<string | null>(null);
   const [timer, setTimer] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
@@ -48,18 +50,7 @@ export default function MindfulnessExercise() {
     setIsRunning(false);
     if (activeExercise && timer > 10) {
       try {
-        const token = localStorage.getItem('token');
-        await axios.post(
-          '/api/progress',
-          {
-            exerciseId: `mindfulness-${activeExercise}`,
-            completed: true,
-            score: timer,
-          },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        await markExerciseComplete(`mindfulness-${activeExercise}`, timer);
       } catch (error) {
         console.error('Failed to save progress:', error);
       }
@@ -120,15 +111,7 @@ export default function MindfulnessExercise() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 rounded-xl bg-midnight-purple flex items-center justify-center">
-          <Zap size={24} className="text-white" />
-        </div>
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Present Moment Awareness</h1>
-          <p className="text-gray-600">Connect with the here and now</p>
-        </div>
-      </div>
+      <ExerciseHeader icon={<Zap size={24} className="text-white" />} title="Present Moment Awareness" subtitle="Connect with the here and now" exerciseId="mindfulness" exerciseName="Mindfulness Exercise" />
 
       <div className="card bg-orange-50 border-orange-200">
         <h3 className="font-semibold text-orange-900 mb-2">Why Practice Mindfulness?</h3>

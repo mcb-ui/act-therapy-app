@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Wind, Play, Pause, RotateCcw } from 'lucide-react';
+import ExerciseHeader from '../../components/ExerciseHeader';
+import ExerciseComplete from '../../components/ExerciseComplete';
+
+// User Improvements: #4 completion tracking, #19 ExerciseHeader+FavoriteButton, #45 page title
 
 export default function BreathCounting() {
   const [isBreathing, setIsBreathing] = useState(false);
@@ -7,6 +11,11 @@ export default function BreathCounting() {
   const [cycles, setCycles] = useState(0);
   const [phase, setPhase] = useState<'inhale' | 'exhale'>('inhale');
   const [sessionTime, setSessionTime] = useState(0);
+  const [completed, setCompleted] = useState(false);
+
+  useEffect(() => {
+    document.title = 'Breath Counting | ACT Therapy';
+  }, []);
 
   useEffect(() => {
     if (isBreathing) {
@@ -44,17 +53,42 @@ export default function BreathCounting() {
   const seconds = sessionTime % 60;
   const totalBreaths = cycles * 10 + breathCount;
 
+  const handleComplete = () => {
+    setIsBreathing(false);
+    setCompleted(true);
+  };
+
+  if (completed) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <ExerciseComplete
+          exerciseId="breath-counting"
+          exerciseName="Breath Counting"
+          title="Mindful Practice Complete!"
+          message={`You completed ${cycles} full cycles (${totalBreaths} total breaths) in ${minutes}m ${seconds}s. You're building your capacity to stay present.`}
+          data={{ cycles, totalBreaths, sessionTimeSeconds: sessionTime }}
+          nextExercise={{ path: '/exercises/sound-awareness', name: 'Sound Awareness' }}
+        >
+          <div className="card bg-parchment border-2 border-midnight-purple">
+            <p className="text-gray-700 font-body italic">
+              Remember: Noticing that your mind has wandered IS success. That moment of awareness is
+              the practice working. Be patient and kind with yourself.
+            </p>
+          </div>
+        </ExerciseComplete>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-      <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 rounded-xl bg-midnight-purple flex items-center justify-center">
-          <Wind size={24} className="text-white" />
-        </div>
-        <div>
-          <h1 className="text-3xl font-header text-midnight-purple">Breath Counting</h1>
-          <p className="text-gray-600 font-body">Anchor your attention with the breath</p>
-        </div>
-      </div>
+      <ExerciseHeader
+        icon={<Wind size={24} className="text-white" />}
+        title="Breath Counting"
+        subtitle="Anchor your attention with the breath"
+        exerciseId="breath-counting"
+        exerciseName="Breath Counting"
+      />
 
       <div className="card bg-electric-blue bg-opacity-10 border-2 border-electric-blue">
         <h3 className="font-subheader text-midnight-purple mb-2 uppercase">How to Practice</h3>
@@ -90,7 +124,6 @@ export default function BreathCounting() {
       {/* Breathing Visualization */}
       <div className="card bg-white border-2 border-midnight-purple relative overflow-hidden" style={{ minHeight: '400px' }}>
         <div className="text-center">
-          {/* Breathing circle animation */}
           <div className="flex items-center justify-center mb-8" style={{ height: '200px' }}>
             <div
               className={`rounded-full bg-electric-blue bg-opacity-20 border-4 border-electric-blue flex items-center justify-center transition-all duration-1000 ${
@@ -107,7 +140,6 @@ export default function BreathCounting() {
             </div>
           </div>
 
-          {/* Current count */}
           <div className="mb-6">
             <div className="text-8xl font-header text-midnight-purple mb-2 animate-pulse-slow">
               {breathCount === 0 ? '-' : breathCount}
@@ -117,40 +149,26 @@ export default function BreathCounting() {
             </div>
           </div>
 
-          {/* Progress dots */}
           <div className="flex justify-center space-x-2 mb-6">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
               <div
                 key={num}
                 className={`w-3 h-3 rounded-full transition-all ${
-                  num <= breathCount
-                    ? 'bg-electric-blue scale-125'
-                    : 'bg-gray-300'
+                  num <= breathCount ? 'bg-electric-blue scale-125' : 'bg-gray-300'
                 }`}
               ></div>
             ))}
           </div>
 
-          {/* Controls */}
           <div className="flex justify-center space-x-3">
-            <button
-              onClick={() => setIsBreathing(!isBreathing)}
-              className="btn-primary flex items-center space-x-2"
-            >
+            <button onClick={() => setIsBreathing(!isBreathing)} className="btn-primary flex items-center space-x-2">
               {isBreathing ? <Pause size={20} /> : <Play size={20} />}
               <span>{isBreathing ? 'Pause' : 'Start'}</span>
             </button>
-            <button
-              onClick={handleBreathComplete}
-              disabled={!isBreathing}
-              className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+            <button onClick={handleBreathComplete} disabled={!isBreathing} className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed">
               Complete Breath
             </button>
-            <button
-              onClick={reset}
-              className="btn-secondary flex items-center space-x-2"
-            >
+            <button onClick={reset} className="btn-secondary flex items-center space-x-2">
               <RotateCcw size={18} />
               <span>Reset</span>
             </button>
@@ -158,12 +176,10 @@ export default function BreathCounting() {
         </div>
       </div>
 
-      {/* Instructions */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="card bg-lime-green bg-opacity-10 border-2 border-lime-green">
           <h3 className="font-subheader text-midnight-purple mb-2 uppercase flex items-center space-x-2">
-            <span>✓</span>
-            <span>When Focused</span>
+            <span>✓</span><span>When Focused</span>
           </h3>
           <ul className="space-y-1 text-gray-700 font-body text-sm">
             <li>• Count each complete breath (in + out = 1 count)</li>
@@ -172,11 +188,9 @@ export default function BreathCounting() {
             <li>• Stay present with each breath</li>
           </ul>
         </div>
-
         <div className="card bg-brand-pink bg-opacity-10 border-2 border-brand-pink">
           <h3 className="font-subheader text-midnight-purple mb-2 uppercase flex items-center space-x-2">
-            <span>↻</span>
-            <span>When Mind Wanders</span>
+            <span>↻</span><span>When Mind Wanders</span>
           </h3>
           <ul className="space-y-1 text-gray-700 font-body text-sm">
             <li>• Notice you've lost count (this IS the practice!)</li>
@@ -190,20 +204,14 @@ export default function BreathCounting() {
       {cycles >= 3 && (
         <div className="card bg-midnight-purple text-white animate-slide-in-up">
           <h3 className="font-subheader mb-2 uppercase">Excellent Practice! 🌬️</h3>
-          <p className="font-body mb-3">
-            You've completed {cycles} full cycles of 10 breaths ({totalBreaths} total breaths) in {minutes} minutes.
-            You're building your capacity to stay present and notice when attention wanders.
+          <p className="font-body mb-4">
+            You've completed {cycles} full cycles ({totalBreaths} total breaths) in {minutes} minutes.
           </p>
-          <p className="font-body italic">
-            Remember: Noticing that your mind has wandered IS success. That moment of awareness is
-            the practice working. Be patient and kind with yourself.
-          </p>
+          <button onClick={handleComplete} className="bg-white text-midnight-purple px-6 py-2 rounded-lg font-subheader uppercase hover:scale-105 transition-all">
+            Save & Complete
+          </button>
         </div>
       )}
-
-      <button onClick={() => window.history.back()} className="btn-secondary w-full">
-        Back to Exercises
-      </button>
     </div>
   );
 }

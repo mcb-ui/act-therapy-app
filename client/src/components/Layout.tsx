@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Hexagon, LogOut, TrendingUp, BookOpen, MessageCircle, Sparkles, Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { Home, Hexagon, LogOut, TrendingUp, BookOpen, MessageCircle, Sparkles, Menu, X, ChevronUp } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
 // Improvement #13: Mobile hamburger menu
@@ -24,6 +24,14 @@ export default function Layout({ children }: LayoutProps) {
   const { logout } = useAuth();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  // User Improvement #44: Back to top button
+  useEffect(() => {
+    const handleScroll = () => setShowBackToTop(window.scrollY > 400);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/';
@@ -150,6 +158,17 @@ export default function Layout({ children }: LayoutProps) {
           </div>
         </div>
       </footer>
+
+      {/* User Improvement #44: Back to top button */}
+      {showBackToTop && (
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-midnight-purple text-white shadow-xl hover:bg-midnight-purple-600 hover:scale-110 transition-all flex items-center justify-center animate-slide-in-up"
+          aria-label="Back to top"
+        >
+          <ChevronUp size={24} />
+        </button>
+      )}
     </div>
   );
 }
