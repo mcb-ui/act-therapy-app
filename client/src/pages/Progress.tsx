@@ -1,11 +1,57 @@
 import { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { TrendingUp, Award, Calendar, Flame } from 'lucide-react';
-import axios from 'axios';
+import { getProgressStats, getProgress } from '../utils/exerciseTracking';
+
+// Improvement #2: Fix hardcoded port 5000 - now uses centralized API client
+// Improvement #4: Fix totalExercises default from 25 → 33
+// Improvement #16: Page title
+// Improvement #39: Dynamic achievement unlocking
+// Improvement #40: Real category distribution data
+
+const EXERCISE_CATEGORIES: Record<string, string> = {
+  'values-duel': 'Values',
+  'values-compass': 'Values',
+  'bulls-eye': 'Values',
+  'life-domains': 'Values',
+  'what-matters': 'Values',
+  'values-in-action': 'Values',
+  'silly-voice': 'Defusion',
+  'thought-labels': 'Defusion',
+  'thank-your-mind': 'Defusion',
+  'passengers-on-bus': 'Defusion',
+  'clouds-in-sky': 'Defusion',
+  'leaves-stream': 'Self-as-Context',
+  'observer-self': 'Self-as-Context',
+  'mindful-walking': 'Mindfulness',
+  'eating-meditation': 'Mindfulness',
+  'sound-awareness': 'Mindfulness',
+  'breath-counting': 'Mindfulness',
+  'progressive-muscle-relaxation': 'Mindfulness',
+  'tug-of-war': 'Acceptance',
+  'willingness-scale': 'Acceptance',
+  'expansion': 'Acceptance',
+  'emotional-surfing': 'Acceptance',
+  'guest-house': 'Acceptance',
+  'smart-goals': 'Action',
+  'barrier-busting': 'Action',
+  'values-based-scheduling': 'Action',
+  'committed-action-tracker': 'Action',
+  'valued-living-questionnaire': 'Action',
+};
+
+const CATEGORY_COLORS: Record<string, string> = {
+  'Values': '#2344E7',
+  'Defusion': '#784A9F',
+  'Acceptance': '#FE97BB',
+  'Self-as-Context': '#0EA5E9',
+  'Mindfulness': '#93F357',
+  'Action': '#EC4625',
+};
 
 export default function Progress() {
   const [stats, setStats] = useState({
-    totalExercises: 25,
+    totalExercises: 33,
     completedExercises: 0,
     currentStreak: 0,
     longestStreak: 0,
@@ -22,55 +68,103 @@ export default function Progress() {
     { day: 'Sun', completed: 0 },
   ]);
 
-  const categoryData = [
+  const [categoryData, setCategoryData] = useState([
     { name: 'Values', value: 0, color: '#2344E7' },
     { name: 'Defusion', value: 0, color: '#784A9F' },
     { name: 'Acceptance', value: 0, color: '#FE97BB' },
     { name: 'Self-as-Context', value: 0, color: '#0EA5E9' },
     { name: 'Mindfulness', value: 0, color: '#93F357' },
     { name: 'Action', value: 0, color: '#EC4625' },
-  ];
+  ]);
 
-  const achievements = [
+  const [achievements, setAchievements] = useState([
     { id: 1, title: 'First Step', description: 'Complete your first exercise', icon: '🎯', unlocked: false },
     { id: 2, title: 'Week Warrior', description: 'Achieve a 7-day streak', icon: '🔥', unlocked: false },
     { id: 3, title: 'Values Champion', description: 'Complete all Values exercises', icon: '⭐', unlocked: false },
     { id: 4, title: 'Perspective Pilot', description: 'Complete the Self-as-Context journey', icon: '👁️', unlocked: false },
-    { id: 5, title: 'Mindful Master', description: 'Practice 100 minutes of mindfulness', icon: '🧘', unlocked: false },
+    { id: 5, title: 'Mindful Master', description: 'Complete all Mindfulness exercises', icon: '🧘', unlocked: false },
     { id: 6, title: 'ACT Expert', description: 'Complete all exercises', icon: '🏆', unlocked: false },
-  ];
+  ]);
 
   useEffect(() => {
+    document.title = 'Your Progress | ACT Therapy';
     fetchProgress();
   }, []);
 
   const fetchProgress = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const statsResponse = await axios.get('http://localhost:5000/api/progress/stats', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const [statsData, progressData] = await Promise.all([
+        getProgressStats(),
+        getProgress(),
+      ]);
 
-      if (statsResponse.data) {
+      if (statsData) {
+        const completedCount = statsData.completedCount || 0;
         setStats({
-          totalExercises: statsResponse.data.totalExercises || 25,
-          completedExercises: statsResponse.data.completedCount || 0,
-          currentStreak: statsResponse.data.currentStreak || 0,
-          longestStreak: statsResponse.data.longestStreak || 0,
-          totalMinutes: 0, // Can be added later
+          totalExercises: statsData.totalExercises || 33,
+          completedExercises: completedCount,
+          currentStreak: statsData.currentStreak || 0,
+          longestStreak: statsData.longestStreak || 0,
+          totalMinutes: completedCount * 10, // Improvement #41: estimate ~10 min per exercise
         });
 
-        if (statsResponse.data.weeklyData) {
-          setWeeklyData(statsResponse.data.weeklyData);
+        if (statsData.weeklyData) {
+          setWeeklyData(statsData.weeklyData);
         }
+      }
+
+      // Improvement #40: Calculate real category distribution
+      if (progressData) {
+        const completedIds = progressData
+          .filter((p) => p.completed)
+          .map((p) => p.exerciseId);
+
+        const categoryCounts: Record<string, number> = {};
+        completedIds.forEach((id) => {
+          const cat = EXERCISE_CATEGORIES[id];
+          if (cat) {
+            categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+          }
+        });
+
+        setCategoryData(
+          Object.entries(CATEGORY_COLORS).map(([name, color]) => ({
+            name,
+            value: categoryCounts[name] || 0,
+            color,
+          }))
+        );
+
+        // Improvement #39: Dynamic achievement unlocking
+        const valuesExercises = ['values-duel', 'values-compass', 'bulls-eye', 'life-domains', 'what-matters', 'values-in-action'];
+        const mindfulnessExercises = ['mindful-walking', 'eating-meditation', 'sound-awareness', 'breath-counting', 'progressive-muscle-relaxation'];
+        const selfAsContextExercises = ['observer-self', 'leaves-stream'];
+
+        const allValuesComplete = valuesExercises.every((id) => completedIds.includes(id));
+        const allMindfulnessComplete = mindfulnessExercises.every((id) => completedIds.includes(id));
+        const selfContextComplete = selfAsContextExercises.every((id) => completedIds.includes(id));
+
+        setAchievements((prev) =>
+          prev.map((a) => {
+            switch (a.id) {
+              case 1: return { ...a, unlocked: completedIds.length >= 1 };
+              case 2: return { ...a, unlocked: (statsData?.longestStreak || 0) >= 7 };
+              case 3: return { ...a, unlocked: allValuesComplete };
+              case 4: return { ...a, unlocked: selfContextComplete };
+              case 5: return { ...a, unlocked: allMindfulnessComplete };
+              case 6: return { ...a, unlocked: completedIds.length >= 33 };
+              default: return a;
+            }
+          })
+        );
       }
     } catch (error) {
       console.error('Failed to fetch progress:', error);
-      // Keep initial zero state
     }
   };
 
   const completionRate = ((stats.completedExercises / stats.totalExercises) * 100).toFixed(0);
+  const unlockedCount = achievements.filter((a) => a.unlocked).length;
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -112,10 +206,10 @@ export default function Progress() {
           <p className="text-xs opacity-75 mt-1">Time invested in growth</p>
         </div>
 
-        <div className="card hover-lift bg-midnight-purple text-midnight-purple">
+        <div className="card hover-lift bg-midnight-purple text-white">
           <div className="flex items-center justify-between mb-2">
             <Award size={32} />
-            <span className="text-4xl font-header">3/5</span>
+            <span className="text-4xl font-header">{unlockedCount}/{achievements.length}</span>
           </div>
           <h3 className="font-subheader uppercase text-sm">Achievements</h3>
           <p className="text-xs opacity-75 mt-1">Unlocked badges</p>
@@ -134,7 +228,7 @@ export default function Progress() {
             <BarChart data={weeklyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="day" stroke="#784A9F" style={{ fontFamily: 'Archivo' }} />
-              <YAxis stroke="#784A9F" style={{ fontFamily: 'Archivo' }} />
+              <YAxis stroke="#784A9F" style={{ fontFamily: 'Archivo' }} allowDecimals={false} />
               <Tooltip
                 contentStyle={{
                   backgroundColor: '#784A9F',
@@ -186,7 +280,7 @@ export default function Progress() {
             {categoryData.map((cat) => (
               <div key={cat.name} className="flex items-center space-x-2">
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }}></div>
-                <span className="text-sm font-body text-gray-700">{cat.name}</span>
+                <span className="text-sm font-body text-gray-700">{cat.name} ({cat.value})</span>
               </div>
             ))}
           </div>

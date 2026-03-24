@@ -1,22 +1,40 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Sparkles } from 'lucide-react';
+import { Send, Bot, User, Sparkles, Trash2 } from 'lucide-react';
+
+// Improvement #5: Fix deprecated onKeyPress → onKeyDown
+// Improvement #16: Page title
+// Improvement #36: More coach response patterns
+// Improvement #37: Conversation persistence in localStorage
+// Improvement #38: Clear chat button
 
 interface Message {
   id: string;
   role: 'user' | 'coach';
   content: string;
-  timestamp: Date;
+  timestamp: string; // ISO string for serialization
 }
 
+const STORAGE_KEY = 'act-coach-messages';
+
+const initialMessage: Message = {
+  id: '1',
+  role: 'coach',
+  content: "Hello! I'm your ACT coach. I'm here to help you apply ACT principles to your daily life. What would you like to work on today?",
+  timestamp: new Date().toISOString(),
+};
+
 export default function Coach() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      role: 'coach',
-      content: "Hello! I'm your ACT coach. I'm here to help you apply ACT principles to your daily life. What would you like to work on today?",
-      timestamp: new Date(),
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return [initialMessage];
+      }
+    }
+    return [initialMessage];
+  });
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -26,9 +44,16 @@ export default function Coach() {
   };
 
   useEffect(() => {
+    document.title = 'ACT Coach | ACT Therapy';
     scrollToBottom();
   }, [messages]);
 
+  // Improvement #37: Persist conversation
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+  }, [messages]);
+
+  // Improvement #36: More response patterns
   const getCoachResponse = (userMessage: string): string => {
     const lowerMessage = userMessage.toLowerCase();
 
@@ -38,8 +63,28 @@ export default function Coach() {
     }
 
     // Anxiety/worry
-    if (lowerMessage.includes('anxious') || lowerMessage.includes('worry') || lowerMessage.includes('nervous')) {
+    if (lowerMessage.includes('anxious') || lowerMessage.includes('worry') || lowerMessage.includes('nervous') || lowerMessage.includes('panic')) {
       return "I hear you're experiencing anxiety. In ACT, we don't try to eliminate anxiety - instead, we learn to make room for it while still moving toward what matters. Can you identify what this anxiety is trying to tell you it wants to protect you from?";
+    }
+
+    // Stress
+    if (lowerMessage.includes('stress') || lowerMessage.includes('overwhelm') || lowerMessage.includes('burned out') || lowerMessage.includes('burnout')) {
+      return "Stress often shows up when we care deeply about something. Rather than fighting the stress, let's explore: what values are underneath this stress? What matters to you about the situation causing it? Sometimes stress is a signpost pointing toward what's important.";
+    }
+
+    // Sleep
+    if (lowerMessage.includes('sleep') || lowerMessage.includes('insomnia') || lowerMessage.includes('can\'t sleep') || lowerMessage.includes('tired')) {
+      return "Sleep difficulties often involve a busy mind. Try this ACT-based approach: Instead of trying to force sleep, practice noticing your thoughts as passing events. Imagine placing each thought on a leaf floating down a stream. The goal isn't to stop thinking - it's to change your relationship with those thoughts.";
+    }
+
+    // Relationships
+    if (lowerMessage.includes('relationship') || lowerMessage.includes('partner') || lowerMessage.includes('friend') || lowerMessage.includes('family') || lowerMessage.includes('lonely')) {
+      return "Relationships are often deeply connected to our values. In ACT, we focus on being the kind of person we want to be in relationships, rather than trying to control how others behave. What kind of friend/partner/family member do you want to be? What qualities do you want to bring to your relationships?";
+    }
+
+    // Self-compassion
+    if (lowerMessage.includes('hate myself') || lowerMessage.includes('not good enough') || lowerMessage.includes('failure') || lowerMessage.includes('worthless') || lowerMessage.includes('self-esteem')) {
+      return "I hear pain in what you're sharing, and I want you to know that's a very human experience. In ACT, we practice self-compassion - not because we're broken and need fixing, but because we're human and deserve kindness. Try this: Would you say what you just said to a close friend? What would you say to them instead?";
     }
 
     // Thoughts
@@ -48,23 +93,33 @@ export default function Coach() {
     }
 
     // Emotions/feelings
-    if (lowerMessage.includes('feel') || lowerMessage.includes('emotion') || lowerMessage.includes('sad') || lowerMessage.includes('angry')) {
+    if (lowerMessage.includes('feel') || lowerMessage.includes('emotion') || lowerMessage.includes('sad') || lowerMessage.includes('angry') || lowerMessage.includes('depressed')) {
       return "Thank you for sharing that feeling with me. In ACT, we practice acceptance - making room for difficult emotions rather than fighting them. On a scale of 1-10, how willing are you to have this feeling if it meant you could do something important to you?";
     }
 
     // Present moment
-    if (lowerMessage.includes('present') || lowerMessage.includes('mindful') || lowerMessage.includes('now')) {
+    if (lowerMessage.includes('present') || lowerMessage.includes('mindful') || lowerMessage.includes('now') || lowerMessage.includes('distract')) {
       return "Being present is a powerful skill! Let's try a quick grounding exercise: Can you notice 3 things you can see right now, 2 things you can hear, and 1 thing you can feel (like your feet on the floor)?";
     }
 
     // Action/goals
-    if (lowerMessage.includes('goal') || lowerMessage.includes('action') || lowerMessage.includes('do')) {
-      return "Committed action is about taking steps aligned with your values! What's one small, concrete action you could take today that would move you toward what matters most to you?";
+    if (lowerMessage.includes('goal') || lowerMessage.includes('action') || lowerMessage.includes('motivation') || lowerMessage.includes('procrastinat')) {
+      return "Committed action is about taking steps aligned with your values - even when motivation is low! In ACT, we don't wait to feel motivated. What's one small, concrete action you could take in the next 5 minutes that would move you toward what matters most?";
+    }
+
+    // Fear/avoidance
+    if (lowerMessage.includes('fear') || lowerMessage.includes('avoid') || lowerMessage.includes('scared') || lowerMessage.includes('afraid')) {
+      return "Fear often shows up when something meaningful is at stake. In ACT, we practice willingness - being open to discomfort in the service of our values. What would you do if fear wasn't in charge? What valued action is fear keeping you from?";
     }
 
     // Stuck/help
     if (lowerMessage.includes('stuck') || lowerMessage.includes('help') || lowerMessage.includes('don\'t know')) {
       return "Feeling stuck is actually a great place to start. It shows you care about moving forward. Let's explore this: If you weren't stuck, what would be different? What would you be doing?";
+    }
+
+    // Gratitude/positive
+    if (lowerMessage.includes('grateful') || lowerMessage.includes('thank') || lowerMessage.includes('better') || lowerMessage.includes('good')) {
+      return "That's wonderful to hear! Noticing what's going well is an important part of being present. In ACT, we hold space for both the difficult AND the positive. What values were you living out in that positive experience?";
     }
 
     // Default responses
@@ -74,6 +129,7 @@ export default function Coach() {
       "That sounds challenging. What have you noticed about how you typically respond to this?",
       "Thank you for being open. What would it be like to make room for this experience while still taking action toward your goals?",
       "I hear you. In ACT, we focus on what you can control - your actions. What's one small step you could take right now?",
+      "That's interesting. If you could step back and observe this situation from the perspective of your 'observer self,' what might you notice?",
     ];
 
     return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
@@ -86,10 +142,11 @@ export default function Coach() {
       id: Date.now().toString(),
       role: 'user',
       content: input,
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    const currentInput = input;
     setInput('');
     setIsTyping(true);
 
@@ -98,13 +155,26 @@ export default function Coach() {
       const coachResponse: Message = {
         id: (Date.now() + 1).toString(),
         role: 'coach',
-        content: getCoachResponse(input),
-        timestamp: new Date(),
+        content: getCoachResponse(currentInput),
+        timestamp: new Date().toISOString(),
       };
 
       setMessages((prev) => [...prev, coachResponse]);
       setIsTyping(false);
     }, 1000 + Math.random() * 1000);
+  };
+
+  // Improvement #38: Clear chat
+  const handleClearChat = () => {
+    setMessages([{ ...initialMessage, timestamp: new Date().toISOString() }]);
+    localStorage.removeItem(STORAGE_KEY);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
   };
 
   const suggestedPrompts = [
@@ -113,7 +183,15 @@ export default function Coach() {
     "I can't stop worrying",
     "I want to be more present",
     "How do I set better goals?",
+    "I'm feeling stuck and overwhelmed",
   ];
+
+  const formatTime = (timestamp: string) => {
+    return new Date(timestamp).toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
 
   return (
     <div className="max-w-4xl mx-auto h-[calc(100vh-12rem)] flex flex-col animate-fade-in">
@@ -130,12 +208,24 @@ export default function Coach() {
             </h1>
             <p className="text-gray-600 font-body">Your personal guide to practicing ACT</p>
           </div>
-          <div className="hidden md:block">
-            <div className="text-xs font-subheader uppercase text-gray-500 mb-1">Status</div>
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-lime-green rounded-full animate-pulse"></div>
-              <span className="text-sm font-body text-gray-700">Online</span>
+          <div className="flex items-center space-x-3">
+            <div className="hidden md:block">
+              <div className="text-xs font-subheader uppercase text-gray-500 mb-1">Status</div>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-lime-green rounded-full animate-pulse"></div>
+                <span className="text-sm font-body text-gray-700">Online</span>
+              </div>
             </div>
+            {messages.length > 1 && (
+              <button
+                onClick={handleClearChat}
+                className="p-2 text-gray-400 hover:text-inferno-red transition-colors rounded-lg hover:bg-gray-100"
+                title="Clear conversation"
+                aria-label="Clear conversation"
+              >
+                <Trash2 size={18} />
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -172,10 +262,7 @@ export default function Coach() {
             >
               <p className="font-body text-gray-800 leading-relaxed">{message.content}</p>
               <span className="text-xs text-gray-500 mt-1 block">
-                {message.timestamp.toLocaleTimeString([], {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
+                {formatTime(message.timestamp)}
               </span>
             </div>
           </div>
@@ -223,10 +310,11 @@ export default function Coach() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+            onKeyDown={handleKeyDown}
             placeholder="Type your message..."
             className="input-field flex-1"
             disabled={isTyping}
+            aria-label="Chat message"
           />
           <button
             onClick={handleSend}
@@ -234,7 +322,7 @@ export default function Coach() {
             className="btn-primary flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Send size={18} />
-            <span>Send</span>
+            <span className="hidden sm:inline">Send</span>
           </button>
         </div>
       </div>
