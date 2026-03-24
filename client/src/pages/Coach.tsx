@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Sparkles, Trash2 } from 'lucide-react';
+import { Send, Bot, User, Sparkles, Trash2, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 // Improvement #5: Fix deprecated onKeyPress → onKeyDown
 // Improvement #16: Page title
@@ -11,7 +12,8 @@ interface Message {
   id: string;
   role: 'user' | 'coach';
   content: string;
-  timestamp: string; // ISO string for serialization
+  timestamp: string;
+  suggestedExercise?: { path: string; name: string };
 }
 
 const STORAGE_KEY = 'act-coach-messages';
@@ -53,86 +55,72 @@ export default function Coach() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
   }, [messages]);
 
-  // Improvement #36: More response patterns
-  const getCoachResponse = (userMessage: string): string => {
+  // User Improvement #37: Exercise suggestions in coach responses
+  const getCoachResponse = (userMessage: string): { content: string; exercise?: { path: string; name: string } } => {
     const lowerMessage = userMessage.toLowerCase();
 
     // Values-related
     if (lowerMessage.includes('value') || lowerMessage.includes('important') || lowerMessage.includes('matter')) {
-      return "Values are like a compass - they guide your direction in life. Can you tell me about one area of your life where you'd like to be more aligned with your values? (Family, Work, Health, Relationships, etc.)";
+      return { content: "Values are like a compass - they guide your direction in life. Can you tell me about one area of your life where you'd like to be more aligned with your values? Try the Values Compass exercise to explore this further.", exercise: { path: '/exercises/values-compass', name: 'Values Compass' } };
     }
 
-    // Anxiety/worry
     if (lowerMessage.includes('anxious') || lowerMessage.includes('worry') || lowerMessage.includes('nervous') || lowerMessage.includes('panic')) {
-      return "I hear you're experiencing anxiety. In ACT, we don't try to eliminate anxiety - instead, we learn to make room for it while still moving toward what matters. Can you identify what this anxiety is trying to tell you it wants to protect you from?";
+      return { content: "I hear you're experiencing anxiety. In ACT, we don't try to eliminate anxiety - instead, we learn to make room for it. Can you identify what this anxiety is trying to protect you from?", exercise: { path: '/exercises/emotional-surfing', name: 'Emotional Surfing' } };
     }
 
-    // Stress
     if (lowerMessage.includes('stress') || lowerMessage.includes('overwhelm') || lowerMessage.includes('burned out') || lowerMessage.includes('burnout')) {
-      return "Stress often shows up when we care deeply about something. Rather than fighting the stress, let's explore: what values are underneath this stress? What matters to you about the situation causing it? Sometimes stress is a signpost pointing toward what's important.";
+      return { content: "Stress often shows up when we care deeply. Rather than fighting it, let's explore: what values are underneath this stress? Sometimes stress is a signpost pointing toward what's important.", exercise: { path: '/exercises/expansion', name: 'Expansion Exercise' } };
     }
 
-    // Sleep
     if (lowerMessage.includes('sleep') || lowerMessage.includes('insomnia') || lowerMessage.includes('can\'t sleep') || lowerMessage.includes('tired')) {
-      return "Sleep difficulties often involve a busy mind. Try this ACT-based approach: Instead of trying to force sleep, practice noticing your thoughts as passing events. Imagine placing each thought on a leaf floating down a stream. The goal isn't to stop thinking - it's to change your relationship with those thoughts.";
+      return { content: "Sleep difficulties often involve a busy mind. Try noticing your thoughts as passing events. Imagine placing each thought on a leaf floating down a stream.", exercise: { path: '/exercises/leaves-stream', name: 'Leaves on a Stream' } };
     }
 
-    // Relationships
     if (lowerMessage.includes('relationship') || lowerMessage.includes('partner') || lowerMessage.includes('friend') || lowerMessage.includes('family') || lowerMessage.includes('lonely')) {
-      return "Relationships are often deeply connected to our values. In ACT, we focus on being the kind of person we want to be in relationships, rather than trying to control how others behave. What kind of friend/partner/family member do you want to be? What qualities do you want to bring to your relationships?";
+      return { content: "Relationships are deeply connected to our values. In ACT, we focus on being the kind of person we want to be in relationships. What qualities do you want to bring?", exercise: { path: '/exercises/what-matters', name: 'What Matters Most' } };
     }
 
-    // Self-compassion
     if (lowerMessage.includes('hate myself') || lowerMessage.includes('not good enough') || lowerMessage.includes('failure') || lowerMessage.includes('worthless') || lowerMessage.includes('self-esteem')) {
-      return "I hear pain in what you're sharing, and I want you to know that's a very human experience. In ACT, we practice self-compassion - not because we're broken and need fixing, but because we're human and deserve kindness. Try this: Would you say what you just said to a close friend? What would you say to them instead?";
+      return { content: "I hear pain in what you're sharing. In ACT, we practice self-compassion. Try this: Would you say what you just said to a close friend? What would you say to them instead?", exercise: { path: '/exercises/silly-voice', name: 'Silly Voice Technique' } };
     }
 
-    // Thoughts
     if (lowerMessage.includes('thought') || lowerMessage.includes('think')) {
-      return "In ACT, we practice cognitive defusion - noticing thoughts as mental events rather than facts. Try this: Take that thought and add 'I'm having the thought that...' before it. How does that change your relationship with it?";
+      return { content: "In ACT, we practice cognitive defusion - noticing thoughts as mental events rather than facts. Try adding 'I'm having the thought that...' before it.", exercise: { path: '/exercises/thought-labels', name: 'Thought Labels' } };
     }
 
-    // Emotions/feelings
     if (lowerMessage.includes('feel') || lowerMessage.includes('emotion') || lowerMessage.includes('sad') || lowerMessage.includes('angry') || lowerMessage.includes('depressed')) {
-      return "Thank you for sharing that feeling with me. In ACT, we practice acceptance - making room for difficult emotions rather than fighting them. On a scale of 1-10, how willing are you to have this feeling if it meant you could do something important to you?";
+      return { content: "Thank you for sharing. In ACT, we practice acceptance - making room for difficult emotions. On a scale of 1-10, how willing are you to have this feeling if it meant doing something important?", exercise: { path: '/exercises/willingness-scale', name: 'Willingness Scale' } };
     }
 
-    // Present moment
     if (lowerMessage.includes('present') || lowerMessage.includes('mindful') || lowerMessage.includes('now') || lowerMessage.includes('distract')) {
-      return "Being present is a powerful skill! Let's try a quick grounding exercise: Can you notice 3 things you can see right now, 2 things you can hear, and 1 thing you can feel (like your feet on the floor)?";
+      return { content: "Being present is powerful! Try this grounding exercise: Notice 3 things you can see, 2 things you can hear, and 1 thing you can feel.", exercise: { path: '/exercises/breath-counting', name: 'Breath Counting' } };
     }
 
-    // Action/goals
     if (lowerMessage.includes('goal') || lowerMessage.includes('action') || lowerMessage.includes('motivation') || lowerMessage.includes('procrastinat')) {
-      return "Committed action is about taking steps aligned with your values - even when motivation is low! In ACT, we don't wait to feel motivated. What's one small, concrete action you could take in the next 5 minutes that would move you toward what matters most?";
+      return { content: "Committed action is about taking steps aligned with your values - even when motivation is low! What's one small action you could take in the next 5 minutes?", exercise: { path: '/exercises/smart-goals', name: 'SMART Goals' } };
     }
 
-    // Fear/avoidance
     if (lowerMessage.includes('fear') || lowerMessage.includes('avoid') || lowerMessage.includes('scared') || lowerMessage.includes('afraid')) {
-      return "Fear often shows up when something meaningful is at stake. In ACT, we practice willingness - being open to discomfort in the service of our values. What would you do if fear wasn't in charge? What valued action is fear keeping you from?";
+      return { content: "Fear often shows up when something meaningful is at stake. What would you do if fear wasn't in charge? What valued action is fear keeping you from?", exercise: { path: '/exercises/tug-of-war', name: 'Tug of War' } };
     }
 
-    // Stuck/help
     if (lowerMessage.includes('stuck') || lowerMessage.includes('help') || lowerMessage.includes('don\'t know')) {
-      return "Feeling stuck is actually a great place to start. It shows you care about moving forward. Let's explore this: If you weren't stuck, what would be different? What would you be doing?";
+      return { content: "Feeling stuck is a great place to start - it shows you care about moving forward. If you weren't stuck, what would be different?", exercise: { path: '/exercises/values-duel', name: 'Values Duel' } };
     }
 
-    // Gratitude/positive
     if (lowerMessage.includes('grateful') || lowerMessage.includes('thank') || lowerMessage.includes('better') || lowerMessage.includes('good')) {
-      return "That's wonderful to hear! Noticing what's going well is an important part of being present. In ACT, we hold space for both the difficult AND the positive. What values were you living out in that positive experience?";
+      return { content: "That's wonderful! Noticing what's going well is an important part of being present. What values were you living out in that positive experience?" };
     }
 
-    // Default responses
     const defaultResponses = [
       "That's an important insight. Can you tell me more about how this affects your daily life?",
-      "I appreciate you sharing that. How does this relate to what truly matters to you - your values?",
-      "That sounds challenging. What have you noticed about how you typically respond to this?",
-      "Thank you for being open. What would it be like to make room for this experience while still taking action toward your goals?",
-      "I hear you. In ACT, we focus on what you can control - your actions. What's one small step you could take right now?",
-      "That's interesting. If you could step back and observe this situation from the perspective of your 'observer self,' what might you notice?",
+      "I appreciate you sharing that. How does this relate to what truly matters to you?",
+      "That sounds challenging. What have you noticed about how you typically respond?",
+      "Thank you for being open. What would it be like to make room for this while still taking action?",
+      "I hear you. In ACT, we focus on what you can control - your actions. What's one small step you could take?",
     ];
 
-    return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+    return { content: defaultResponses[Math.floor(Math.random() * defaultResponses.length)] };
   };
 
   const handleSend = async () => {
@@ -152,11 +140,13 @@ export default function Coach() {
 
     // Simulate coach "thinking"
     setTimeout(() => {
+      const response = getCoachResponse(currentInput);
       const coachResponse: Message = {
         id: (Date.now() + 1).toString(),
         role: 'coach',
-        content: getCoachResponse(currentInput),
+        content: response.content,
         timestamp: new Date().toISOString(),
+        suggestedExercise: response.exercise,
       };
 
       setMessages((prev) => [...prev, coachResponse]);
@@ -261,6 +251,15 @@ export default function Coach() {
               }`}
             >
               <p className="font-body text-gray-800 leading-relaxed">{message.content}</p>
+              {message.suggestedExercise && (
+                <Link
+                  to={message.suggestedExercise.path}
+                  className="mt-2 inline-flex items-center space-x-1 bg-white/80 text-electric-blue px-3 py-1.5 rounded-lg text-xs font-subheader uppercase hover:bg-white hover:scale-105 transition-all"
+                >
+                  <span>Try: {message.suggestedExercise.name}</span>
+                  <ArrowRight size={12} />
+                </Link>
+              )}
               <span className="text-xs text-gray-500 mt-1 block">
                 {formatTime(message.timestamp)}
               </span>

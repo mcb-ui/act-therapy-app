@@ -1,10 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Smile, Volume2, RefreshCw } from 'lucide-react';
+import ExerciseHeader from '../../components/ExerciseHeader';
+import ExerciseComplete from '../../components/ExerciseComplete';
+
+// User Improvements: #5 completion tracking, #20 ExerciseHeader+FavoriteButton, #45 page title
 
 export default function SillyVoice() {
   const [thought, setThought] = useState('');
   const [currentVoice, setCurrentVoice] = useState<string | null>(null);
   const [practiced, setPracticed] = useState<string[]>([]);
+  const [completed, setCompleted] = useState(false);
+
+  useEffect(() => { document.title = 'Silly Voice | ACT Therapy'; }, []);
 
   const voices = [
     { id: 'cartoon', name: 'Cartoon Character', style: 'font-comic', color: 'bg-brand-pink', effect: 'animate-bounce' },
@@ -23,13 +30,7 @@ export default function SillyVoice() {
   };
 
   const renderThought = (voiceId: string) => {
-    const voice = voices.find(v => v.id === voiceId);
-    if (!voice) return thought;
-
-    if (voiceId === 'backwards') {
-      return thought.split('').reverse().join('');
-    }
-
+    if (voiceId === 'backwards') return thought.split('').reverse().join('');
     return thought;
   };
 
@@ -38,17 +39,43 @@ export default function SillyVoice() {
     return voice ? voice.style : '';
   };
 
+  if (completed || practiced.length === voices.length) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <ExerciseComplete
+          exerciseId="silly-voice"
+          exerciseName="Silly Voice Technique"
+          title="Great Defusion Practice!"
+          message="You practiced hearing your thought in all the silly voices. Remember: thoughts are just thoughts, not facts."
+          data={{ thought, voicesPracticed: practiced.length }}
+          nextExercise={{ path: '/exercises/thought-labels', name: 'Thought Labels' }}
+        >
+          <div className="card bg-parchment border-2 border-midnight-purple text-center">
+            <p className="text-gray-700 font-body">
+              You can use this technique anytime a thought feels heavy. Just imagine hearing it in a silly voice!
+            </p>
+            <button
+              onClick={() => { setThought(''); setCurrentVoice(null); setPracticed([]); setCompleted(false); }}
+              className="mt-4 btn-secondary inline-flex items-center space-x-2"
+            >
+              <RefreshCw size={18} />
+              <span>Try Another Thought</span>
+            </button>
+          </div>
+        </ExerciseComplete>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-      <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 rounded-xl bg-midnight-purple flex items-center justify-center">
-          <Smile size={24} className="text-white" />
-        </div>
-        <div>
-          <h1 className="text-3xl font-header text-midnight-purple">Silly Voice Technique</h1>
-          <p className="text-gray-600 font-body">Defuse from difficult thoughts</p>
-        </div>
-      </div>
+      <ExerciseHeader
+        icon={<Smile size={24} className="text-white" />}
+        title="Silly Voice Technique"
+        subtitle="Defuse from difficult thoughts"
+        exerciseId="silly-voice"
+        exerciseName="Silly Voice Technique"
+      />
 
       <div className="card bg-electric-blue bg-opacity-10 border-2 border-electric-blue">
         <h3 className="font-subheader text-midnight-purple mb-2 uppercase">How it Works</h3>
@@ -58,11 +85,9 @@ export default function SillyVoice() {
         </p>
         <p className="text-gray-700 font-body">
           <strong>Try this:</strong> Enter a troubling thought, then "hear" it in different silly voices.
-          Notice how the thought loses its grip when you defuse from it.
         </p>
       </div>
 
-      {/* Input Section */}
       <div className="card">
         <label className="font-subheader uppercase text-midnight-purple text-sm mb-2 block">
           Enter a troubling thought:
@@ -73,14 +98,8 @@ export default function SillyVoice() {
           placeholder="e.g., 'I'm not good enough' or 'I'll never succeed'"
           className="input-field w-full h-24 resize-none"
         />
-        {thought && (
-          <p className="text-xs text-gray-600 mt-2 font-body">
-            Now try saying this in different silly voices below
-          </p>
-        )}
       </div>
 
-      {/* Voice Display */}
       {thought && currentVoice && (
         <div className="card bg-white border-2 border-midnight-purple animate-slide-in-up">
           <div className="text-center mb-4">
@@ -97,7 +116,6 @@ export default function SillyVoice() {
         </div>
       )}
 
-      {/* Voice Buttons */}
       {thought && (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {voices.map((voice, idx) => (
@@ -115,8 +133,7 @@ export default function SillyVoice() {
               <h4 className="font-subheader uppercase text-midnight-purple text-sm mb-1">{voice.name}</h4>
               {practiced.includes(voice.id) && (
                 <div className="flex items-center justify-center space-x-1 text-lime-green text-xs">
-                  <span>✓</span>
-                  <span>Practiced</span>
+                  <span>✓</span><span>Practiced</span>
                 </div>
               )}
             </button>
@@ -124,7 +141,6 @@ export default function SillyVoice() {
         </div>
       )}
 
-      {/* Progress & Completion */}
       {practiced.length > 0 && (
         <div className="card bg-lime-green bg-opacity-10 border-2 border-lime-green animate-slide-in-up">
           <div className="flex items-center justify-between mb-3">
@@ -132,61 +148,15 @@ export default function SillyVoice() {
             <span className="text-sm font-body text-gray-600">{practiced.length} / {voices.length} voices tried</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
-            <div
-              className="bg-lime-green h-2 rounded-full transition-all duration-500"
-              style={{ width: `${(practiced.length / voices.length) * 100}%` }}
-            ></div>
+            <div className="bg-lime-green h-2 rounded-full transition-all duration-500" style={{ width: `${(practiced.length / voices.length) * 100}%` }}></div>
           </div>
-
           {practiced.length >= 3 && (
-            <div className="space-y-2">
-              <p className="text-gray-700 font-body mb-2">
-                <strong>Reflection:</strong> How does the thought feel now compared to when you started?
-              </p>
-              <ul className="space-y-1 text-gray-700 font-body text-sm ml-4">
-                <li className="flex items-start">
-                  <span className="text-lime-green mr-2">•</span>
-                  <span>Is it still as heavy or serious?</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-lime-green mr-2">•</span>
-                  <span>Can you notice the thought without getting caught up in it?</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-lime-green mr-2">•</span>
-                  <span>Do you feel more distance from it?</span>
-                </li>
-              </ul>
-            </div>
+            <button onClick={() => setCompleted(true)} className="btn-primary w-full mt-2">
+              Save & Complete Exercise
+            </button>
           )}
         </div>
       )}
-
-      {practiced.length === voices.length && (
-        <div className="card bg-electric-blue text-white text-center py-8 animate-slide-in-up">
-          <Smile size={60} className="mx-auto mb-4" />
-          <h2 className="text-2xl font-header mb-2">Great Job!</h2>
-          <p className="font-body mb-4">
-            You've practiced defusion with all the silly voices. Remember: thoughts are just thoughts,
-            not facts. You can notice them without being controlled by them.
-          </p>
-          <button
-            onClick={() => {
-              setThought('');
-              setCurrentVoice(null);
-              setPracticed([]);
-            }}
-            className="bg-white text-electric-blue px-6 py-2 rounded-lg font-subheader uppercase hover:scale-105 transition-all inline-flex items-center space-x-2"
-          >
-            <RefreshCw size={18} />
-            <span>Try Another Thought</span>
-          </button>
-        </div>
-      )}
-
-      <button onClick={() => window.history.back()} className="btn-secondary w-full">
-        Back to Exercises
-      </button>
     </div>
   );
 }
