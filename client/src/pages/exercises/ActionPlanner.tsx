@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../utils/api';
 import { CheckSquare, Plus, Check, X, Calendar } from 'lucide-react';
+import ExerciseHeader from '../../components/ExerciseHeader';
 
 interface Action {
   id: string;
@@ -28,6 +29,8 @@ export default function ActionPlanner() {
     dueDate: '',
   });
 
+  useEffect(() => { document.title = 'Action Planner | ACT Therapy'; }, []);
+
   useEffect(() => {
     fetchActions();
     fetchValues();
@@ -35,10 +38,7 @@ export default function ActionPlanner() {
 
   const fetchActions = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get('/api/actions', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get('/actions');
       setActions(response.data);
     } catch (error) {
       console.error('Failed to fetch actions:', error);
@@ -47,10 +47,7 @@ export default function ActionPlanner() {
 
   const fetchValues = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get('/api/values', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get('/values');
       setValues(response.data);
     } catch (error) {
       console.error('Failed to fetch values:', error);
@@ -59,13 +56,8 @@ export default function ActionPlanner() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
-
     try {
-      await axios.post('/api/actions', formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
+      await api.post('/actions', formData);
       setFormData({ title: '', description: '', valueId: '', dueDate: '' });
       setShowForm(false);
       fetchActions();
@@ -76,14 +68,7 @@ export default function ActionPlanner() {
 
   const toggleComplete = async (action: Action) => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.put(
-        `/api/actions/${action.id}`,
-        { ...action, completed: !action.completed },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      await api.put(`/actions/${action.id}`, { ...action, completed: !action.completed });
       fetchActions();
     } catch (error) {
       console.error('Failed to update action:', error);
@@ -92,12 +77,8 @@ export default function ActionPlanner() {
 
   const deleteAction = async (id: string) => {
     if (!confirm('Delete this action?')) return;
-
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`/api/actions/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.delete(`/actions/${id}`);
       fetchActions();
     } catch (error) {
       console.error('Failed to delete action:', error);
@@ -113,16 +94,9 @@ export default function ActionPlanner() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <div className="w-12 h-12 rounded-xl bg-midnight-purple flex items-center justify-center">
-            <CheckSquare size={24} className="text-white" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Committed Action</h1>
-            <p className="text-gray-600">Take steps aligned with your values</p>
-          </div>
-        </div>
+      <ExerciseHeader icon={<CheckSquare size={24} className="text-white" />} title="Committed Action" subtitle="Take steps aligned with your values" exerciseId="action-planner" exerciseName="Action Planner" />
+
+      <div className="flex justify-end">
         <button
           onClick={() => setShowForm(!showForm)}
           className="btn-primary flex items-center space-x-2"

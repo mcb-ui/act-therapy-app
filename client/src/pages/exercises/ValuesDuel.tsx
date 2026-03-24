@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Trophy, Sparkles, Target } from 'lucide-react';
+import { Trophy, Sparkles, Target } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { markExerciseComplete, saveExerciseData } from '../../utils/exerciseTracking';
-import FavoriteButton from '../../components/FavoriteButton';
+import ExerciseHeader from '../../components/ExerciseHeader';
 
 interface Value {
   name: string;
@@ -119,6 +119,8 @@ const allValues: Value[] = [
 type Phase = 'intro' | 'duel' | 'top10' | 'complete';
 
 const ValuesDuel: React.FC = () => {
+  useEffect(() => { document.title = 'Values Duel | ACT Therapy'; }, []);
+
   const [phase, setPhase] = useState<Phase>('intro');
   const [remainingValues, setRemainingValues] = useState<Value[]>([]);
   const [currentPair, setCurrentPair] = useState<[Value, Value] | null>(null);
@@ -225,15 +227,8 @@ const ValuesDuel: React.FC = () => {
     <div className="min-h-screen bg-midnight-purple p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <Link
-            to="/exercises"
-            className="flex items-center space-x-2 text-parchment hover:text-white transition-colors"
-          >
-            <ArrowLeft size={20} />
-            <span>Back to Exercises</span>
-          </Link>
-          <FavoriteButton exerciseId="values-duel" exerciseName="Values Duel" className="text-white" />
+        <div className="mb-8">
+          <ExerciseHeader icon={<Sparkles size={24} className="text-white" />} title="Values Duel" subtitle="Discover your core values through choices" exerciseId="values-duel" exerciseName="Values Duel" />
         </div>
 
         <AnimatePresence mode="wait">

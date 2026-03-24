@@ -229,7 +229,7 @@ export default function Dashboard() {
 
       {/* User Improvement #34: Daily ACT quote */}
       <div className="card bg-midnight-purple text-white text-center py-6 animate-fade-in">
-        <p className="text-lg md:text-xl font-alt-header mb-2">"{dailyQuote.text}"</p>
+        <p className="text-lg md:text-xl font-header italic mb-2">"{dailyQuote.text}"</p>
         <p className="font-body text-white/70 text-sm">— {dailyQuote.author}</p>
       </div>
 

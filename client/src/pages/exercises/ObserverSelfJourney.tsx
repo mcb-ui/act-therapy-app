@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Eye, Anchor, Compass, Feather, Sparkles, CheckCircle2 } from 'lucide-react';
-import FavoriteButton from '../../components/FavoriteButton';
+import ExerciseHeader from '../../components/ExerciseHeader';
 import { markExerciseComplete, saveExerciseData } from '../../utils/exerciseTracking';
 
 interface PerspectiveMoment {
@@ -88,6 +88,8 @@ const steps = [
 ];
 
 export default function ObserverSelfJourney() {
+  useEffect(() => { document.title = 'Observer Self Journey | ACT Therapy'; }, []);
+
   const [stepIndex, setStepIndex] = useState(0);
   const [breathCadence, setBreathCadence] = useState(4);
   const [selectedAnchors, setSelectedAnchors] = useState<string[]>(['breath']);
@@ -181,29 +183,14 @@ export default function ObserverSelfJourney() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-8 animate-fade-in">
-      <div className="card bg-midnight-purple text-white">
-        <div className="flex items-start justify-between">
-          <div className="flex items-start space-x-4">
-            <div className="w-16 h-16 rounded-2xl bg-electric-blue flex items-center justify-center shadow-lg">
-              <Eye size={32} className="text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl md:text-4xl font-header mb-2">Observer Self Journey</h1>
-              <p className="text-white/80 font-body max-w-2xl">
-                Strengthen the ACT process of self-as-context. Practice stepping back into the
-                part of you that notices every thought, feeling, and sensation without being
-                consumed by them.
-              </p>
-            </div>
-          </div>
-          <FavoriteButton
-            exerciseId="observer-self"
-            exerciseName="Observer Self Journey"
-            className="text-white"
-          />
-        </div>
+      <ExerciseHeader icon={<Eye size={24} className="text-white" />} title="Observer Self Journey" subtitle="Strengthen the ACT process of self-as-context" exerciseId="observer-self" exerciseName="Observer Self Journey" />
 
-        <div className="mt-6">
+      <div className="card bg-midnight-purple text-white">
+        <p className="text-white/80 font-body max-w-2xl mb-6">
+          Practice stepping back into the part of you that notices every thought, feeling, and sensation without being consumed by them.
+        </p>
+
+        <div>
           <div className="flex items-center justify-between text-sm font-subheader uppercase">
             <span>Journey Progress</span>
             <span>{progress}%</span>

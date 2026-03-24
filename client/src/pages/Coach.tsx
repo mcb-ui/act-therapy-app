@@ -30,7 +30,15 @@ export default function Coach() {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        // Reviewer Fix #3: Handle old messages that lack suggestedExercise field
+        return Array.isArray(parsed) ? parsed.map((m: Partial<Message>) => ({
+          id: m.id || Date.now().toString(),
+          role: m.role || 'coach',
+          content: m.content || '',
+          timestamp: m.timestamp || new Date().toISOString(),
+          suggestedExercise: m.suggestedExercise,
+        })) : [initialMessage];
       } catch {
         return [initialMessage];
       }

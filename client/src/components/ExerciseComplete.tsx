@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom';
-import { CheckCircle, ArrowRight, Home } from 'lucide-react';
-import { useEffect } from 'react';
+import { CheckCircle, ArrowRight, Home, AlertCircle } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { useExerciseTracking } from '../hooks/useExerciseTracking';
 
-// User Improvement #3: Unified exercise completion screen
-// Provides celebration, stats, save-to-server, and next exercise suggestion
+// Reviewer Fix #1: Prevent double-fire in StrictMode via ref guard
+// Reviewer Fix #7: Show error feedback when save fails
 
 interface ExerciseCompleteProps {
   exerciseId: string;
@@ -27,10 +27,15 @@ export default function ExerciseComplete({
   nextExercise,
   children,
 }: ExerciseCompleteProps) {
-  const { completeExercise, isSaved } = useExerciseTracking({ exerciseId, exerciseName });
+  const { completeExercise, isSaved, isSaving } = useExerciseTracking({ exerciseId, exerciseName });
+  const hasCalledRef = useRef(false);
+  const [saveError, setSaveError] = useState(false);
 
   useEffect(() => {
-    completeExercise(data);
+    if (hasCalledRef.current) return;
+    hasCalledRef.current = true;
+    completeExercise(data).catch(() => setSaveError(true));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -39,8 +44,17 @@ export default function ExerciseComplete({
         {icon || <CheckCircle size={80} className="mx-auto mb-6 animate-bounce-subtle" />}
         <h1 className="text-4xl font-header mb-4">{title}</h1>
         {message && <p className="text-xl opacity-90 font-body max-w-2xl mx-auto">{message}</p>}
+        {isSaving && (
+          <p className="text-sm opacity-75 font-body mt-4">Saving progress...</p>
+        )}
         {isSaved && (
           <p className="text-sm opacity-75 font-body mt-4">Progress saved</p>
+        )}
+        {saveError && (
+          <p className="text-sm opacity-90 font-body mt-4 flex items-center justify-center space-x-1">
+            <AlertCircle size={14} />
+            <span>Could not save — your progress may not be recorded</span>
+          </p>
         )}
       </div>
 

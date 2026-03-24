@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../utils/api';
 import { Target, Plus, Edit2, Trash2 } from 'lucide-react';
+import ExerciseHeader from '../../components/ExerciseHeader';
 
 interface Value {
   id: string;
@@ -34,16 +35,15 @@ export default function ValuesExercise() {
     'Environment',
   ];
 
+  useEffect(() => { document.title = 'Values Exercise | ACT Therapy'; }, []);
+
   useEffect(() => {
     fetchValues();
   }, []);
 
   const fetchValues = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get('/api/values', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get('/values');
       setValues(response.data);
     } catch (error) {
       console.error('Failed to fetch values:', error);
@@ -52,19 +52,12 @@ export default function ValuesExercise() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
-
     try {
       if (editingId) {
-        await axios.put(`/api/values/${editingId}`, formData, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await api.put(`/values/${editingId}`, formData);
       } else {
-        await axios.post('/api/values', formData, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await api.post('/values', formData);
       }
-
       setFormData({ category: '', description: '', importance: 5, alignment: 5 });
       setShowForm(false);
       setEditingId(null);
@@ -87,12 +80,8 @@ export default function ValuesExercise() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this value?')) return;
-
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`/api/values/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.delete(`/values/${id}`);
       fetchValues();
     } catch (error) {
       console.error('Failed to delete value:', error);
@@ -101,16 +90,9 @@ export default function ValuesExercise() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <div className="w-12 h-12 rounded-xl bg-midnight-purple flex items-center justify-center">
-            <Target size={24} className="text-white" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Values Clarification</h1>
-            <p className="text-gray-600">Define what truly matters to you</p>
-          </div>
-        </div>
+      <ExerciseHeader icon={<Target size={24} className="text-white" />} title="Values Clarification" subtitle="Define what truly matters to you" exerciseId="values" exerciseName="Values Exercise" />
+
+      <div className="flex justify-end">
         <button
           onClick={() => {
             setShowForm(!showForm);

@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { ListChecks, Plus, Check } from 'lucide-react';
+import ExerciseHeader from '../../components/ExerciseHeader';
 
 interface Action {
   id: string;
@@ -33,17 +35,17 @@ export default function CommittedActionTracker() {
   const completed = actions.filter(a => a.completed).length;
   const completionRate = actions.length > 0 ? Math.round((completed / actions.length) * 100) : 0;
 
+  useEffect(() => { document.title = 'Committed Action Tracker | ACT Therapy'; }, []);
+
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-      <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 rounded-xl bg-lime-green flex items-center justify-center">
-          <ListChecks size={24} className="text-white" />
-        </div>
-        <div>
-          <h1 className="text-3xl font-header text-midnight-purple">Committed Action Tracker</h1>
-          <p className="text-gray-600 font-body">Track your values-based actions</p>
-        </div>
-      </div>
+      <ExerciseHeader
+        icon={<ListChecks size={24} className="text-white" />}
+        title="Committed Action Tracker"
+        subtitle="Track your values-based actions"
+        exerciseId="committed-action-tracker"
+        exerciseName="Committed Action Tracker"
+      />
 
       <div className="card bg-electric-blue bg-opacity-10 border-2 border-electric-blue">
         <p className="text-gray-700 font-body">
@@ -83,7 +85,7 @@ export default function CommittedActionTracker() {
             type="text"
             value={newAction.action}
             onChange={(e) => setNewAction({ ...newAction, action: e.target.value })}
-            onKeyPress={(e) => e.key === 'Enter' && addAction()}
+            onKeyDown={(e) => e.key === 'Enter' && addAction()}
             placeholder="Specific action you'll take (e.g., 'Call an old friend')"
             className="input-field w-full"
           />
@@ -149,9 +151,9 @@ export default function CommittedActionTracker() {
         </div>
       )}
 
-      <button onClick={() => window.history.back()} className="btn-secondary w-full">
-        Back to Exercises
-      </button>
+      <Link to="/" className="btn-secondary w-full">
+        Back to Dashboard
+      </Link>
     </div>
   );
 }

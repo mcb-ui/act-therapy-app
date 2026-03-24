@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Heart, ChevronRight } from 'lucide-react';
-import axios from 'axios';
+import { markExerciseComplete } from '../../utils/exerciseTracking';
+import ExerciseHeader from '../../components/ExerciseHeader';
 
 export default function AcceptanceExercise() {
+  useEffect(() => { document.title = 'Acceptance Exercise | ACT Therapy'; }, []);
   const [currentStep, setCurrentStep] = useState(0);
   const [emotion, setEmotion] = useState('');
   const [resistance, setResistance] = useState(5);
@@ -130,18 +132,7 @@ export default function AcceptanceExercise() {
   const handleComplete = async () => {
     setCompleted(true);
     try {
-      const token = localStorage.getItem('token');
-      await axios.post(
-        '/api/progress',
-        {
-          exerciseId: 'acceptance-exercise',
-          completed: true,
-          notes: `Emotion: ${emotion}, Resistance: ${resistance}, Willingness: ${willingness}`,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      await markExerciseComplete('acceptance', undefined, `Emotion: ${emotion}, Resistance: ${resistance}, Willingness: ${willingness}`);
     } catch (error) {
       console.error('Failed to save progress:', error);
     }
@@ -157,15 +148,7 @@ export default function AcceptanceExercise() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 rounded-xl bg-midnight-purple flex items-center justify-center">
-          <Heart size={24} className="text-white" />
-        </div>
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Acceptance</h1>
-          <p className="text-gray-600">Make room for difficult experiences</p>
-        </div>
-      </div>
+      <ExerciseHeader icon={<Heart size={24} className="text-white" />} title="Acceptance" subtitle="Make room for difficult experiences" exerciseId="acceptance" exerciseName="Acceptance Exercise" />
 
       <div className="card bg-pink-50 border-pink-200">
         <h3 className="font-semibold text-pink-900 mb-2">What is Acceptance?</h3>

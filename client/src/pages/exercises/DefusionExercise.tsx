@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Brain, RefreshCw } from 'lucide-react';
-import axios from 'axios';
+import { markExerciseComplete } from '../../utils/exerciseTracking';
+import ExerciseHeader from '../../components/ExerciseHeader';
 
 export default function DefusionExercise() {
+  useEffect(() => { document.title = 'Defusion Exercise | ACT Therapy'; }, []);
   const [thought, setThought] = useState('');
   const [currentExercise, setCurrentExercise] = useState<number | null>(null);
   const [defusedThought, setDefusedThought] = useState('');
@@ -59,18 +61,7 @@ export default function DefusionExercise() {
 
       // Save progress
       try {
-        const token = localStorage.getItem('token');
-        await axios.post(
-          '/api/progress',
-          {
-            exerciseId: `defusion-${exerciseId}`,
-            completed: true,
-            notes: thought,
-          },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        await markExerciseComplete(`defusion-${exerciseId}`, undefined, thought);
       } catch (error) {
         console.error('Failed to save progress:', error);
       }
@@ -79,15 +70,7 @@ export default function DefusionExercise() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 rounded-xl bg-midnight-purple flex items-center justify-center">
-          <Brain size={24} className="text-white" />
-        </div>
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Cognitive Defusion</h1>
-          <p className="text-gray-600">Change your relationship with difficult thoughts</p>
-        </div>
-      </div>
+      <ExerciseHeader icon={<Brain size={24} className="text-white" />} title="Cognitive Defusion" subtitle="Change your relationship with difficult thoughts" exerciseId="defusion" exerciseName="Defusion Exercise" />
 
       <div className="card bg-purple-50 border-purple-200">
         <h3 className="font-semibold text-purple-900 mb-2">What is Cognitive Defusion?</h3>
