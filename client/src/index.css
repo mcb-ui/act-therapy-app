@@ -5,6 +5,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Improvement #44: Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   font-family: 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
@@ -20,6 +25,23 @@ h1, h2, h3 {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: #000000;
+}
+
+/* Improvement #45: Focus-visible styles for keyboard accessibility */
+*:focus-visible {
+  outline: 2px solid #2344E7;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Improvement #43b: Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 @layer components {
@@ -41,6 +63,11 @@ h1, h2, h3 {
 
   .input-field {
     @apply w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-midnight-purple focus:border-midnight-purple transition-all duration-200 font-body;
+  }
+
+  /* Improvement #44b: Skip to main content link for accessibility */
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-midnight-purple focus:text-white focus:px-4 focus:py-2 focus:rounded-lg;
   }
 }
 
@@ -95,6 +122,16 @@ h1, h2, h3 {
     }
   }
 
+  /* Improvement #44c: Spin animation for loading spinner */
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
   .animate-slide-in-right {
     animation: slide-in-right 0.3s ease-out;
   }
@@ -115,6 +152,10 @@ h1, h2, h3 {
     animation: bounce-subtle 1s ease-in-out infinite;
   }
 
+  .animate-spin {
+    animation: spin 1s linear infinite;
+  }
+
   /* Hover effects */
   .hover-lift {
     @apply transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl;
@@ -126,5 +167,13 @@ h1, h2, h3 {
 
   .hover-glow:hover {
     filter: drop-shadow(0 0 10px rgba(120, 74, 159, 0.5));
+  }
+
+  /* Improvement #44d: Line clamp utility */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 }

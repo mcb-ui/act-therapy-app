@@ -1,30 +1,38 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import { Eye, EyeOff } from 'lucide-react';
+import api from '../utils/api';
+import { useAuth } from '../contexts/AuthContext';
 
-interface RegisterProps {
-  setAuth: (value: boolean) => void;
-}
+// Improvement #10: Use centralized API client
+// Improvement #19: Password visibility toggle
+// Improvement #22: Use AuthContext
+// Improvement #30: Typed error handling
 
-export default function Register({ setAuth }: RegisterProps) {
+export default function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
     try {
-      const response = await axios.post('/api/auth/register', { name, email, password });
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
-      setAuth(true);
+      const response = await api.post('/auth/register', { name, email, password });
+      login(response.data.token, response.data.user);
       navigate('/');
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Registration failed');
+    } catch (err: unknown) {
+      const axiosError = err as { response?: { data?: { error?: string } } };
+      setError(axiosError.response?.data?.error || 'Registration failed');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -44,7 +52,7 @@ export default function Register({ setAuth }: RegisterProps) {
         </div>
 
         {error && (
-          <div className="bg-white border-2 border-inferno-red text-inferno-red px-4 py-3 rounded-lg mb-4 font-body animate-slide-in-right flex items-center space-x-2">
+          <div className="bg-white border-2 border-inferno-red text-inferno-red px-4 py-3 rounded-lg mb-4 font-body animate-slide-in-right flex items-center space-x-2" role="alert">
             <span>⚠️</span>
             <span>{error}</span>
           </div>
@@ -52,51 +60,71 @@ export default function Register({ setAuth }: RegisterProps) {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-subheader text-gray-700 mb-2 uppercase tracking-wider">
+            <label htmlFor="register-name" className="block text-sm font-subheader text-gray-700 mb-2 uppercase tracking-wider">
               Name
             </label>
             <input
+              id="register-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="input-field"
               placeholder="Your Name"
               required
+              autoComplete="name"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-subheader text-gray-700 mb-2 uppercase tracking-wider">
+            <label htmlFor="register-email" className="block text-sm font-subheader text-gray-700 mb-2 uppercase tracking-wider">
               Email
             </label>
             <input
+              id="register-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="input-field"
               placeholder="your@email.com"
               required
+              autoComplete="email"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-subheader text-gray-700 mb-2 uppercase tracking-wider">
+            <label htmlFor="register-password" className="block text-sm font-subheader text-gray-700 mb-2 uppercase tracking-wider">
               Password
             </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="input-field"
-              placeholder="••••••••"
-              minLength={6}
-              required
-            />
+            <div className="relative">
+              <input
+                id="register-password"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="input-field pr-12"
+                placeholder="••••••••"
+                minLength={6}
+                required
+                autoComplete="new-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
             <p className="text-xs text-gray-500 mt-1 font-body">Minimum 6 characters</p>
           </div>
 
-          <button type="submit" className="btn-primary w-full mt-6 shadow-lg">
-            Create Account
+          <button
+            type="submit"
+            className="btn-primary w-full mt-6 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={loading}
+          >
+            {loading ? 'Creating account...' : 'Create Account'}
           </button>
         </form>
 

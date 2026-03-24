@@ -1,9 +1,10 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
+import prisma from '../lib/prisma.js';
+
+// Improvement #34: Use shared Prisma instance
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Get user favorites
 router.get('/', authMiddleware, async (req: AuthRequest, res) => {
@@ -14,6 +15,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
     });
     res.json(favorites);
   } catch (error) {
+    console.error('Failed to fetch favorites:', error);
     res.status(500).json({ error: 'Failed to fetch favorites' });
   }
 });
@@ -22,6 +24,10 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
 router.post('/', authMiddleware, async (req: AuthRequest, res) => {
   try {
     const { exerciseId, exerciseName } = req.body;
+
+    if (!exerciseId || !exerciseName) {
+      return res.status(400).json({ error: 'exerciseId and exerciseName are required' });
+    }
 
     const favorite = await prisma.favorite.create({
       data: {
@@ -33,6 +39,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
 
     res.json(favorite);
   } catch (error) {
+    console.error('Failed to add favorite:', error);
     res.status(500).json({ error: 'Failed to add favorite' });
   }
 });
@@ -51,6 +58,7 @@ router.delete('/:exerciseId', authMiddleware, async (req: AuthRequest, res) => {
 
     res.json({ success: true });
   } catch (error) {
+    console.error('Failed to remove favorite:', error);
     res.status(500).json({ error: 'Failed to remove favorite' });
   }
 });

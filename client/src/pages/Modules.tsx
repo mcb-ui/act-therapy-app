@@ -1,21 +1,29 @@
 import { Link } from 'react-router-dom';
-import { BookOpen, Lock, CheckCircle, PlayCircle } from 'lucide-react';
+import { BookOpen, CheckCircle, PlayCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getProgress } from '../utils/exerciseTracking';
 
+// Improvement #16: Page title
+// Improvement #28: Replace `any` types
+
+interface ProgressRecord {
+  exerciseId: string;
+  completed: boolean;
+}
+
 export default function Modules() {
-  const [completedModules] = useState<number[]>([]); // Track completed modules
   const [completedExerciseIds, setCompletedExerciseIds] = useState<string[]>([]);
 
   useEffect(() => {
+    document.title = 'Learning Modules | ACT Therapy';
     fetchCompletedExercises();
   }, []);
 
   const fetchCompletedExercises = async () => {
     const progress = await getProgress();
     const completed = progress
-      .filter((p: any) => p.completed)
-      .map((p: any) => p.exerciseId);
+      .filter((p: ProgressRecord) => p.completed)
+      .map((p: ProgressRecord) => p.exerciseId);
     setCompletedExerciseIds(completed);
   };
 
@@ -26,11 +34,11 @@ export default function Modules() {
       description: 'Learn the basics of Acceptance and Commitment Therapy',
       duration: '45 mins',
       exercises: [
-        { id: 'intro-act', name: 'Introduction to ACT', path: '/exercises/intro-act', completed: false },
-        { id: 'values-duel', name: 'Values Duel', path: '/exercises/values-duel', completed: false },
-        { id: 'values-compass', name: 'Values Compass', path: '/exercises/values-compass', completed: false },
-        { id: 'life-domains', name: 'Life Domains Assessment', path: '/exercises/life-domains', completed: false },
-        { id: 'hexaflex', name: 'The ACT Hexaflex', path: '/hexaflex', completed: false },
+        { id: 'intro-act', name: 'Introduction to ACT', path: '/exercises/intro-act' },
+        { id: 'values-duel', name: 'Values Duel', path: '/exercises/values-duel' },
+        { id: 'values-compass', name: 'Values Compass', path: '/exercises/values-compass' },
+        { id: 'life-domains', name: 'Life Domains Assessment', path: '/exercises/life-domains' },
+        { id: 'hexaflex', name: 'The ACT Hexaflex', path: '/hexaflex' },
       ],
       color: 'from-electric-blue to-midnight-purple',
       icon: '📚',
@@ -41,11 +49,11 @@ export default function Modules() {
       description: 'Develop mindfulness and stay grounded in the now',
       duration: '60 mins',
       exercises: [
-        { id: 'breath-counting', name: 'Breath Counting', path: '/exercises/breath-counting', completed: false },
-        { id: 'sound-awareness', name: 'Sound Awareness', path: '/exercises/sound-awareness', completed: false },
-        { id: 'mindful-walking', name: 'Mindful Walking', path: '/exercises/mindful-walking', completed: false },
-        { id: 'eating-meditation', name: 'Eating Meditation', path: '/exercises/eating-meditation', completed: false },
-        { id: 'pmr', name: 'Progressive Muscle Relaxation', path: '/exercises/progressive-muscle-relaxation', completed: false },
+        { id: 'breath-counting', name: 'Breath Counting', path: '/exercises/breath-counting' },
+        { id: 'sound-awareness', name: 'Sound Awareness', path: '/exercises/sound-awareness' },
+        { id: 'mindful-walking', name: 'Mindful Walking', path: '/exercises/mindful-walking' },
+        { id: 'eating-meditation', name: 'Eating Meditation', path: '/exercises/eating-meditation' },
+        { id: 'pmr', name: 'Progressive Muscle Relaxation', path: '/exercises/progressive-muscle-relaxation' },
       ],
       color: 'from-lime-green to-electric-blue',
       icon: '🧘',
@@ -56,12 +64,12 @@ export default function Modules() {
       description: 'Learn to observe thoughts without being controlled',
       duration: '55 mins',
       exercises: [
-        { id: 'silly-voice', name: 'Silly Voice Technique', path: '/exercises/silly-voice', completed: false },
-        { id: 'thought-labels', name: 'Thought Labels', path: '/exercises/thought-labels', completed: false },
-        { id: 'thank-your-mind', name: 'Thank Your Mind', path: '/exercises/thank-your-mind', completed: false },
-        { id: 'leaves-stream', name: 'Leaves on a Stream', path: '/exercises/leaves-stream', completed: false },
-        { id: 'passengers-on-bus', name: 'Passengers on the Bus', path: '/exercises/passengers-on-bus', completed: false },
-        { id: 'clouds-in-sky', name: 'Clouds in the Sky', path: '/exercises/clouds-in-sky', completed: false },
+        { id: 'silly-voice', name: 'Silly Voice Technique', path: '/exercises/silly-voice' },
+        { id: 'thought-labels', name: 'Thought Labels', path: '/exercises/thought-labels' },
+        { id: 'thank-your-mind', name: 'Thank Your Mind', path: '/exercises/thank-your-mind' },
+        { id: 'leaves-stream', name: 'Leaves on a Stream', path: '/exercises/leaves-stream' },
+        { id: 'passengers-on-bus', name: 'Passengers on the Bus', path: '/exercises/passengers-on-bus' },
+        { id: 'clouds-in-sky', name: 'Clouds in the Sky', path: '/exercises/clouds-in-sky' },
       ],
       color: 'from-midnight-purple to-brand-pink',
       icon: '🧠',
@@ -72,11 +80,11 @@ export default function Modules() {
       description: 'Open up to difficult experiences with compassion',
       duration: '50 mins',
       exercises: [
-        { id: 'tug-of-war', name: 'Tug of War with a Monster', path: '/exercises/tug-of-war', completed: false },
-        { id: 'expansion', name: 'Expansion Exercise', path: '/exercises/expansion', completed: false },
-        { id: 'willingness-scale', name: 'Willingness Scale', path: '/exercises/willingness-scale', completed: false },
-        { id: 'emotional-surfing', name: 'Emotional Surfing', path: '/exercises/emotional-surfing', completed: false },
-        { id: 'guest-house', name: 'The Guest House', path: '/exercises/guest-house', completed: false },
+        { id: 'tug-of-war', name: 'Tug of War with a Monster', path: '/exercises/tug-of-war' },
+        { id: 'expansion', name: 'Expansion Exercise', path: '/exercises/expansion' },
+        { id: 'willingness-scale', name: 'Willingness Scale', path: '/exercises/willingness-scale' },
+        { id: 'emotional-surfing', name: 'Emotional Surfing', path: '/exercises/emotional-surfing' },
+        { id: 'guest-house', name: 'The Guest House', path: '/exercises/guest-house' },
       ],
       color: 'from-brand-pink to-inferno-red',
       icon: '❤️',
@@ -87,9 +95,9 @@ export default function Modules() {
       description: 'Practice taking the observer stance and widening perspective',
       duration: '45 mins',
       exercises: [
-        { id: 'observer-self', name: 'Observer Self Journey', path: '/exercises/observer-self', completed: false },
-        { id: 'leaves-stream', name: 'Leaves on a Stream', path: '/exercises/leaves-stream', completed: false },
-        { id: 'breath-counting', name: 'Observer Breath Practice', path: '/exercises/breath-counting', completed: false },
+        { id: 'observer-self', name: 'Observer Self Journey', path: '/exercises/observer-self' },
+        { id: 'leaves-stream', name: 'Leaves on a Stream', path: '/exercises/leaves-stream' },
+        { id: 'breath-counting', name: 'Observer Breath Practice', path: '/exercises/breath-counting' },
       ],
       color: 'from-electric-blue to-midnight-purple',
       icon: '👁️',
@@ -100,24 +108,26 @@ export default function Modules() {
       description: 'Clarify values and take meaningful action',
       duration: '65 mins',
       exercises: [
-        { id: 'what-matters', name: 'What Matters Most', path: '/exercises/what-matters', completed: false },
-        { id: 'bulls-eye', name: 'Bull\'s Eye Exercise', path: '/exercises/bulls-eye', completed: false },
-        { id: 'values-in-action', name: 'Values in Action', path: '/exercises/values-in-action', completed: false },
-        { id: 'smart-goals', name: 'SMART Goals', path: '/exercises/smart-goals', completed: false },
-        { id: 'barrier-busting', name: 'Barrier Busting', path: '/exercises/barrier-busting', completed: false },
-        { id: 'values-scheduling', name: 'Values-Based Scheduling', path: '/exercises/values-based-scheduling', completed: false },
-        { id: 'action-tracker', name: 'Committed Action Tracker', path: '/exercises/committed-action-tracker', completed: false },
+        { id: 'what-matters', name: 'What Matters Most', path: '/exercises/what-matters' },
+        { id: 'bulls-eye', name: 'Bull\'s Eye Exercise', path: '/exercises/bulls-eye' },
+        { id: 'values-in-action', name: 'Values in Action', path: '/exercises/values-in-action' },
+        { id: 'smart-goals', name: 'SMART Goals', path: '/exercises/smart-goals' },
+        { id: 'barrier-busting', name: 'Barrier Busting', path: '/exercises/barrier-busting' },
+        { id: 'values-scheduling', name: 'Values-Based Scheduling', path: '/exercises/values-based-scheduling' },
+        { id: 'action-tracker', name: 'Committed Action Tracker', path: '/exercises/committed-action-tracker' },
       ],
       color: 'from-inferno-red to-lime-green',
       icon: '🎯',
     },
   ];
 
-  const getModuleStatus = (moduleId: number): 'completed' | 'unlocked' | 'locked' => {
-    if (completedModules.includes(moduleId)) return 'completed';
-    // All modules are unlocked - users can explore freely
-    return 'unlocked';
-  };
+  // Calculate overall progress
+  const allExerciseIds = modules.flatMap((m) => m.exercises.map((e) => e.id));
+  const uniqueExerciseIds = [...new Set(allExerciseIds)];
+  const totalCompleted = uniqueExerciseIds.filter((id) => completedExerciseIds.includes(id)).length;
+  const completedModuleCount = modules.filter((module) => {
+    return module.exercises.every((e) => completedExerciseIds.includes(e.id));
+  }).length;
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -133,46 +143,38 @@ export default function Modules() {
       {/* Progress Overview */}
       <div className="card bg-midnight-purple text-white">
         <div className="flex items-center justify-between">
-          <div>
+          <div className="flex-1">
             <h2 className="text-2xl md:text-3xl font-header mb-2">Your Learning Journey</h2>
             <p className="text-white opacity-90 font-body mb-4">
-              {completedModules.length} of {modules.length} modules completed
+              {completedModuleCount} of {modules.length} modules completed ({totalCompleted} exercises done)
             </p>
             <div className="w-full bg-white bg-opacity-20 rounded-full h-3">
               <div
                 className="bg-lime-green h-3 rounded-full transition-all duration-500"
-                style={{ width: `${(completedModules.length / modules.length) * 100}%` }}
+                style={{ width: `${(totalCompleted / uniqueExerciseIds.length) * 100}%` }}
               ></div>
             </div>
           </div>
-          <BookOpen size={80} className="hidden md:block opacity-20" />
+          <BookOpen size={80} className="hidden md:block opacity-20 ml-8" />
         </div>
       </div>
 
       {/* Modules */}
       <div className="space-y-6">
         {modules.map((module, index) => {
-          const status = getModuleStatus(module.id);
-          const isLocked = status === 'locked';
-          const isCompleted = status === 'completed';
-          const completedCount = module.exercises.filter(e => completedExerciseIds.includes(e.id)).length;
+          const completedCount = module.exercises.filter((e) => completedExerciseIds.includes(e.id)).length;
+          const isModuleComplete = completedCount === module.exercises.length;
 
           return (
             <div
               key={module.id}
-              className={`card hover-lift animate-slide-in-up ${
-                isLocked ? 'opacity-60' : ''
-              }`}
+              className="card hover-lift animate-slide-in-up"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <div className="flex items-start space-x-4">
                 {/* Module Icon */}
-                <div className={`w-20 h-20 rounded-2xl ${module.color} flex items-center justify-center flex-shrink-0 shadow-lg ${
-                  isLocked ? 'grayscale' : ''
-                }`}>
-                  {isLocked ? (
-                    <Lock size={32} className="text-white" />
-                  ) : isCompleted ? (
+                <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${module.color} flex items-center justify-center flex-shrink-0 shadow-lg`}>
+                  {isModuleComplete ? (
                     <CheckCircle size={32} className="text-white" />
                   ) : (
                     <span className="text-4xl">{module.icon}</span>
@@ -180,7 +182,7 @@ export default function Modules() {
                 </div>
 
                 {/* Module Content */}
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between mb-2">
                     <div>
                       <h3 className="text-2xl font-subheader text-midnight-purple uppercase">
@@ -205,7 +207,7 @@ export default function Modules() {
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div
-                        className={`${module.color} h-2 rounded-full transition-all duration-500`}
+                        className={`bg-gradient-to-r ${module.color} h-2 rounded-full transition-all duration-500`}
                         style={{
                           width: `${(completedCount / module.exercises.length) * 100}%`,
                         }}
@@ -219,32 +221,23 @@ export default function Modules() {
                       const isExerciseCompleted = completedExerciseIds.includes(exercise.id);
                       return (
                         <Link
-                          key={exercise.id}
-                          to={isLocked ? '#' : exercise.path}
-                          className={`flex items-center space-x-3 p-3 rounded-lg transition-all ${
-                            isLocked
-                              ? 'cursor-not-allowed bg-gray-50'
-                              : 'hover:bg-parchment hover:scale-102 cursor-pointer'
-                          }`}
-                          onClick={(e) => isLocked && e.preventDefault()}
+                          key={`${module.id}-${exercise.id}`}
+                          to={exercise.path}
+                          className="flex items-center space-x-3 p-3 rounded-lg transition-all hover:bg-parchment hover:scale-102 cursor-pointer"
                         >
                           {isExerciseCompleted ? (
                             <CheckCircle size={20} className="text-lime-green flex-shrink-0" />
-                          ) : isLocked ? (
-                            <Lock size={20} className="text-gray-400 flex-shrink-0" />
                           ) : (
                             <PlayCircle size={20} className="text-electric-blue flex-shrink-0" />
                           )}
                           <span className={`font-body ${
                             isExerciseCompleted
                               ? 'text-gray-500 line-through'
-                              : isLocked
-                              ? 'text-gray-400'
                               : 'text-gray-800'
                           }`}>
                             {exercise.name}
                           </span>
-                          {!isLocked && !isExerciseCompleted && (
+                          {!isExerciseCompleted && (
                             <span className="text-xs text-electric-blue font-subheader uppercase ml-auto">
                               Start →
                             </span>
@@ -253,16 +246,6 @@ export default function Modules() {
                       );
                     })}
                   </div>
-
-                  {/* Lock Message */}
-                  {isLocked && (
-                    <div className="mt-4 p-3 bg-gray-100 rounded-lg border-2 border-gray-200">
-                      <p className="text-sm text-gray-600 font-body flex items-center space-x-2">
-                        <Lock size={16} />
-                        <span>Complete the previous module to unlock this one</span>
-                      </p>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
@@ -276,7 +259,7 @@ export default function Modules() {
           🎓 Keep Going!
         </h3>
         <p className="text-gray-700 font-body max-w-2xl mx-auto">
-          Complete each module in order to build a strong foundation in ACT. Take your time,
+          Complete each module to build a strong foundation in ACT. Take your time,
           practice regularly, and remember that progress, not perfection, is the goal.
         </p>
       </div>

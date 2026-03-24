@@ -1,9 +1,14 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
+import prisma from '../lib/prisma.js';
+
+// Improvement #3: Fix totalExercises from 25 → 33
+// Improvement #33: Input validation for progress routes
+// Improvement #34: Use shared Prisma instance
 
 const router = express.Router();
-const prisma = new PrismaClient();
+
+const TOTAL_EXERCISES = 33;
 
 // Get user progress
 router.get('/', authMiddleware, async (req: AuthRequest, res) => {
@@ -14,6 +19,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
     });
     res.json(progress);
   } catch (error) {
+    console.error('Failed to fetch progress:', error);
     res.status(500).json({ error: 'Failed to fetch progress' });
   }
 });
@@ -22,6 +28,11 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
 router.post('/', authMiddleware, async (req: AuthRequest, res) => {
   try {
     const { exerciseId, completed, score, notes } = req.body;
+
+    // Improvement #33: Validate exerciseId
+    if (!exerciseId || typeof exerciseId !== 'string') {
+      return res.status(400).json({ error: 'exerciseId is required' });
+    }
 
     // Check if progress already exists
     const existing = await prisma.progress.findFirst({
@@ -33,7 +44,6 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
 
     let progress;
     if (existing) {
-      // Update existing progress
       progress = await prisma.progress.update({
         where: { id: existing.id },
         data: {
@@ -43,7 +53,6 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
         },
       });
     } else {
-      // Create new progress
       progress = await prisma.progress.create({
         data: {
           userId: req.userId!,
@@ -57,6 +66,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
 
     res.json(progress);
   } catch (error) {
+    console.error('Failed to save progress:', error);
     res.status(500).json({ error: 'Failed to save progress' });
   }
 });
@@ -126,10 +136,10 @@ router.get('/stats', authMiddleware, async (req: AuthRequest, res) => {
       currentStreak,
       longestStreak,
       weeklyData,
-      totalExercises: 25,
+      totalExercises: TOTAL_EXERCISES,
     });
   } catch (error) {
-    console.error(error);
+    console.error('Failed to fetch stats:', error);
     res.status(500).json({ error: 'Failed to fetch stats' });
   }
 });

@@ -1,5 +1,5 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { useAuth } from './contexts/AuthContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
@@ -15,6 +15,8 @@ import IntroACT from './pages/exercises/IntroACT';
 import LeavesStream from './pages/exercises/LeavesStream';
 import Hexaflex from './pages/Hexaflex';
 import Layout from './components/Layout';
+import ScrollToTop from './components/ScrollToTop';
+import NotFound from './pages/NotFound';
 import ObserverSelfJourney from './pages/exercises/ObserverSelfJourney';
 
 // Values exercises
@@ -53,320 +55,91 @@ import ValuesBasedScheduling from './pages/exercises/ValuesBasedScheduling';
 import CommittedActionTracker from './pages/exercises/CommittedActionTracker';
 import ValuedLivingQuestionnaire from './pages/exercises/ValuedLivingQuestionnaire';
 
+// Improvement #22: Use AuthContext instead of prop drilling
+// Improvement #25: Reduce route boilerplate with layout route
+function ProtectedRoute() {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? <Outlet /> : <Navigate to="/login" />;
+}
+
+function ProtectedLayout() {
+  return (
+    <Layout>
+      <Outlet />
+    </Layout>
+  );
+}
+
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    setIsAuthenticated(!!token);
-  }, []);
-
-  const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-    return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
-  };
-
   return (
     <Router>
+      <ScrollToTop />
       <Routes>
-        <Route path="/login" element={<Login setAuth={setIsAuthenticated} />} />
-        <Route path="/register" element={<Register setAuth={setIsAuthenticated} />} />
+        {/* Public routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
-        <Route path="/" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <Dashboard />
-            </Layout>
-          </ProtectedRoute>
-        } />
+        {/* Protected routes with shared layout */}
+        <Route element={<ProtectedRoute />}>
+          <Route element={<ProtectedLayout />}>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/hexaflex" element={<Hexaflex />} />
+            <Route path="/progress" element={<Progress />} />
+            <Route path="/modules" element={<Modules />} />
+            <Route path="/coach" element={<Coach />} />
 
-        <Route path="/exercises/values" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <ValuesExercise />
-            </Layout>
-          </ProtectedRoute>
-        } />
+            {/* Category overview exercises */}
+            <Route path="/exercises/values" element={<ValuesExercise />} />
+            <Route path="/exercises/defusion" element={<DefusionExercise />} />
+            <Route path="/exercises/mindfulness" element={<MindfulnessExercise />} />
+            <Route path="/exercises/acceptance" element={<AcceptanceExercise />} />
+            <Route path="/exercises/action" element={<ActionPlanner />} />
+            <Route path="/exercises/intro-act" element={<IntroACT />} />
 
-        <Route path="/exercises/defusion" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <DefusionExercise />
-            </Layout>
-          </ProtectedRoute>
-        } />
+            {/* Self-as-Context */}
+            <Route path="/exercises/observer-self" element={<ObserverSelfJourney />} />
+            <Route path="/exercises/leaves-stream" element={<LeavesStream />} />
 
-        <Route path="/exercises/mindfulness" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <MindfulnessExercise />
-            </Layout>
-          </ProtectedRoute>
-        } />
+            {/* Values Exercises */}
+            <Route path="/exercises/values-compass" element={<ValuesCompass />} />
+            <Route path="/exercises/bulls-eye" element={<BullsEye />} />
+            <Route path="/exercises/life-domains" element={<LifeDomains />} />
+            <Route path="/exercises/what-matters" element={<WhatMatters />} />
+            <Route path="/exercises/values-in-action" element={<ValuesInAction />} />
+            <Route path="/exercises/values-duel" element={<ValuesDuel />} />
 
-        <Route path="/exercises/acceptance" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <AcceptanceExercise />
-            </Layout>
-          </ProtectedRoute>
-        } />
+            {/* Defusion Exercises */}
+            <Route path="/exercises/silly-voice" element={<SillyVoice />} />
+            <Route path="/exercises/thought-labels" element={<ThoughtLabels />} />
+            <Route path="/exercises/thank-your-mind" element={<ThankYourMind />} />
+            <Route path="/exercises/passengers-on-bus" element={<PassengersOnBus />} />
+            <Route path="/exercises/clouds-in-sky" element={<CloudsInSky />} />
 
-        {/* Self-as-Context */}
-        <Route path="/exercises/observer-self" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <ObserverSelfJourney />
-            </Layout>
-          </ProtectedRoute>
-        } />
+            {/* Mindfulness Exercises */}
+            <Route path="/exercises/mindful-walking" element={<MindfulWalking />} />
+            <Route path="/exercises/eating-meditation" element={<EatingMeditation />} />
+            <Route path="/exercises/sound-awareness" element={<SoundAwareness />} />
+            <Route path="/exercises/breath-counting" element={<BreathCounting />} />
+            <Route path="/exercises/progressive-muscle-relaxation" element={<ProgressiveMuscleRelaxation />} />
 
-        <Route path="/exercises/action" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <ActionPlanner />
-            </Layout>
-          </ProtectedRoute>
-        } />
+            {/* Acceptance Exercises */}
+            <Route path="/exercises/tug-of-war" element={<TugOfWar />} />
+            <Route path="/exercises/willingness-scale" element={<WillingnessScale />} />
+            <Route path="/exercises/expansion" element={<Expansion />} />
+            <Route path="/exercises/emotional-surfing" element={<EmotionalSurfing />} />
+            <Route path="/exercises/guest-house" element={<GuestHouse />} />
 
-        <Route path="/hexaflex" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <Hexaflex />
-            </Layout>
-          </ProtectedRoute>
-        } />
+            {/* Action Exercises */}
+            <Route path="/exercises/smart-goals" element={<SMARTGoals />} />
+            <Route path="/exercises/barrier-busting" element={<BarrierBusting />} />
+            <Route path="/exercises/values-based-scheduling" element={<ValuesBasedScheduling />} />
+            <Route path="/exercises/committed-action-tracker" element={<CommittedActionTracker />} />
+            <Route path="/exercises/valued-living-questionnaire" element={<ValuedLivingQuestionnaire />} />
+          </Route>
+        </Route>
 
-        <Route path="/progress" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <Progress />
-            </Layout>
-          </ProtectedRoute>
-        } />
-
-        <Route path="/modules" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <Modules />
-            </Layout>
-          </ProtectedRoute>
-        } />
-
-        <Route path="/coach" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <Coach />
-            </Layout>
-          </ProtectedRoute>
-        } />
-
-        <Route path="/exercises/intro-act" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <IntroACT />
-            </Layout>
-          </ProtectedRoute>
-        } />
-
-        <Route path="/exercises/leaves-stream" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <LeavesStream />
-            </Layout>
-          </ProtectedRoute>
-        } />
-
-        {/* Values Exercises */}
-        <Route path="/exercises/values-compass" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <ValuesCompass />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/exercises/bulls-eye" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <BullsEye />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/exercises/life-domains" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <LifeDomains />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/exercises/what-matters" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <WhatMatters />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/exercises/values-in-action" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <ValuesInAction />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/exercises/values-duel" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <ValuesDuel />
-            </Layout>
-          </ProtectedRoute>
-        } />
-
-        {/* Defusion Exercises */}
-        <Route path="/exercises/silly-voice" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <SillyVoice />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/exercises/thought-labels" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <ThoughtLabels />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/exercises/thank-your-mind" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <ThankYourMind />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/exercises/passengers-on-bus" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <PassengersOnBus />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/exercises/clouds-in-sky" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <CloudsInSky />
-            </Layout>
-          </ProtectedRoute>
-        } />
-
-        {/* Mindfulness Exercises */}
-        <Route path="/exercises/mindful-walking" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <MindfulWalking />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/exercises/eating-meditation" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <EatingMeditation />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/exercises/sound-awareness" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <SoundAwareness />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/exercises/breath-counting" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <BreathCounting />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/exercises/progressive-muscle-relaxation" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <ProgressiveMuscleRelaxation />
-            </Layout>
-          </ProtectedRoute>
-        } />
-
-        {/* Acceptance Exercises */}
-        <Route path="/exercises/tug-of-war" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <TugOfWar />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/exercises/willingness-scale" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <WillingnessScale />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/exercises/expansion" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <Expansion />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/exercises/emotional-surfing" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <EmotionalSurfing />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/exercises/guest-house" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <GuestHouse />
-            </Layout>
-          </ProtectedRoute>
-        } />
-
-        {/* Action Exercises */}
-        <Route path="/exercises/smart-goals" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <SMARTGoals />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/exercises/barrier-busting" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <BarrierBusting />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/exercises/values-based-scheduling" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <ValuesBasedScheduling />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/exercises/committed-action-tracker" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <CommittedActionTracker />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/exercises/valued-living-questionnaire" element={
-          <ProtectedRoute>
-            <Layout setAuth={setIsAuthenticated}>
-              <ValuedLivingQuestionnaire />
-            </Layout>
-          </ProtectedRoute>
-        } />
+        {/* Improvement #12: 404 catch-all route */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
   );

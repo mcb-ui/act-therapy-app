@@ -1,9 +1,10 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
+import prisma from '../lib/prisma.js';
+
+// Improvement #34: Use shared Prisma instance
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Get user values
 router.get('/', authMiddleware, async (req: AuthRequest, res) => {
@@ -14,6 +15,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
     });
     res.json(values);
   } catch (error) {
+    console.error('Failed to fetch values:', error);
     res.status(500).json({ error: 'Failed to fetch values' });
   }
 });
@@ -23,18 +25,23 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
   try {
     const { category, description, importance, alignment } = req.body;
 
+    if (!category || !description) {
+      return res.status(400).json({ error: 'Category and description are required' });
+    }
+
     const value = await prisma.value.create({
       data: {
         userId: req.userId!,
         category,
         description,
-        importance,
-        alignment,
+        importance: importance ?? 5,
+        alignment: alignment ?? 5,
       },
     });
 
     res.json(value);
   } catch (error) {
+    console.error('Failed to create value:', error);
     res.status(500).json({ error: 'Failed to create value' });
   }
 });
@@ -52,6 +59,7 @@ router.put('/:id', authMiddleware, async (req: AuthRequest, res) => {
 
     res.json(value);
   } catch (error) {
+    console.error('Failed to update value:', error);
     res.status(500).json({ error: 'Failed to update value' });
   }
 });
@@ -63,6 +71,7 @@ router.delete('/:id', authMiddleware, async (req: AuthRequest, res) => {
     await prisma.value.delete({ where: { id } });
     res.json({ message: 'Value deleted' });
   } catch (error) {
+    console.error('Failed to delete value:', error);
     res.status(500).json({ error: 'Failed to delete value' });
   }
 });

@@ -1,8 +1,14 @@
 import { Link } from 'react-router-dom';
-import { Target, Brain, Heart, Zap, CheckSquare, Hexagon, Sparkles, CheckCircle, Eye } from 'lucide-react';
+import { Target, Brain, Heart, Zap, CheckSquare, Hexagon, Sparkles, CheckCircle, Eye, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getProgress } from '../utils/exerciseTracking';
+import { useAuth } from '../contexts/AuthContext';
 import FavoriteButton from '../components/FavoriteButton';
+
+// Improvement #15: Loading state
+// Improvement #16: Page title
+// Improvement #22: Use AuthContext for user name
+// Improvement #27: Replace `any` types
 
 interface Value {
   name: string;
@@ -10,34 +16,44 @@ interface Value {
   example: string;
 }
 
+interface ProgressRecord {
+  exerciseId: string;
+  completed: boolean;
+}
+
 export default function Dashboard() {
-  const [userName, setUserName] = useState('');
+  const { user } = useAuth();
   const [topFiveValues, setTopFiveValues] = useState<Value[]>([]);
   const [completedExerciseIds, setCompletedExerciseIds] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const user = localStorage.getItem('user');
-    if (user) {
-      const userData = JSON.parse(user);
-      setUserName(userData.name);
-    }
+    document.title = 'Dashboard | ACT Therapy';
 
     // Load top 5 values if they exist
     const savedValues = localStorage.getItem('topFiveValues');
     if (savedValues) {
-      setTopFiveValues(JSON.parse(savedValues));
+      try {
+        setTopFiveValues(JSON.parse(savedValues));
+      } catch {
+        // Ignore invalid JSON
+      }
     }
 
-    // Load progress and favorites
     loadProgress();
   }, []);
 
   const loadProgress = async () => {
-    const progress = await getProgress();
-    const completed = progress
-      .filter((p: any) => p.completed)
-      .map((p: any) => p.exerciseId);
-    setCompletedExerciseIds(completed);
+    setLoading(true);
+    try {
+      const progress = await getProgress();
+      const completed = progress
+        .filter((p: ProgressRecord) => p.completed)
+        .map((p: ProgressRecord) => p.exerciseId);
+      setCompletedExerciseIds(completed);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const exerciseCategories = [
@@ -47,6 +63,7 @@ export default function Dashboard() {
       description: 'Identify and explore what truly matters to you in life',
       icon: Target,
       color: 'bg-electric-blue',
+      borderColor: '#2344E7',
       exercises: [
         { name: 'Values Duel', path: '/exercises/values-duel', description: 'Discover your top 5 core values through choices' },
         { name: 'Values Compass', path: '/exercises/values-compass', description: 'Rate 8 life directions with interactive compass' },
@@ -62,6 +79,7 @@ export default function Dashboard() {
       description: 'Learn to observe thoughts without being controlled by them',
       icon: Brain,
       color: 'bg-midnight-purple',
+      borderColor: '#784A9F',
       exercises: [
         { name: 'Silly Voice', path: '/exercises/silly-voice', description: 'Transform thoughts with playful voices' },
         { name: 'Thought Labels', path: '/exercises/thought-labels', description: 'Categorize thoughts to create distance' },
@@ -76,6 +94,7 @@ export default function Dashboard() {
       description: 'Develop awareness and connection to the here and now',
       icon: Zap,
       color: 'bg-lime-green',
+      borderColor: '#93F357',
       exercises: [
         { name: 'Mindful Walking', path: '/exercises/mindful-walking', description: 'Step-by-step walking meditation' },
         { name: 'Eating Meditation', path: '/exercises/eating-meditation', description: '8-phase sensory eating practice' },
@@ -90,6 +109,7 @@ export default function Dashboard() {
       description: 'Practice opening up to difficult emotions and experiences',
       icon: Heart,
       color: 'bg-brand-pink',
+      borderColor: '#FE97BB',
       exercises: [
         { name: 'Tug of War', path: '/exercises/tug-of-war', description: 'Interactive metaphor about dropping struggle' },
         { name: 'Willingness Scale', path: '/exercises/willingness-scale', description: 'Assess willingness to feel for values' },
@@ -104,6 +124,7 @@ export default function Dashboard() {
       description: 'Strengthen the observing self and flexible perspective-taking',
       icon: Eye,
       color: 'bg-electric-blue',
+      borderColor: '#2344E7',
       exercises: [
         { name: 'Observer Self Journey', path: '/exercises/observer-self', description: 'Guided practice to embody the observing self' },
         { name: 'Leaves on a Stream', path: '/exercises/leaves-stream', description: 'Watch experiences float by from the observer seat' },
@@ -115,6 +136,7 @@ export default function Dashboard() {
       description: 'Set goals and take steps aligned with your values',
       icon: CheckSquare,
       color: 'bg-inferno-red',
+      borderColor: '#EC4625',
       exercises: [
         { name: 'SMART Goals', path: '/exercises/smart-goals', description: 'Create specific, measurable goals' },
         { name: 'Barrier Busting', path: '/exercises/barrier-busting', description: 'Plan for obstacles with if-then strategies' },
@@ -125,11 +147,23 @@ export default function Dashboard() {
     },
   ];
 
+  // Improvement #15: Loading skeleton
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="text-center">
+          <Loader2 size={48} className="animate-spin text-electric-blue mx-auto mb-4" />
+          <p className="text-gray-600 font-body">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <div className="text-center animate-fade-in">
         <h1 className="text-4xl md:text-5xl font-header text-midnight-purple mb-2 hover-glow">
-          Welcome back, {userName}!
+          Welcome back, {user?.name || 'Friend'}!
         </h1>
         <p className="text-xl text-gray-600 font-body">
           Continue your journey toward psychological flexibility
@@ -199,6 +233,11 @@ export default function Dashboard() {
         <div className="space-y-8">
           {exerciseCategories.map((category, catIndex) => {
             const Icon = category.icon;
+            const completedCount = category.exercises.filter((ex) => {
+              const exerciseId = ex.path.replace('/exercises/', '');
+              return completedExerciseIds.includes(exerciseId);
+            }).length;
+
             return (
               <div
                 key={category.id}
@@ -210,8 +249,11 @@ export default function Dashboard() {
                   <div className={`w-12 h-12 rounded-xl ${category.color} flex items-center justify-center shadow-lg`}>
                     <Icon size={24} className="text-white" />
                   </div>
-                  <div>
-                    <h3 className="text-xl font-subheader text-midnight-purple uppercase">{category.title}</h3>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-xl font-subheader text-midnight-purple uppercase">{category.title}</h3>
+                      <span className="text-sm font-body text-gray-500">{completedCount}/{category.exercises.length}</span>
+                    </div>
                     <p className="text-sm text-gray-600 font-body">{category.description}</p>
                   </div>
                 </div>
@@ -226,7 +268,7 @@ export default function Dashboard() {
                         key={exercise.path}
                         className="card hover-lift group bg-white border-l-4 transition-all relative"
                         style={{
-                          borderColor: category.color.replace('bg-', ''),
+                          borderLeftColor: category.borderColor,
                           animationDelay: `${(catIndex * 0.1) + (exIndex * 0.05)}s`
                         }}
                       >
