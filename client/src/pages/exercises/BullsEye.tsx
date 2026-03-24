@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Target } from 'lucide-react';
+import ExerciseHeader from '../../components/ExerciseHeader';
 
 interface DomainRating {
   domain: string;
@@ -18,6 +20,8 @@ export default function BullsEye() {
   ]);
   const [step, setStep] = useState<'importance' | 'current'>('importance');
   const [completed, setCompleted] = useState(false);
+
+  useEffect(() => { document.title = 'Bull\'s Eye | ACT Therapy'; }, []);
 
   const handleRating = (value: number) => {
     const newRatings = [...ratings];
@@ -140,9 +144,9 @@ export default function BullsEye() {
           </p>
         </div>
 
-        <button onClick={() => window.history.back()} className="btn-primary w-full">
+        <Link to="/" className="btn-primary w-full">
           Complete Exercise
-        </button>
+        </Link>
       </div>
     );
   }
@@ -157,15 +161,13 @@ export default function BullsEye() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
-      <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 rounded-xl bg-electric-blue flex items-center justify-center">
-          <Target size={24} className="text-white" />
-        </div>
-        <div>
-          <h1 className="text-3xl font-header text-midnight-purple">Bull's Eye Exercise</h1>
-          <p className="text-gray-600 font-body">Plot your values alignment</p>
-        </div>
-      </div>
+      <ExerciseHeader
+        icon={<Target size={24} className="text-white" />}
+        title="Bull's Eye"
+        subtitle="Plot your values alignment"
+        exerciseId="bulls-eye"
+        exerciseName="Bull's Eye"
+      />
 
       <div className="card">
         <div className="flex justify-between text-sm mb-2">

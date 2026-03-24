@@ -8,7 +8,8 @@ import prisma from '../lib/prisma.js';
 
 const router = express.Router();
 
-const TOTAL_EXERCISES = 33;
+// Reviewer Fix #4: Correct exercise count (34 exercise files)
+const TOTAL_EXERCISES = 34;
 
 // Get user progress
 router.get('/', authMiddleware, async (req: AuthRequest, res) => {

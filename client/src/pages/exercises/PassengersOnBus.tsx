@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Bus, MapPin, Plus, X } from 'lucide-react';
+import ExerciseHeader from '../../components/ExerciseHeader';
 
 interface Passenger {
   id: string;
@@ -9,6 +11,7 @@ interface Passenger {
 }
 
 export default function PassengersOnBus() {
+  useEffect(() => { document.title = 'Passengers on the Bus | ACT Therapy'; }, []);
   const [passengers, setPassengers] = useState<Passenger[]>([]);
   const [newPassenger, setNewPassenger] = useState({ name: '', message: '' });
   const [destination, setDestination] = useState('');
@@ -102,9 +105,7 @@ export default function PassengersOnBus() {
           </div>
         </div>
 
-        <button onClick={() => window.history.back()} className="btn-primary w-full">
-          Complete Exercise
-        </button>
+        <Link to="/" className="btn-primary w-full">Back to Dashboard</Link>
       </div>
     );
   }
@@ -166,15 +167,7 @@ export default function PassengersOnBus() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-      <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 rounded-xl bg-electric-blue flex items-center justify-center">
-          <Bus size={24} className="text-white" />
-        </div>
-        <div>
-          <h1 className="text-3xl font-header text-midnight-purple">Passengers on the Bus</h1>
-          <p className="text-gray-600 font-body">An ACT metaphor for defusion</p>
-        </div>
-      </div>
+      <ExerciseHeader icon={<Bus size={24} className="text-white" />} title="Passengers on the Bus" subtitle="An ACT metaphor for defusion" exerciseId="passengers-on-bus" exerciseName="Passengers on the Bus" />
 
       <div className="card bg-electric-blue bg-opacity-10 border-2 border-electric-blue">
         <h3 className="font-subheader text-midnight-purple mb-2 uppercase">The Metaphor</h3>
@@ -225,7 +218,7 @@ export default function PassengersOnBus() {
             type="text"
             value={newPassenger.message}
             onChange={(e) => setNewPassenger({ ...newPassenger, message: e.target.value })}
-            onKeyPress={(e) => e.key === 'Enter' && addPassenger()}
+            onKeyDown={(e) => e.key === 'Enter' && addPassenger()}
             placeholder="What does this passenger say? (e.g., 'You'll fail!', 'Turn back!')"
             className="input-field w-full"
           />
