@@ -1,74 +1,160 @@
 import { useEffect, useState } from 'react';
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { TrendingUp, Award, Calendar, Target, Flame } from 'lucide-react';
-import axios from 'axios';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { TrendingUp, Award, Calendar, Flame } from 'lucide-react';
+import { getProgress, getProgressStats, type ProgressEntry } from '../utils/exerciseTracking';
+
+interface UiStats {
+  totalExercises: number;
+  completedExercises: number;
+  currentStreak: number;
+  longestStreak: number;
+  totalMinutes: number;
+}
+
+const EMPTY_WEEKLY_DATA = [
+  { day: 'Mon', completed: 0 },
+  { day: 'Tue', completed: 0 },
+  { day: 'Wed', completed: 0 },
+  { day: 'Thu', completed: 0 },
+  { day: 'Fri', completed: 0 },
+  { day: 'Sat', completed: 0 },
+  { day: 'Sun', completed: 0 },
+];
+
+const CATEGORY_METADATA = [
+  { name: 'Values', value: 0, color: '#2344E7', total: 6 },
+  { name: 'Defusion', value: 0, color: '#784A9F', total: 6 },
+  { name: 'Acceptance', value: 0, color: '#FE97BB', total: 5 },
+  { name: 'Mindfulness', value: 0, color: '#93F357', total: 5 },
+  { name: 'Action', value: 0, color: '#EC4625', total: 5 },
+];
+
+const getCategoryForExercise = (exerciseId: string) => {
+  if (exerciseId.startsWith('values-') || ['bulls-eye', 'life-domains', 'what-matters', 'values-in-action'].includes(exerciseId)) {
+    return 'Values';
+  }
+
+  if (exerciseId.startsWith('defusion-') || ['silly-voice', 'thought-labels', 'thank-your-mind', 'passengers-on-bus', 'clouds-in-sky', 'leaves-stream'].includes(exerciseId)) {
+    return 'Defusion';
+  }
+
+  if (exerciseId.startsWith('mindfulness-') || ['mindful-walking', 'eating-meditation', 'sound-awareness', 'breath-counting', 'progressive-muscle-relaxation'].includes(exerciseId)) {
+    return 'Mindfulness';
+  }
+
+  if (exerciseId === 'acceptance-exercise' || ['tug-of-war', 'willingness-scale', 'expansion', 'emotional-surfing', 'guest-house'].includes(exerciseId)) {
+    return 'Acceptance';
+  }
+
+  if (['smart-goals', 'barrier-busting', 'values-based-scheduling', 'committed-action-tracker', 'valued-living-questionnaire'].includes(exerciseId)) {
+    return 'Action';
+  }
+
+  return null;
+};
+
+const getTrackedMindfulnessMinutes = (progressEntries: ProgressEntry[]) => {
+  const totalSeconds = progressEntries.reduce((sum, entry) => {
+    if (!entry.completed || !entry.exerciseId.startsWith('mindfulness-') || typeof entry.score !== 'number') {
+      return sum;
+    }
+
+    return sum + entry.score;
+  }, 0);
+
+  return Math.round(totalSeconds / 60);
+};
 
 export default function Progress() {
-  const [stats, setStats] = useState({
-    totalExercises: 24,
+  const [stats, setStats] = useState<UiStats>({
+    totalExercises: 28,
     completedExercises: 0,
     currentStreak: 0,
     longestStreak: 0,
     totalMinutes: 0,
   });
-
-  const [weeklyData, setWeeklyData] = useState([
-    { day: 'Mon', completed: 0 },
-    { day: 'Tue', completed: 0 },
-    { day: 'Wed', completed: 0 },
-    { day: 'Thu', completed: 0 },
-    { day: 'Fri', completed: 0 },
-    { day: 'Sat', completed: 0 },
-    { day: 'Sun', completed: 0 },
-  ]);
-
-  const categoryData = [
-    { name: 'Values', value: 0, color: '#2344E7' },
-    { name: 'Defusion', value: 0, color: '#784A9F' },
-    { name: 'Acceptance', value: 0, color: '#FE97BB' },
-    { name: 'Mindfulness', value: 0, color: '#93F357' },
-    { name: 'Action', value: 0, color: '#EC4625' },
-  ];
-
-  const achievements = [
-    { id: 1, title: 'First Step', description: 'Complete your first exercise', icon: '🎯', unlocked: false },
-    { id: 2, title: 'Week Warrior', description: 'Achieve a 7-day streak', icon: '🔥', unlocked: false },
-    { id: 3, title: 'Values Champion', description: 'Complete all Values exercises', icon: '⭐', unlocked: false },
-    { id: 4, title: 'Mindful Master', description: 'Practice 100 minutes of mindfulness', icon: '🧘', unlocked: false },
-    { id: 5, title: 'ACT Expert', description: 'Complete all exercises', icon: '🏆', unlocked: false },
-  ];
+  const [weeklyData, setWeeklyData] = useState(EMPTY_WEEKLY_DATA);
+  const [progressEntries, setProgressEntries] = useState<ProgressEntry[]>([]);
 
   useEffect(() => {
-    fetchProgress();
+    void fetchProgress();
   }, []);
 
   const fetchProgress = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const statsResponse = await axios.get('http://localhost:5000/api/progress/stats', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+    const [statsResponse, progressResponse] = await Promise.all([
+      getProgressStats(),
+      getProgress(),
+    ]);
 
-      if (statsResponse.data) {
-        setStats({
-          totalExercises: statsResponse.data.totalExercises || 24,
-          completedExercises: statsResponse.data.completedCount || 0,
-          currentStreak: statsResponse.data.currentStreak || 0,
-          longestStreak: statsResponse.data.longestStreak || 0,
-          totalMinutes: 0, // Can be added later
-        });
+    setProgressEntries(progressResponse);
 
-        if (statsResponse.data.weeklyData) {
-          setWeeklyData(statsResponse.data.weeklyData);
-        }
-      }
-    } catch (error) {
-      console.error('Failed to fetch progress:', error);
-      // Keep initial zero state
+    const totalMinutes = getTrackedMindfulnessMinutes(progressResponse);
+    if (!statsResponse) {
+      setStats((currentStats) => ({
+        ...currentStats,
+        totalMinutes,
+        completedExercises: progressResponse.filter((entry) => entry.completed).length,
+      }));
+      return;
     }
+
+    setStats({
+      totalExercises: statsResponse.totalExercises || 28,
+      completedExercises: statsResponse.completedCount || 0,
+      currentStreak: statsResponse.currentStreak || 0,
+      longestStreak: statsResponse.longestStreak || 0,
+      totalMinutes,
+    });
+    setWeeklyData(statsResponse.weeklyData?.length ? statsResponse.weeklyData : EMPTY_WEEKLY_DATA);
   };
 
-  const completionRate = ((stats.completedExercises / stats.totalExercises) * 100).toFixed(0);
+  const categoryData = CATEGORY_METADATA.map((category) => ({
+    ...category,
+    value: progressEntries.filter(
+      (entry) => entry.completed && getCategoryForExercise(entry.exerciseId) === category.name
+    ).length,
+  }));
+  const achievements = [
+    {
+      id: 1,
+      title: 'First Step',
+      description: 'Complete your first exercise',
+      icon: '🎯',
+      unlocked: stats.completedExercises > 0,
+    },
+    {
+      id: 2,
+      title: 'Week Warrior',
+      description: 'Achieve a 7-day streak',
+      icon: '🔥',
+      unlocked: stats.currentStreak >= 7,
+    },
+    {
+      id: 3,
+      title: 'Values Champion',
+      description: 'Complete all Values exercises',
+      icon: '⭐',
+      unlocked: categoryData.find((category) => category.name === 'Values')?.value === 6,
+    },
+    {
+      id: 4,
+      title: 'Mindful Master',
+      description: 'Practice 100 minutes of mindfulness',
+      icon: '🧘',
+      unlocked: stats.totalMinutes >= 100,
+    },
+    {
+      id: 5,
+      title: 'ACT Expert',
+      description: 'Complete all exercises',
+      icon: '🏆',
+      unlocked: stats.completedExercises >= stats.totalExercises,
+    },
+  ];
+  const unlockedAchievements = achievements.filter((achievement) => achievement.unlocked).length;
+  const completionRate = stats.totalExercises > 0
+    ? ((stats.completedExercises / stats.totalExercises) * 100).toFixed(0)
+    : '0';
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -113,7 +199,7 @@ export default function Progress() {
         <div className="card hover-lift bg-midnight-purple text-midnight-purple">
           <div className="flex items-center justify-between mb-2">
             <Award size={32} />
-            <span className="text-4xl font-header">3/5</span>
+            <span className="text-4xl font-header">{unlockedAchievements}/5</span>
           </div>
           <h3 className="font-subheader uppercase text-sm">Achievements</h3>
           <p className="text-xs opacity-75 mt-1">Unlocked badges</p>
@@ -151,7 +237,7 @@ export default function Progress() {
         <div className="card">
           <h3 className="text-xl font-subheader text-midnight-purple mb-6 uppercase flex items-center space-x-2">
             <span className="w-2 h-2 bg-midnight-purple rounded-full"></span>
-            <span>Exercise Distribution</span>
+            <span>Completed by Category</span>
           </h3>
           <div className="flex items-center justify-center">
             <ResponsiveContainer width="100%" height={250}>
@@ -184,7 +270,9 @@ export default function Progress() {
             {categoryData.map((cat) => (
               <div key={cat.name} className="flex items-center space-x-2">
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }}></div>
-                <span className="text-sm font-body text-gray-700">{cat.name}</span>
+                <span className="text-sm font-body text-gray-700">
+                  {cat.name} ({cat.value}/{cat.total})
+                </span>
               </div>
             ))}
           </div>

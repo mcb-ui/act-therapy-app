@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
-import { Target, Brain, Heart, Zap, CheckSquare, Hexagon, Sparkles, CheckCircle, Star } from 'lucide-react';
+import { Target, Brain, Heart, Zap, CheckSquare, Hexagon, Sparkles, CheckCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { getProgress, getFavorites } from '../utils/exerciseTracking';
+import { getProgress } from '../utils/exerciseTracking';
 import FavoriteButton from '../components/FavoriteButton';
 
 interface Value {
@@ -14,7 +14,6 @@ export default function Dashboard() {
   const [userName, setUserName] = useState('');
   const [topFiveValues, setTopFiveValues] = useState<Value[]>([]);
   const [completedExerciseIds, setCompletedExerciseIds] = useState<string[]>([]);
-  const [favoriteExerciseIds, setFavoriteExerciseIds] = useState<string[]>([]);
 
   useEffect(() => {
     const user = localStorage.getItem('user');
@@ -29,20 +28,15 @@ export default function Dashboard() {
       setTopFiveValues(JSON.parse(savedValues));
     }
 
-    // Load progress and favorites
-    loadProgressAndFavorites();
+    loadProgress();
   }, []);
 
-  const loadProgressAndFavorites = async () => {
+  const loadProgress = async () => {
     const progress = await getProgress();
     const completed = progress
-      .filter((p: any) => p.completed)
-      .map((p: any) => p.exerciseId);
+      .filter((entry) => entry.completed)
+      .map((entry) => entry.exerciseId);
     setCompletedExerciseIds(completed);
-
-    const favorites = await getFavorites();
-    const favoriteIds = favorites.map((f: any) => f.exerciseId);
-    setFavoriteExerciseIds(favoriteIds);
   };
 
   const exerciseCategories = [
@@ -52,6 +46,7 @@ export default function Dashboard() {
       description: 'Identify and explore what truly matters to you in life',
       icon: Target,
       color: 'bg-electric-blue',
+      accent: '#2344E7',
       exercises: [
         { name: 'Values Duel', path: '/exercises/values-duel', description: 'Discover your top 5 core values through choices' },
         { name: 'Values Compass', path: '/exercises/values-compass', description: 'Rate 8 life directions with interactive compass' },
@@ -67,6 +62,7 @@ export default function Dashboard() {
       description: 'Learn to observe thoughts without being controlled by them',
       icon: Brain,
       color: 'bg-midnight-purple',
+      accent: '#784A9F',
       exercises: [
         { name: 'Silly Voice', path: '/exercises/silly-voice', description: 'Transform thoughts with playful voices' },
         { name: 'Thought Labels', path: '/exercises/thought-labels', description: 'Categorize thoughts to create distance' },
@@ -81,6 +77,7 @@ export default function Dashboard() {
       description: 'Develop awareness and connection to the here and now',
       icon: Zap,
       color: 'bg-lime-green',
+      accent: '#93F357',
       exercises: [
         { name: 'Mindful Walking', path: '/exercises/mindful-walking', description: 'Step-by-step walking meditation' },
         { name: 'Eating Meditation', path: '/exercises/eating-meditation', description: '8-phase sensory eating practice' },
@@ -95,6 +92,7 @@ export default function Dashboard() {
       description: 'Practice opening up to difficult emotions and experiences',
       icon: Heart,
       color: 'bg-brand-pink',
+      accent: '#FE97BB',
       exercises: [
         { name: 'Tug of War', path: '/exercises/tug-of-war', description: 'Interactive metaphor about dropping struggle' },
         { name: 'Willingness Scale', path: '/exercises/willingness-scale', description: 'Assess willingness to feel for values' },
@@ -109,6 +107,7 @@ export default function Dashboard() {
       description: 'Set goals and take steps aligned with your values',
       icon: CheckSquare,
       color: 'bg-inferno-red',
+      accent: '#EC4625',
       exercises: [
         { name: 'SMART Goals', path: '/exercises/smart-goals', description: 'Create specific, measurable goals' },
         { name: 'Barrier Busting', path: '/exercises/barrier-busting', description: 'Plan for obstacles with if-then strategies' },
@@ -215,21 +214,22 @@ export default function Dashboard() {
                   {category.exercises.map((exercise, exIndex) => {
                     const exerciseId = exercise.path.replace('/exercises/', '');
                     const isCompleted = completedExerciseIds.includes(exerciseId);
-                    const isFavorite = favoriteExerciseIds.includes(exerciseId);
 
                     return (
                       <div
                         key={exercise.path}
                         className="card hover-lift group bg-white border-l-4 transition-all relative"
                         style={{
-                          borderColor: category.color.replace('bg-', ''),
+                          borderColor: category.accent,
                           animationDelay: `${(catIndex * 0.1) + (exIndex * 0.05)}s`
                         }}
                       >
                         {/* Favorite & Completed Icons */}
                         <div className="absolute top-3 right-3 flex items-center space-x-2">
                           {isCompleted && (
-                            <CheckCircle size={18} className="text-lime-green" title="Completed" />
+                            <span title="Completed">
+                              <CheckCircle size={18} className="text-lime-green" />
+                            </span>
                           )}
                           <div onClick={(e) => e.preventDefault()}>
                             <FavoriteButton

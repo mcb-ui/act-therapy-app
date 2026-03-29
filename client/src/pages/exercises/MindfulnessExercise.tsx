@@ -9,7 +9,7 @@ export default function MindfulnessExercise() {
   const [breathPhase, setBreathPhase] = useState<'inhale' | 'hold' | 'exhale'>('inhale');
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval> | undefined;
 
     if (isRunning) {
       interval = setInterval(() => {

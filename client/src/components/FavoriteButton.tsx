@@ -18,7 +18,7 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({ exerciseId, exerciseNam
 
   const checkFavoriteStatus = async () => {
     const favorites = await getFavorites();
-    const isFav = favorites.some((f: any) => f.exerciseId === exerciseId);
+    const isFav = favorites.some((favorite) => favorite.exerciseId === exerciseId);
     setIsFavorite(isFav);
   };
 

@@ -1,6 +1,40 @@
 import axios from 'axios';
 
-const API_BASE = 'http://localhost:5000/api';
+export const API_BASE = '/api';
+
+export interface ProgressEntry {
+  id: string;
+  exerciseId: string;
+  completed: boolean;
+  score: number | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ExerciseDataRecord {
+  id: string;
+  exerciseId: string;
+  exerciseName: string;
+  data: string;
+  completedAt: string;
+  updatedAt: string;
+}
+
+export interface ProgressStats {
+  completedCount: number;
+  currentStreak: number;
+  longestStreak: number;
+  weeklyData: Array<{ day: string; completed: number }>;
+  totalExercises: number;
+}
+
+export interface Favorite {
+  id: string;
+  exerciseId: string;
+  exerciseName: string;
+  createdAt: string;
+}
 
 // Mark exercise as complete
 export const markExerciseComplete = async (exerciseId: string, score?: number, notes?: string) => {
@@ -24,7 +58,7 @@ export const markExerciseComplete = async (exerciseId: string, score?: number, n
 };
 
 // Save exercise data (responses)
-export const saveExerciseData = async (exerciseId: string, exerciseName: string, data: any) => {
+export const saveExerciseData = async (exerciseId: string, exerciseName: string, data: unknown) => {
   try {
     const token = localStorage.getItem('token');
     await axios.post(
@@ -44,7 +78,7 @@ export const saveExerciseData = async (exerciseId: string, exerciseName: string,
 };
 
 // Get exercise data
-export const getExerciseData = async (exerciseId: string) => {
+export const getExerciseData = async (exerciseId: string): Promise<ExerciseDataRecord | null> => {
   try {
     const token = localStorage.getItem('token');
     const response = await axios.get(`${API_BASE}/exercise-data/${exerciseId}`, {
@@ -58,7 +92,7 @@ export const getExerciseData = async (exerciseId: string) => {
 };
 
 // Get all progress
-export const getProgress = async () => {
+export const getProgress = async (): Promise<ProgressEntry[]> => {
   try {
     const token = localStorage.getItem('token');
     const response = await axios.get(`${API_BASE}/progress`, {
@@ -72,7 +106,7 @@ export const getProgress = async () => {
 };
 
 // Get progress stats
-export const getProgressStats = async () => {
+export const getProgressStats = async (): Promise<ProgressStats | null> => {
   try {
     const token = localStorage.getItem('token');
     const response = await axios.get(`${API_BASE}/progress/stats`, {
@@ -113,7 +147,7 @@ export const toggleFavorite = async (exerciseId: string, exerciseName: string, i
 };
 
 // Get favorites
-export const getFavorites = async () => {
+export const getFavorites = async (): Promise<Favorite[]> => {
   try {
     const token = localStorage.getItem('token');
     const response = await axios.get(`${API_BASE}/favorites`, {

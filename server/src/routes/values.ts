@@ -1,9 +1,8 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
+import { prisma } from '../lib/prisma.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Get user values
 router.get('/', authMiddleware, async (req: AuthRequest, res) => {
@@ -44,6 +43,16 @@ router.put('/:id', authMiddleware, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
     const { category, description, importance, alignment } = req.body;
+    const existingValue = await prisma.value.findFirst({
+      where: {
+        id,
+        userId: req.userId!,
+      },
+    });
+
+    if (!existingValue) {
+      return res.status(404).json({ error: 'Value not found' });
+    }
 
     const value = await prisma.value.update({
       where: { id },
@@ -60,6 +69,17 @@ router.put('/:id', authMiddleware, async (req: AuthRequest, res) => {
 router.delete('/:id', authMiddleware, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
+    const existingValue = await prisma.value.findFirst({
+      where: {
+        id,
+        userId: req.userId!,
+      },
+    });
+
+    if (!existingValue) {
+      return res.status(404).json({ error: 'Value not found' });
+    }
+
     await prisma.value.delete({ where: { id } });
     res.json({ message: 'Value deleted' });
   } catch (error) {

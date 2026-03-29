@@ -1,9 +1,8 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
+import { prisma } from '../lib/prisma.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Get user favorites
 router.get('/', authMiddleware, async (req: AuthRequest, res) => {
@@ -23,8 +22,17 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
   try {
     const { exerciseId, exerciseName } = req.body;
 
-    const favorite = await prisma.favorite.create({
-      data: {
+    const favorite = await prisma.favorite.upsert({
+      where: {
+        userId_exerciseId: {
+          userId: req.userId!,
+          exerciseId,
+        },
+      },
+      update: {
+        exerciseName,
+      },
+      create: {
         userId: req.userId!,
         exerciseId,
         exerciseName,
