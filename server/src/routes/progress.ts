@@ -1,73 +1,66 @@
 import express from 'express';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
-import prisma from '../lib/prisma.js';
-
-// Improvement #3: Fix totalExercises from 25 → 33
-// Improvement #33: Input validation for progress routes
-// Improvement #34: Use shared Prisma instance
+import { prisma } from '../lib/prisma.js';
 
 const router = express.Router();
+const TOTAL_EXERCISES = 28;
+const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
-// Reviewer Fix #4: Correct exercise count (34 exercise files)
-const TOTAL_EXERCISES = 34;
+const getDateKey = (date: Date) => date.toISOString().split('T')[0];
+
+const shiftDateKey = (dateKey: string, days: number) => {
+  const date = new Date(`${dateKey}T00:00:00.000Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return getDateKey(date);
+};
+
+const diffInDays = (earlierDateKey: string, laterDateKey: string) => {
+  const earlier = new Date(`${earlierDateKey}T00:00:00.000Z`);
+  const later = new Date(`${laterDateKey}T00:00:00.000Z`);
+  return Math.round((later.getTime() - earlier.getTime()) / MS_PER_DAY);
+};
 
 // Get user progress
 router.get('/', authMiddleware, async (req: AuthRequest, res) => {
   try {
-    const progress = await prisma.progress.findMany({
+    const progressHistory = await prisma.progress.findMany({
       where: { userId: req.userId! },
       orderBy: { createdAt: 'desc' },
     });
-    res.json(progress);
+
+    const latestByExercise = new Map<string, (typeof progressHistory)[number]>();
+    for (const entry of progressHistory) {
+      if (!latestByExercise.has(entry.exerciseId)) {
+        latestByExercise.set(entry.exerciseId, entry);
+      }
+    }
+
+    res.json([...latestByExercise.values()]);
   } catch (error) {
-    console.error('Failed to fetch progress:', error);
     res.status(500).json({ error: 'Failed to fetch progress' });
   }
 });
 
-// Create or update progress
+// Record progress events so stats can retain completion history.
 router.post('/', authMiddleware, async (req: AuthRequest, res) => {
   try {
     const { exerciseId, completed, score, notes } = req.body;
-
-    // Improvement #33: Validate exerciseId
-    if (!exerciseId || typeof exerciseId !== 'string') {
+    if (!exerciseId) {
       return res.status(400).json({ error: 'exerciseId is required' });
     }
 
-    // Check if progress already exists
-    const existing = await prisma.progress.findFirst({
-      where: {
+    const progress = await prisma.progress.create({
+      data: {
         userId: req.userId!,
         exerciseId,
+        completed: Boolean(completed),
+        score,
+        notes,
       },
     });
 
-    let progress;
-    if (existing) {
-      progress = await prisma.progress.update({
-        where: { id: existing.id },
-        data: {
-          completed,
-          score,
-          notes,
-        },
-      });
-    } else {
-      progress = await prisma.progress.create({
-        data: {
-          userId: req.userId!,
-          exerciseId,
-          completed,
-          score,
-          notes,
-        },
-      });
-    }
-
     res.json(progress);
   } catch (error) {
-    console.error('Failed to save progress:', error);
     res.status(500).json({ error: 'Failed to save progress' });
   }
 });
@@ -75,57 +68,61 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
 // Get completion stats
 router.get('/stats', authMiddleware, async (req: AuthRequest, res) => {
   try {
-    const completedCount = await prisma.progress.count({
-      where: {
-        userId: req.userId!,
-        completed: true,
-      },
-    });
-
     const allProgress = await prisma.progress.findMany({
       where: { userId: req.userId! },
       orderBy: { createdAt: 'desc' },
     });
+    const latestByExercise = new Map<string, (typeof allProgress)[number]>();
+    for (const entry of allProgress) {
+      if (!latestByExercise.has(entry.exerciseId)) {
+        latestByExercise.set(entry.exerciseId, entry);
+      }
+    }
 
-    // Calculate streak (days in a row with completion)
-    const dates = allProgress
-      .filter(p => p.completed)
-      .map(p => p.createdAt.toISOString().split('T')[0]);
+    const completedCount = [...latestByExercise.values()].filter((entry) => entry.completed).length;
 
-    const uniqueDates = [...new Set(dates)].sort().reverse();
+    const completionDates = allProgress
+      .filter((entry) => entry.completed)
+      .map((entry) => getDateKey(entry.createdAt));
+    const uniqueCompletionDates = [...new Set(completionDates)].sort();
+    const completionDateSet = new Set(uniqueCompletionDates);
     let currentStreak = 0;
     let longestStreak = 0;
     let tempStreak = 0;
+    let previousDate: string | null = null;
 
-    const today = new Date().toISOString().split('T')[0];
-    let lastDate = today;
-
-    for (const date of uniqueDates) {
-      const diffDays = Math.floor(
-        (new Date(lastDate).getTime() - new Date(date).getTime()) / (1000 * 60 * 60 * 24)
-      );
-
-      if (diffDays <= 1) {
-        tempStreak++;
-        if (date === today || (tempStreak === 1 && diffDays === 1)) {
-          currentStreak = tempStreak;
-        }
+    for (const date of uniqueCompletionDates) {
+      if (previousDate && diffInDays(previousDate, date) === 1) {
+        tempStreak += 1;
       } else {
         tempStreak = 1;
       }
 
       longestStreak = Math.max(longestStreak, tempStreak);
-      lastDate = date;
+      previousDate = date;
+    }
+
+    const today = getDateKey(new Date());
+    const yesterday = shiftDateKey(today, -1);
+    let streakCursor: string | null = completionDateSet.has(today)
+      ? today
+      : completionDateSet.has(yesterday)
+      ? yesterday
+      : null;
+
+    while (streakCursor && completionDateSet.has(streakCursor)) {
+      currentStreak += 1;
+      streakCursor = shiftDateKey(streakCursor, -1);
     }
 
     // Get weekly data (last 7 days)
-    const weeklyData = [];
+    const weeklyData: Array<{ day: string; completed: number }> = [];
     const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     for (let i = 6; i >= 0; i--) {
       const date = new Date();
       date.setDate(date.getDate() - i);
-      const dateStr = date.toISOString().split('T')[0];
-      const count = dates.filter(d => d === dateStr).length;
+      const dateStr = getDateKey(date);
+      const count = completionDates.filter((dayKey) => dayKey === dateStr).length;
       weeklyData.push({
         day: dayNames[date.getDay()],
         completed: count,
@@ -140,7 +137,7 @@ router.get('/stats', authMiddleware, async (req: AuthRequest, res) => {
       totalExercises: TOTAL_EXERCISES,
     });
   } catch (error) {
-    console.error('Failed to fetch stats:', error);
+    console.error(error);
     res.status(500).json({ error: 'Failed to fetch stats' });
   }
 });

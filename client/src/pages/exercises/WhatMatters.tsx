@@ -1,7 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
 import { Heart, Star, Check } from 'lucide-react';
-import ExerciseHeader from '../../components/ExerciseHeader';
 
 interface Value {
   id: string;
@@ -83,8 +81,6 @@ export default function WhatMatters() {
     setRankedValues(newRanked);
   };
 
-  useEffect(() => { document.title = 'What Matters Most | ACT Therapy'; }, []);
-
   if (step === 'complete') {
     return (
       <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
@@ -145,9 +141,9 @@ export default function WhatMatters() {
           </ul>
         </div>
 
-        <Link to="/" className="btn-primary w-full">
+        <button onClick={() => window.history.back()} className="btn-primary w-full">
           Complete Exercise
-        </Link>
+        </button>
       </div>
     );
   }
@@ -155,13 +151,15 @@ export default function WhatMatters() {
   if (step === 'rank') {
     return (
       <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
-        <ExerciseHeader
-          icon={<Heart size={24} className="text-white" />}
-          title="Rank Your Values"
-          subtitle="Put them in order of importance"
-          exerciseId="what-matters"
-          exerciseName="What Matters Most"
-        />
+        <div className="flex items-center space-x-3">
+          <div className="w-12 h-12 rounded-xl bg-electric-blue flex items-center justify-center">
+            <Heart size={24} className="text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-header text-midnight-purple">Rank Your Values</h1>
+            <p className="text-gray-600 font-body">Put them in order of importance</p>
+          </div>
+        </div>
 
         <div className="card bg-electric-blue bg-opacity-10 border-2 border-electric-blue">
           <p className="text-gray-700 font-body">
@@ -216,13 +214,15 @@ export default function WhatMatters() {
   // Select step
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-      <ExerciseHeader
-        icon={<Heart size={24} className="text-white" />}
-        title="What Matters Most"
-        subtitle="Identify your core values"
-        exerciseId="what-matters"
-        exerciseName="What Matters Most"
-      />
+      <div className="flex items-center space-x-3">
+        <div className="w-12 h-12 rounded-xl bg-electric-blue flex items-center justify-center">
+          <Heart size={24} className="text-white" />
+        </div>
+        <div>
+          <h1 className="text-3xl font-header text-midnight-purple">What Matters Most</h1>
+          <p className="text-gray-600 font-body">Identify your core values</p>
+        </div>
+      </div>
 
       <div className="card bg-electric-blue bg-opacity-10 border-2 border-electric-blue">
         <h3 className="font-subheader text-midnight-purple mb-2 uppercase">Instructions</h3>

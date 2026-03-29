@@ -1,11 +1,9 @@
-import api from './api';
+import axios from 'axios';
 
-// Improvement #1, #6, #7: Use centralized API client with relative URLs (fixes port 5000 bug)
+export const API_BASE = '/api';
 
-// Improvement #26: TypeScript interfaces for API responses
-interface ProgressRecord {
+export interface ProgressEntry {
   id: string;
-  userId: string;
   exerciseId: string;
   completed: boolean;
   score: number | null;
@@ -14,17 +12,8 @@ interface ProgressRecord {
   updatedAt: string;
 }
 
-interface FavoriteRecord {
+export interface ExerciseDataRecord {
   id: string;
-  userId: string;
-  exerciseId: string;
-  exerciseName: string;
-  createdAt: string;
-}
-
-interface ExerciseDataRecord {
-  id: string;
-  userId: string;
   exerciseId: string;
   exerciseName: string;
   data: string;
@@ -32,27 +21,57 @@ interface ExerciseDataRecord {
   updatedAt: string;
 }
 
-interface ProgressStats {
+export interface ProgressStats {
   completedCount: number;
   currentStreak: number;
   longestStreak: number;
-  weeklyData: { day: string; completed: number }[];
+  weeklyData: Array<{ day: string; completed: number }>;
   totalExercises: number;
+}
+
+export interface Favorite {
+  id: string;
+  exerciseId: string;
+  exerciseName: string;
+  createdAt: string;
 }
 
 // Mark exercise as complete
 export const markExerciseComplete = async (exerciseId: string, score?: number, notes?: string) => {
   try {
-    await api.post('/progress', { exerciseId, completed: true, score, notes });
+    const token = localStorage.getItem('token');
+    await axios.post(
+      `${API_BASE}/progress`,
+      {
+        exerciseId,
+        completed: true,
+        score,
+        notes,
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
   } catch (error) {
     console.error('Failed to mark exercise complete:', error);
   }
 };
 
 // Save exercise data (responses)
-export const saveExerciseData = async (exerciseId: string, exerciseName: string, data: Record<string, unknown>) => {
+export const saveExerciseData = async (exerciseId: string, exerciseName: string, data: unknown) => {
   try {
-    await api.post('/exercise-data', { exerciseId, exerciseName, data });
+    const token = localStorage.getItem('token');
+    await axios.post(
+      `${API_BASE}/exercise-data`,
+      {
+        exerciseId,
+        exerciseName,
+        data,
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
   } catch (error) {
     console.error('Failed to save exercise data:', error);
   }
@@ -61,7 +80,10 @@ export const saveExerciseData = async (exerciseId: string, exerciseName: string,
 // Get exercise data
 export const getExerciseData = async (exerciseId: string): Promise<ExerciseDataRecord | null> => {
   try {
-    const response = await api.get(`/exercise-data/${exerciseId}`);
+    const token = localStorage.getItem('token');
+    const response = await axios.get(`${API_BASE}/exercise-data/${exerciseId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return response.data;
   } catch (error) {
     console.error('Failed to get exercise data:', error);
@@ -70,9 +92,12 @@ export const getExerciseData = async (exerciseId: string): Promise<ExerciseDataR
 };
 
 // Get all progress
-export const getProgress = async (): Promise<ProgressRecord[]> => {
+export const getProgress = async (): Promise<ProgressEntry[]> => {
   try {
-    const response = await api.get('/progress');
+    const token = localStorage.getItem('token');
+    const response = await axios.get(`${API_BASE}/progress`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return response.data;
   } catch (error) {
     console.error('Failed to get progress:', error);
@@ -83,7 +108,10 @@ export const getProgress = async (): Promise<ProgressRecord[]> => {
 // Get progress stats
 export const getProgressStats = async (): Promise<ProgressStats | null> => {
   try {
-    const response = await api.get('/progress/stats');
+    const token = localStorage.getItem('token');
+    const response = await axios.get(`${API_BASE}/progress/stats`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return response.data;
   } catch (error) {
     console.error('Failed to get progress stats:', error);
@@ -94,10 +122,24 @@ export const getProgressStats = async (): Promise<ProgressStats | null> => {
 // Toggle favorite
 export const toggleFavorite = async (exerciseId: string, exerciseName: string, isFavorite: boolean) => {
   try {
+    const token = localStorage.getItem('token');
     if (isFavorite) {
-      await api.delete(`/favorites/${exerciseId}`);
+      // Remove favorite
+      await axios.delete(`${API_BASE}/favorites/${exerciseId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
     } else {
-      await api.post('/favorites', { exerciseId, exerciseName });
+      // Add favorite
+      await axios.post(
+        `${API_BASE}/favorites`,
+        {
+          exerciseId,
+          exerciseName,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
     }
   } catch (error) {
     console.error('Failed to toggle favorite:', error);
@@ -105,9 +147,12 @@ export const toggleFavorite = async (exerciseId: string, exerciseName: string, i
 };
 
 // Get favorites
-export const getFavorites = async (): Promise<FavoriteRecord[]> => {
+export const getFavorites = async (): Promise<Favorite[]> => {
   try {
-    const response = await api.get('/favorites');
+    const token = localStorage.getItem('token');
+    const response = await axios.get(`${API_BASE}/favorites`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return response.data;
   } catch (error) {
     console.error('Failed to get favorites:', error);

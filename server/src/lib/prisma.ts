@@ -1,6 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 
-// Improvement #34: Shared single PrismaClient instance across all routes
-const prisma = new PrismaClient();
+const globalForPrisma = globalThis as typeof globalThis & {
+  prisma?: PrismaClient;
+};
 
-export default prisma;
+export const prisma = globalForPrisma.prisma ?? new PrismaClient();
+
+if (process.env.NODE_ENV !== 'production') {
+  globalForPrisma.prisma = prisma;
+}
