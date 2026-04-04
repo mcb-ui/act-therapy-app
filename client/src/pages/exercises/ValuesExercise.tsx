@@ -1,9 +1,13 @@
-import { useState, useEffect } from 'react';
-import api from '../../utils/api';
-import { Target, Plus, Edit2, Trash2 } from 'lucide-react';
-import ExerciseHeader from '../../components/ExerciseHeader';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Edit2, Plus, Target, Trash2 } from 'lucide-react';
+import ConfirmDialog from '../../components/ConfirmDialog';
+import ExerciseShell from '../../components/ExerciseShell';
+import { useAppToast } from '../../contexts/ToastContext';
+import { useExerciseDraft } from '../../hooks/useExerciseDraft';
+import { api, getApiErrorMessage } from '../../lib/api';
 
-interface Value {
+interface ValueRecord {
   id: string;
   category: string;
   description: string;
@@ -11,63 +15,143 @@ interface Value {
   alignment: number;
 }
 
-export default function ValuesExercise() {
-  const [values, setValues] = useState<Value[]>([]);
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
-    category: '',
-    description: '',
-    importance: 5,
-    alignment: 5,
+const emptyForm = {
+  category: '',
+  description: '',
+  importance: 5,
+  alignment: 5,
+};
+
+const categories = [
+  'Family',
+  'Relationships',
+  'Career',
+  'Health',
+  'Personal Growth',
+  'Community',
+  'Spirituality',
+  'Recreation',
+  'Creativity',
+  'Environment',
+];
+
+const sortValues = (values: ValueRecord[]) =>
+  [...values].sort((left, right) => {
+    if (right.importance !== left.importance) {
+      return right.importance - left.importance;
+    }
+
+    return left.alignment - right.alignment;
   });
 
-  const categories = [
-    'Family',
-    'Relationships',
-    'Career',
-    'Health',
-    'Personal Growth',
-    'Community',
-    'Spirituality',
-    'Recreation',
-    'Creativity',
-    'Environment',
-  ];
-
-  useEffect(() => { document.title = 'Values Exercise | ACT Therapy'; }, []);
+export default function ValuesExercise() {
+  const { success, error: showError } = useAppToast();
+  const [values, setValues] = useState<ValueRecord[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [valueToDelete, setValueToDelete] = useState<ValueRecord | null>(null);
+  const formRef = useRef<HTMLDivElement>(null);
+  const {
+    value: formData,
+    setValue: setFormData,
+    clearDraft,
+    draftStatus,
+    hasStoredDraft,
+  } = useExerciseDraft('act-values-form-draft', emptyForm);
 
   useEffect(() => {
-    fetchValues();
+    void fetchValues();
   }, []);
 
-  const fetchValues = async () => {
-    try {
-      const response = await api.get('/values');
-      setValues(response.data);
-    } catch (error) {
-      console.error('Failed to fetch values:', error);
+  useEffect(() => {
+    if (hasStoredDraft) {
+      setShowForm(true);
     }
+  }, [hasStoredDraft]);
+
+  useEffect(() => {
+    if (showForm) {
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [showForm]);
+
+  const fetchValues = async () => {
+    setIsLoading(true);
+
+    try {
+      const response = await api.get<ValueRecord[]>('/values');
+      setValues(sortValues(response.data));
+    } catch (err) {
+      showError(getApiErrorMessage(err, 'Could not load your values.'));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const valuesSummary = useMemo(() => {
+    if (values.length === 0) {
+      return null;
+    }
+
+    const totalImportance = values.reduce((sum, value) => sum + value.importance, 0);
+    const totalAlignment = values.reduce((sum, value) => sum + value.alignment, 0);
+    const biggestGap = [...values].sort(
+      (left, right) =>
+        right.importance - right.alignment - (left.importance - left.alignment)
+    )[0];
+
+    return {
+      count: values.length,
+      averageImportance: (totalImportance / values.length).toFixed(1),
+      averageAlignment: (totalAlignment / values.length).toFixed(1),
+      biggestGap,
+    };
+  }, [values]);
+
+  const resetForm = () => {
+    clearDraft();
+    setEditingId(null);
+    setShowForm(false);
+  };
+
+  const openFreshForm = () => {
+    if (editingId) {
+      setEditingId(null);
+      setFormData(emptyForm);
+      clearDraft();
+    }
+
+    setShowForm(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSaving(true);
+
     try {
       if (editingId) {
-        await api.put(`/values/${editingId}`, formData);
+        const response = await api.put<ValueRecord>(`/values/${editingId}`, formData);
+        setValues((current) =>
+          sortValues(current.map((value) => (value.id === editingId ? response.data : value)))
+        );
+        success('Value updated.');
       } else {
-        await api.post('/values', formData);
+        const response = await api.post<ValueRecord>('/values', formData);
+        setValues((current) => sortValues([response.data, ...current]));
+        success('Value added.');
       }
-      setFormData({ category: '', description: '', importance: 5, alignment: 5 });
-      setShowForm(false);
-      setEditingId(null);
-      fetchValues();
-    } catch (error) {
-      console.error('Failed to save value:', error);
+
+      resetForm();
+    } catch (err) {
+      showError(getApiErrorMessage(err, 'Could not save this value.'));
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const handleEdit = (value: Value) => {
+  const handleEdit = (value: ValueRecord) => {
     setFormData({
       category: value.category,
       description: value.description,
@@ -78,199 +162,335 @@ export default function ValuesExercise() {
     setShowForm(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this value?')) return;
+  const restoreDeletedValue = async (value: ValueRecord) => {
     try {
-      await api.delete(`/values/${id}`);
-      fetchValues();
-    } catch (error) {
-      console.error('Failed to delete value:', error);
+      const response = await api.post<ValueRecord>('/values', {
+        category: value.category,
+        description: value.description,
+        importance: value.importance,
+        alignment: value.alignment,
+      });
+      setValues((current) => sortValues([response.data, ...current]));
+      success('Value restored.');
+    } catch (err) {
+      showError(getApiErrorMessage(err, 'Could not restore this value.'));
     }
   };
 
+  const confirmDelete = async () => {
+    if (!valueToDelete) {
+      return;
+    }
+
+    const deletedValue = valueToDelete;
+    setValueToDelete(null);
+    setValues((current) => current.filter((value) => value.id !== deletedValue.id));
+
+    try {
+      await api.delete(`/values/${deletedValue.id}`);
+      success('Value deleted.', {
+        actionLabel: 'Undo',
+        duration: 7000,
+        onAction: async () => restoreDeletedValue(deletedValue),
+      });
+    } catch (err) {
+      setValues((current) => sortValues([deletedValue, ...current]));
+      showError(getApiErrorMessage(err, 'Could not delete this value.'));
+    }
+  };
+
+  const footer = (
+    <div className="flex flex-col gap-3 md:flex-row md:justify-between">
+      <button
+        type="button"
+        onClick={showForm ? resetForm : openFreshForm}
+        className="btn-primary md:min-w-[13rem]"
+      >
+        {showForm ? 'Close Value Form' : 'Add or Edit Values'}
+      </button>
+      <Link
+        to="/exercises/action"
+        className="btn-secondary text-center md:min-w-[13rem]"
+      >
+        Turn Values Into Action
+      </Link>
+    </div>
+  );
+
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <ExerciseHeader icon={<Target size={24} className="text-white" />} title="Values Clarification" subtitle="Define what truly matters to you" exerciseId="values" exerciseName="Values Exercise" />
+    <>
+      <ExerciseShell
+        exerciseId="values"
+        estimatedDuration="12 min"
+        intro="Clarify what you want to stand for, then notice the gap between what matters and how daily life is actually unfolding."
+        whyItMatters="Values are directions, not finish lines. When you know what matters most, difficult thoughts and feelings stop deciding the whole day for you."
+        draftStatus={draftStatus}
+        headerActions={
+          <button
+            type="button"
+            onClick={showForm ? resetForm : openFreshForm}
+            className="btn-primary"
+          >
+            <span className="inline-flex items-center gap-2">
+              <Plus size={18} />
+              {showForm ? 'Close Form' : 'Add Value'}
+            </span>
+          </button>
+        }
+        footer={footer}
+      >
+        {valuesSummary && (
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="card">
+              <p className="font-subheader text-xs uppercase tracking-[0.18em] text-gray-500">
+                Values Logged
+              </p>
+              <p className="mt-2 font-header text-4xl text-midnight-purple">{valuesSummary.count}</p>
+            </div>
+            <div className="card">
+              <p className="font-subheader text-xs uppercase tracking-[0.18em] text-gray-500">
+                Average Importance
+              </p>
+              <p className="mt-2 font-header text-4xl text-midnight-purple">
+                {valuesSummary.averageImportance}
+              </p>
+            </div>
+            <div className="card">
+              <p className="font-subheader text-xs uppercase tracking-[0.18em] text-gray-500">
+                Biggest Gap
+              </p>
+              <p className="mt-2 font-subheader text-sm uppercase text-midnight-purple">
+                {valuesSummary.biggestGap.category}
+              </p>
+              <p className="mt-1 font-body text-sm text-gray-600">
+                {valuesSummary.biggestGap.importance - valuesSummary.biggestGap.alignment} point gap
+              </p>
+            </div>
+          </div>
+        )}
 
-      <div className="flex justify-end">
-        <button
-          onClick={() => {
-            setShowForm(!showForm);
-            setEditingId(null);
-            setFormData({ category: '', description: '', importance: 5, alignment: 5 });
-          }}
-          className="btn-primary flex items-center space-x-2"
-        >
-          <Plus size={20} />
-          <span>Add Value</span>
-        </button>
-      </div>
-
-      <div className="card bg-blue-50 border-blue-200">
-        <h3 className="font-semibold text-blue-900 mb-2">What are values?</h3>
-        <p className="text-blue-800">
-          Values are chosen life directions. They're not goals you can complete, but ongoing
-          qualities you want to bring to your actions. For example, "being a loving parent" is
-          a value, while "spending an hour with my kids today" is a goal aligned with that value.
-        </p>
-      </div>
-
-      {showForm && (
-        <div className="card">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">
-            {editingId ? 'Edit Value' : 'Add New Value'}
-          </h3>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Life Category
-              </label>
-              <select
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="input-field"
-                required
-              >
-                <option value="">Select a category</option>
-                {categories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
+        {showForm && (
+          <div ref={formRef} className="card">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <p className="font-subheader text-xs uppercase tracking-[0.18em] text-electric-blue">
+                  Working Draft
+                </p>
+                <h2 className="mt-2 font-subheader text-xl uppercase text-midnight-purple">
+                  {editingId ? 'Edit Value' : 'Add a new value'}
+                </h2>
+              </div>
+              {hasStoredDraft && !editingId ? (
+                <span className="rounded-full bg-midnight-purple/5 px-3 py-1 font-subheader text-[11px] uppercase tracking-[0.18em] text-gray-500">
+                  Draft resumed
+                </span>
+              ) : null}
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Describe this value
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="input-field"
-                rows={3}
-                placeholder="e.g., Being present and supportive with my family..."
-                required
-              />
-            </div>
+            <form onSubmit={handleSubmit} className="mt-5 space-y-4">
+              <div>
+                <label className="mb-2 block font-subheader text-xs uppercase tracking-[0.18em] text-gray-600">
+                  Life category
+                </label>
+                <select
+                  value={formData.category}
+                  onChange={(e) => setFormData((current) => ({ ...current, category: e.target.value }))}
+                  className="input-field"
+                  required
+                >
+                  <option value="">Select a category</option>
+                  {categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                How important is this? ({formData.importance}/10)
-              </label>
-              <input
-                type="range"
-                min="1"
-                max="10"
-                value={formData.importance}
-                onChange={(e) => setFormData({ ...formData, importance: parseInt(e.target.value) })}
-                className="w-full"
-              />
-            </div>
+              <div>
+                <label className="mb-2 block font-subheader text-xs uppercase tracking-[0.18em] text-gray-600">
+                  Describe this value
+                </label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData((current) => ({ ...current, description: e.target.value }))
+                  }
+                  className="input-field"
+                  rows={4}
+                  placeholder="e.g. Being present, encouraging, and emotionally available with my family."
+                  required
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                How aligned are you currently? ({formData.alignment}/10)
-              </label>
-              <input
-                type="range"
-                min="1"
-                max="10"
-                value={formData.alignment}
-                onChange={(e) => setFormData({ ...formData, alignment: parseInt(e.target.value) })}
-                className="w-full"
-              />
-            </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="rounded-2xl bg-midnight-purple/5 p-4">
+                  <label className="mb-2 block font-subheader text-xs uppercase tracking-[0.18em] text-gray-600">
+                    Importance {formData.importance}/10
+                  </label>
+                  <input
+                    type="range"
+                    min="1"
+                    max="10"
+                    value={formData.importance}
+                    onChange={(e) =>
+                      setFormData((current) => ({
+                        ...current,
+                        importance: Number.parseInt(e.target.value, 10),
+                      }))
+                    }
+                    className="w-full accent-electric-blue"
+                  />
+                </div>
 
-            <div className="flex space-x-3">
-              <button type="submit" className="btn-primary">
-                {editingId ? 'Update Value' : 'Add Value'}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowForm(false);
-                  setEditingId(null);
-                  setFormData({ category: '', description: '', importance: 5, alignment: 5 });
-                }}
-                className="btn-secondary"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+                <div className="rounded-2xl bg-midnight-purple/5 p-4">
+                  <label className="mb-2 block font-subheader text-xs uppercase tracking-[0.18em] text-gray-600">
+                    Current alignment {formData.alignment}/10
+                  </label>
+                  <input
+                    type="range"
+                    min="1"
+                    max="10"
+                    value={formData.alignment}
+                    onChange={(e) =>
+                      setFormData((current) => ({
+                        ...current,
+                        alignment: Number.parseInt(e.target.value, 10),
+                      }))
+                    }
+                    className="w-full accent-lime-green"
+                  />
+                </div>
+              </div>
 
-      <div className="space-y-4">
-        {values.length === 0 ? (
-          <div className="card text-center py-12">
-            <Target size={48} className="mx-auto text-gray-400 mb-4" />
-            <p className="text-gray-600">
-              No values defined yet. Click "Add Value" to get started!
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="btn-primary disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isSaving ? 'Saving...' : editingId ? 'Update Value' : 'Add Value'}
+                </button>
+                <button type="button" onClick={resetForm} className="btn-secondary">
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {isLoading ? (
+          <div className="grid gap-4 md:grid-cols-2">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="h-40 animate-pulse rounded-[1.5rem] bg-white/70 shadow-lg" />
+            ))}
+          </div>
+        ) : values.length === 0 ? (
+          <div className="card py-12 text-center">
+            <Target size={48} className="mx-auto mb-4 text-gray-300" />
+            <p className="font-body text-gray-600">
+              No values defined yet. Add one value to start building a clearer direction.
             </p>
           </div>
         ) : (
-          values.map((value) => (
-            <div key={value.id} className="card hover:shadow-lg transition-shadow">
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-3 mb-2">
-                    <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold">
-                      {value.category}
-                    </span>
-                  </div>
-                  <p className="text-gray-800 mb-4">{value.description}</p>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm text-gray-600 mb-1">Importance</p>
-                      <div className="flex items-center space-x-2">
-                        <div className="flex-1 bg-gray-200 rounded-full h-2">
-                          <div
-                            className="bg-blue-600 h-2 rounded-full"
-                            style={{ width: `${value.importance * 10}%` }}
-                          />
-                        </div>
-                        <span className="text-sm font-semibold text-gray-900">
-                          {value.importance}/10
+          <div className="grid gap-4">
+            {values.map((value) => {
+              const gap = value.importance - value.alignment;
+
+              return (
+                <div key={value.id} className="card">
+                  <div className="flex flex-wrap items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="mb-3 flex flex-wrap items-center gap-3">
+                        <span className="rounded-full bg-electric-blue/10 px-3 py-1 text-xs font-subheader uppercase tracking-[0.16em] text-electric-blue">
+                          {value.category}
                         </span>
+                        <span className="rounded-full bg-midnight-purple/5 px-3 py-1 text-xs font-subheader uppercase tracking-[0.16em] text-gray-500">
+                          Gap {gap}
+                        </span>
+                      </div>
+                      <p className="font-body leading-7 text-gray-700">{value.description}</p>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleEdit(value)}
+                        className="rounded-2xl p-3 text-electric-blue transition hover:bg-electric-blue/10"
+                      >
+                        <Edit2 size={18} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setValueToDelete(value)}
+                        className="rounded-2xl p-3 text-inferno-red transition hover:bg-inferno-red/10"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 grid gap-4 md:grid-cols-2">
+                    <div>
+                      <div className="mb-2 flex items-center justify-between font-body text-sm text-gray-600">
+                        <span>Importance</span>
+                        <span>{value.importance}/10</span>
+                      </div>
+                      <div className="h-3 rounded-full bg-gray-100">
+                        <div
+                          className="h-3 rounded-full bg-electric-blue"
+                          style={{ width: `${value.importance * 10}%` }}
+                        />
                       </div>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600 mb-1">Current Alignment</p>
-                      <div className="flex items-center space-x-2">
-                        <div className="flex-1 bg-gray-200 rounded-full h-2">
-                          <div
-                            className="bg-green-600 h-2 rounded-full"
-                            style={{ width: `${value.alignment * 10}%` }}
-                          />
-                        </div>
-                        <span className="text-sm font-semibold text-gray-900">
-                          {value.alignment}/10
-                        </span>
+                      <div className="mb-2 flex items-center justify-between font-body text-sm text-gray-600">
+                        <span>Current alignment</span>
+                        <span>{value.alignment}/10</span>
+                      </div>
+                      <div className="h-3 rounded-full bg-gray-100">
+                        <div
+                          className="h-3 rounded-full bg-lime-green"
+                          style={{ width: `${value.alignment * 10}%` }}
+                        />
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className="flex space-x-2 ml-4">
-                  <button
-                    onClick={() => handleEdit(value)}
-                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
-                  >
-                    <Edit2 size={18} />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(value.id)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))
+              );
+            })}
+          </div>
         )}
-      </div>
-    </div>
+
+        <div className="card bg-midnight-purple/5">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="font-subheader text-xs uppercase tracking-[0.18em] text-gray-500">
+                Next Step
+              </p>
+              <h2 className="mt-2 font-header text-2xl text-midnight-purple">
+                Convert insight into one real commitment.
+              </h2>
+              <p className="mt-2 max-w-2xl font-body text-sm leading-6 text-gray-600">
+                Values become useful when they shape behavior. Once this feels clear enough, open the action planner and make one small next move.
+              </p>
+            </div>
+            <Link to="/exercises/action" className="btn-secondary text-center">
+              Open Committed Action
+            </Link>
+          </div>
+        </div>
+      </ExerciseShell>
+
+      <ConfirmDialog
+        open={Boolean(valueToDelete)}
+        title="Delete this value?"
+        description="Deleting a value removes it from your dashboard and action planning context. You can still undo right after deletion."
+        confirmLabel="Delete Value"
+        tone="danger"
+        onCancel={() => setValueToDelete(null)}
+        onConfirm={() => void confirmDelete()}
+      />
+    </>
   );
 }

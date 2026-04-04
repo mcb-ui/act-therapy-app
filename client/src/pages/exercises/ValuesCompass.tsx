@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Compass } from 'lucide-react';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 export default function ValuesCompass() {
   const [currentDirection, setCurrentDirection] = useState(0);
@@ -59,9 +60,7 @@ export default function ValuesCompass() {
           ))}
         </div>
 
-        <button onClick={() => window.history.back()} className="btn-primary w-full">
-          Complete Exercise
-        </button>
+        <ExerciseBackButton label="Complete Exercise" variant="primary" />
       </div>
     );
   }

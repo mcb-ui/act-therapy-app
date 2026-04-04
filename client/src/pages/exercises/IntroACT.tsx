@@ -1,10 +1,8 @@
 import { BookOpen, CheckCircle } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import ExerciseHeader from '../../components/ExerciseHeader';
+import { useState } from 'react';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 export default function IntroACT() {
-  useEffect(() => { document.title = 'Introduction to ACT | ACT Therapy'; }, []);
   const [currentSection, setCurrentSection] = useState(0);
   const [completed, setCompleted] = useState(false);
 
@@ -48,9 +46,11 @@ export default function IntroACT() {
           <p className="text-xl font-body mb-8 opacity-90">
             You've completed the introduction to ACT
           </p>
-          <Link to="/" className="bg-white text-electric-blue px-8 py-3 rounded-lg font-subheader uppercase hover:scale-105 transition-all inline-block">
-            Continue Learning
-          </Link>
+          <ExerciseBackButton
+            label="Continue Learning"
+            variant="primary"
+            className="w-full sm:w-auto"
+          />
         </div>
       </div>
     );
@@ -58,7 +58,15 @@ export default function IntroACT() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
-      <ExerciseHeader icon={<BookOpen size={24} className="text-white" />} title="Introduction to ACT" subtitle="Learn the foundations of ACT therapy" exerciseId="intro-act" exerciseName="Introduction to ACT" />
+      <div className="flex items-center space-x-3">
+        <div className="w-12 h-12 rounded-xl bg-electric-blue flex items-center justify-center">
+          <BookOpen size={24} className="text-white" />
+        </div>
+        <div>
+          <h1 className="text-3xl font-header text-midnight-purple">Introduction to ACT</h1>
+          <p className="text-gray-600 font-body">Learn the foundations of ACT therapy</p>
+        </div>
+      </div>
 
       {/* Progress */}
       <div className="card">

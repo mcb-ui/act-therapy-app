@@ -1,10 +1,8 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
 import { Shield, Zap } from 'lucide-react';
-import ExerciseHeader from '../../components/ExerciseHeader';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 export default function BarrierBusting() {
-  useEffect(() => { document.title = 'Barrier Busting | ACT Therapy'; }, []);
   const [valuedAction, setValuedAction] = useState('');
   const [barriers, setBarriers] = useState<Array<{ id: string; barrier: string; solution: string }>>([]);
   const [currentBarrier, setCurrentBarrier] = useState('');
@@ -20,7 +18,15 @@ export default function BarrierBusting() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-      <ExerciseHeader icon={<Shield size={24} className="text-white" />} title="Barrier Busting" subtitle="Overcome obstacles to valued action" exerciseId="barrier-busting" exerciseName="Barrier Busting" />
+      <div className="flex items-center space-x-3">
+        <div className="w-12 h-12 rounded-xl bg-midnight-purple flex items-center justify-center">
+          <Shield size={24} className="text-white" />
+        </div>
+        <div>
+          <h1 className="text-3xl font-header text-midnight-purple">Barrier Busting</h1>
+          <p className="text-gray-600 font-body">Overcome obstacles to valued action</p>
+        </div>
+      </div>
 
       <div className="card bg-electric-blue bg-opacity-10 border-2 border-electric-blue">
         <p className="text-gray-700 font-body">
@@ -106,7 +112,7 @@ export default function BarrierBusting() {
         </div>
       )}
 
-      <Link to="/" className="btn-secondary w-full">Back to Dashboard</Link>
+      <ExerciseBackButton label="Back to Modules" />
     </div>
   );
 }

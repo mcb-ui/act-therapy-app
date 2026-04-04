@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Heart } from 'lucide-react';
+import { useAppToast } from '../contexts/ToastContext';
 import { toggleFavorite, getFavorites } from '../utils/exerciseTracking';
 
 interface FavoriteButtonProps {
@@ -9,6 +10,7 @@ interface FavoriteButtonProps {
 }
 
 const FavoriteButton: React.FC<FavoriteButtonProps> = ({ exerciseId, exerciseName, className = '' }) => {
+  const { success, error } = useAppToast();
   const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -27,9 +29,15 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({ exerciseId, exerciseNam
     e.stopPropagation();
 
     setLoading(true);
-    await toggleFavorite(exerciseId, exerciseName, isFavorite);
-    setIsFavorite(!isFavorite);
-    setLoading(false);
+    try {
+      await toggleFavorite(exerciseId, exerciseName, isFavorite);
+      setIsFavorite(!isFavorite);
+      success(isFavorite ? 'Removed from favorites.' : 'Added to favorites.');
+    } catch {
+      error('Could not update favorites.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

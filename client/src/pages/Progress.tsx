@@ -1,15 +1,41 @@
-import { useEffect, useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { TrendingUp, Award, Calendar, Flame } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Award, Calendar, CheckCircle2, Flame, TrendingUp } from 'lucide-react';
+import AppLoader from '../components/AppLoader';
+import ProgressTrendsPanel from '../components/progress/ProgressTrendsPanel';
+import {
+  exerciseCatalog,
+  getCompletedExerciseIds,
+  getExercisesByProcess,
+  processCatalog,
+  totalTrackableExercises,
+} from '../data/exerciseCatalog';
 import { getProgress, getProgressStats, type ProgressEntry } from '../utils/exerciseTracking';
 
 interface UiStats {
-  totalExercises: number;
   completedExercises: number;
   currentStreak: number;
   longestStreak: number;
   totalMinutes: number;
+  practiceDays: number;
+  completedThisWeek: number;
+  lastCompletedAt: string | null;
 }
+
+interface CategoryDataPoint {
+  name: string;
+  value: number;
+  total: number;
+  color: string;
+}
+
+interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  unlocked: boolean;
+}
+
+type ProgressTab = 'overview' | 'trends' | 'achievements';
 
 const EMPTY_WEEKLY_DATA = [
   { day: 'Mon', completed: 0 },
@@ -21,41 +47,19 @@ const EMPTY_WEEKLY_DATA = [
   { day: 'Sun', completed: 0 },
 ];
 
-const CATEGORY_METADATA = [
-  { name: 'Values', value: 0, color: '#2344E7', total: 6 },
-  { name: 'Defusion', value: 0, color: '#784A9F', total: 6 },
-  { name: 'Acceptance', value: 0, color: '#FE97BB', total: 5 },
-  { name: 'Mindfulness', value: 0, color: '#93F357', total: 5 },
-  { name: 'Action', value: 0, color: '#EC4625', total: 5 },
+const progressTabs: Array<{ id: ProgressTab; label: string }> = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'trends', label: 'Trends' },
+  { id: 'achievements', label: 'Achievements' },
 ];
-
-const getCategoryForExercise = (exerciseId: string) => {
-  if (exerciseId.startsWith('values-') || ['bulls-eye', 'life-domains', 'what-matters', 'values-in-action'].includes(exerciseId)) {
-    return 'Values';
-  }
-
-  if (exerciseId.startsWith('defusion-') || ['silly-voice', 'thought-labels', 'thank-your-mind', 'passengers-on-bus', 'clouds-in-sky', 'leaves-stream'].includes(exerciseId)) {
-    return 'Defusion';
-  }
-
-  if (exerciseId.startsWith('mindfulness-') || ['mindful-walking', 'eating-meditation', 'sound-awareness', 'breath-counting', 'progressive-muscle-relaxation'].includes(exerciseId)) {
-    return 'Mindfulness';
-  }
-
-  if (exerciseId === 'acceptance-exercise' || ['tug-of-war', 'willingness-scale', 'expansion', 'emotional-surfing', 'guest-house'].includes(exerciseId)) {
-    return 'Acceptance';
-  }
-
-  if (['smart-goals', 'barrier-busting', 'values-based-scheduling', 'committed-action-tracker', 'valued-living-questionnaire'].includes(exerciseId)) {
-    return 'Action';
-  }
-
-  return null;
-};
 
 const getTrackedMindfulnessMinutes = (progressEntries: ProgressEntry[]) => {
   const totalSeconds = progressEntries.reduce((sum, entry) => {
-    if (!entry.completed || !entry.exerciseId.startsWith('mindfulness-') || typeof entry.score !== 'number') {
+    if (
+      !entry.completed ||
+      !entry.exerciseId.startsWith('mindfulness-') ||
+      typeof entry.score !== 'number'
+    ) {
       return sum;
     }
 
@@ -65,261 +69,386 @@ const getTrackedMindfulnessMinutes = (progressEntries: ProgressEntry[]) => {
   return Math.round(totalSeconds / 60);
 };
 
+const getRecentCompletions = (progressEntries: ProgressEntry[]) =>
+  progressEntries
+    .filter((entry) => entry.completed)
+    .sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime())
+    .map((entry) => ({
+      entry,
+      exercise: exerciseCatalog.find((exercise) => exercise.trackIds.includes(entry.exerciseId)),
+    }))
+    .filter(
+      (
+        item
+      ): item is {
+        entry: ProgressEntry;
+        exercise: NonNullable<(typeof exerciseCatalog)[number]>;
+      } => Boolean(item.exercise)
+    )
+    .slice(0, 5);
+
+function AchievementCard({ achievement }: { achievement: Achievement }) {
+  return (
+    <div
+      className={`rounded-[1.5rem] border px-5 py-5 transition ${
+        achievement.unlocked
+          ? 'border-lime-green/30 bg-lime-green/10 shadow-md'
+          : 'border-midnight-purple/10 bg-white opacity-70'
+      }`}
+    >
+      <div className="mb-3 flex items-center justify-between">
+        <Award size={24} className={achievement.unlocked ? 'text-lime-green' : 'text-gray-300'} />
+        {achievement.unlocked && (
+          <span className="rounded-full bg-lime-green px-3 py-1 text-[10px] font-subheader uppercase tracking-[0.18em] text-white">
+            Unlocked
+          </span>
+        )}
+      </div>
+      <h3 className="font-subheader text-sm uppercase text-midnight-purple">{achievement.title}</h3>
+      <p className="mt-2 font-body text-sm leading-6 text-gray-600">{achievement.description}</p>
+    </div>
+  );
+}
+
 export default function Progress() {
   const [stats, setStats] = useState<UiStats>({
-    totalExercises: 28,
     completedExercises: 0,
     currentStreak: 0,
     longestStreak: 0,
     totalMinutes: 0,
+    practiceDays: 0,
+    completedThisWeek: 0,
+    lastCompletedAt: null,
   });
   const [weeklyData, setWeeklyData] = useState(EMPTY_WEEKLY_DATA);
   const [progressEntries, setProgressEntries] = useState<ProgressEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<ProgressTab>('overview');
 
   useEffect(() => {
-    void fetchProgress();
+    void (async () => {
+      setIsLoading(true);
+      const [statsResponse, progressResponse] = await Promise.all([getProgressStats(), getProgress()]);
+
+      setProgressEntries(progressResponse);
+
+      const completedExerciseIds = getCompletedExerciseIds(progressResponse);
+      const totalMinutes = getTrackedMindfulnessMinutes(progressResponse);
+
+      setStats({
+        completedExercises: completedExerciseIds.size,
+        currentStreak: statsResponse?.currentStreak ?? 0,
+        longestStreak: statsResponse?.longestStreak ?? 0,
+        totalMinutes,
+        practiceDays: statsResponse?.practiceDays ?? 0,
+        completedThisWeek: statsResponse?.completedThisWeek ?? 0,
+        lastCompletedAt: statsResponse?.lastCompletedAt ?? null,
+      });
+      setWeeklyData(statsResponse?.weeklyData?.length ? statsResponse.weeklyData : EMPTY_WEEKLY_DATA);
+      setIsLoading(false);
+    })();
   }, []);
 
-  const fetchProgress = async () => {
-    const [statsResponse, progressResponse] = await Promise.all([
-      getProgressStats(),
-      getProgress(),
-    ]);
+  const completedExerciseIds = useMemo(
+    () => getCompletedExerciseIds(progressEntries),
+    [progressEntries]
+  );
 
-    setProgressEntries(progressResponse);
+  const categoryData = useMemo<CategoryDataPoint[]>(
+    () =>
+      processCatalog.map((process) => {
+        const exercises = getExercisesByProcess(process.id);
 
-    const totalMinutes = getTrackedMindfulnessMinutes(progressResponse);
-    if (!statsResponse) {
-      setStats((currentStats) => ({
-        ...currentStats,
-        totalMinutes,
-        completedExercises: progressResponse.filter((entry) => entry.completed).length,
-      }));
-      return;
-    }
+        return {
+          name: process.title.replace(' Clarification', ''),
+          value: exercises.filter((exercise) => completedExerciseIds.has(exercise.id)).length,
+          total: exercises.length,
+          color: process.accent,
+        };
+      }),
+    [completedExerciseIds]
+  );
 
-    setStats({
-      totalExercises: statsResponse.totalExercises || 28,
-      completedExercises: statsResponse.completedCount || 0,
-      currentStreak: statsResponse.currentStreak || 0,
-      longestStreak: statsResponse.longestStreak || 0,
-      totalMinutes,
-    });
-    setWeeklyData(statsResponse.weeklyData?.length ? statsResponse.weeklyData : EMPTY_WEEKLY_DATA);
-  };
+  const recentCompletions = useMemo(() => getRecentCompletions(progressEntries), [progressEntries]);
 
-  const categoryData = CATEGORY_METADATA.map((category) => ({
-    ...category,
-    value: progressEntries.filter(
-      (entry) => entry.completed && getCategoryForExercise(entry.exerciseId) === category.name
-    ).length,
-  }));
-  const achievements = [
+  const completionRate = Math.round(
+    (stats.completedExercises / Math.max(totalTrackableExercises, 1)) * 100
+  );
+
+  const achievements: Achievement[] = [
     {
-      id: 1,
+      id: 'first-step',
       title: 'First Step',
-      description: 'Complete your first exercise',
-      icon: '🎯',
+      description: 'Complete your first exercise.',
       unlocked: stats.completedExercises > 0,
     },
     {
-      id: 2,
+      id: 'week-warrior',
       title: 'Week Warrior',
-      description: 'Achieve a 7-day streak',
-      icon: '🔥',
+      description: 'Maintain a 7-day practice streak.',
       unlocked: stats.currentStreak >= 7,
     },
     {
-      id: 3,
+      id: 'values-champion',
       title: 'Values Champion',
-      description: 'Complete all Values exercises',
-      icon: '⭐',
-      unlocked: categoryData.find((category) => category.name === 'Values')?.value === 6,
+      description: 'Complete every values-focused exercise.',
+      unlocked:
+        categoryData.find((category) => category.name === 'Values')?.value ===
+        categoryData.find((category) => category.name === 'Values')?.total,
     },
     {
-      id: 4,
+      id: 'mindful-master',
       title: 'Mindful Master',
-      description: 'Practice 100 minutes of mindfulness',
-      icon: '🧘',
+      description: 'Accumulate 100 minutes of mindfulness practice.',
       unlocked: stats.totalMinutes >= 100,
     },
     {
-      id: 5,
+      id: 'act-expert',
       title: 'ACT Expert',
-      description: 'Complete all exercises',
-      icon: '🏆',
-      unlocked: stats.completedExercises >= stats.totalExercises,
+      description: 'Complete every trackable exercise in the app.',
+      unlocked: stats.completedExercises >= totalTrackableExercises,
     },
   ];
-  const unlockedAchievements = achievements.filter((achievement) => achievement.unlocked).length;
-  const completionRate = stats.totalExercises > 0
-    ? ((stats.completedExercises / stats.totalExercises) * 100).toFixed(0)
-    : '0';
+
+  const unlockedAchievements = achievements.filter((achievement) => achievement.unlocked);
+
+  if (isLoading) {
+    return <AppLoader label="Loading your progress overview..." />;
+  }
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      <div className="text-center">
-        <h1 className="text-4xl md:text-5xl font-header text-midnight-purple mb-2 hover-glow">
-          Your Progress
-        </h1>
-        <p className="text-xl text-gray-600 font-body">
-          Track your journey toward psychological flexibility
-        </p>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="card hover-lift bg-electric-blue text-white">
-          <div className="flex items-center justify-between mb-2">
-            <TrendingUp size={32} />
-            <span className="text-4xl font-header">{completionRate}%</span>
-          </div>
-          <h3 className="font-subheader uppercase text-sm opacity-90">Completion Rate</h3>
-          <p className="text-xs opacity-75 mt-1">{stats.completedExercises}/{stats.totalExercises} exercises done</p>
+    <div className="space-y-8">
+      <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="rounded-[2rem] border border-midnight-purple/10 bg-white p-6 shadow-xl sm:p-8">
+          <p className="font-subheader text-xs uppercase tracking-[0.2em] text-electric-blue">
+            Practice Pulse
+          </p>
+          <h1 className="mt-3 font-header text-4xl text-midnight-purple md:text-5xl">
+            One place to see momentum, balance, and what to strengthen next.
+          </h1>
+          <p className="mt-4 max-w-2xl font-body text-base leading-7 text-gray-600">
+            Progress in ACT is not only about volume. This view now separates quick signals from deeper analytics so you can scan fast or dig in when you want.
+          </p>
         </div>
 
-        <div className="card hover-lift bg-inferno-red text-white">
-          <div className="flex items-center justify-between mb-2">
-            <Flame size={32} className="animate-pulse-slow" />
-            <span className="text-4xl font-header">{stats.currentStreak}</span>
+        <div className="rounded-[2rem] border border-midnight-purple/10 bg-midnight-purple p-8 text-white shadow-xl shadow-midnight-purple/15">
+          <div className="mb-6 flex items-center justify-between">
+            <TrendingUp size={36} className="text-electric-blue" />
+            <span className="font-header text-5xl">{completionRate}%</span>
           </div>
-          <h3 className="font-subheader uppercase text-sm opacity-90">Day Streak</h3>
-          <p className="text-xs opacity-75 mt-1">Longest: {stats.longestStreak} days</p>
-        </div>
-
-        <div className="card hover-lift bg-lime-green text-white">
-          <div className="flex items-center justify-between mb-2">
-            <Calendar size={32} />
-            <span className="text-4xl font-header">{stats.totalMinutes}</span>
-          </div>
-          <h3 className="font-subheader uppercase text-sm opacity-90">Total Minutes</h3>
-          <p className="text-xs opacity-75 mt-1">Time invested in growth</p>
-        </div>
-
-        <div className="card hover-lift bg-midnight-purple text-midnight-purple">
-          <div className="flex items-center justify-between mb-2">
-            <Award size={32} />
-            <span className="text-4xl font-header">{unlockedAchievements}/5</span>
-          </div>
-          <h3 className="font-subheader uppercase text-sm">Achievements</h3>
-          <p className="text-xs opacity-75 mt-1">Unlocked badges</p>
-        </div>
-      </div>
-
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Weekly Activity */}
-        <div className="card">
-          <h3 className="text-xl font-subheader text-midnight-purple mb-6 uppercase flex items-center space-x-2">
-            <span className="w-2 h-2 bg-electric-blue rounded-full"></span>
-            <span>Weekly Activity</span>
-          </h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={weeklyData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="day" stroke="#784A9F" style={{ fontFamily: 'Archivo' }} />
-              <YAxis stroke="#784A9F" style={{ fontFamily: 'Archivo' }} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#784A9F',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontFamily: 'Archivo'
-                }}
-              />
-              <Bar dataKey="completed" fill="#2344E7" radius={[8, 8, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Exercise Distribution */}
-        <div className="card">
-          <h3 className="text-xl font-subheader text-midnight-purple mb-6 uppercase flex items-center space-x-2">
-            <span className="w-2 h-2 bg-midnight-purple rounded-full"></span>
-            <span>Completed by Category</span>
-          </h3>
-          <div className="flex items-center justify-center">
-            <ResponsiveContainer width="100%" height={250}>
-              <PieChart>
-                <Pie
-                  data={categoryData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={90}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {categoryData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'white',
-                    border: '2px solid #784A9F',
-                    borderRadius: '8px',
-                    fontFamily: 'Archivo'
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="grid grid-cols-2 gap-2 mt-4">
-            {categoryData.map((cat) => (
-              <div key={cat.name} className="flex items-center space-x-2">
-                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }}></div>
-                <span className="text-sm font-body text-gray-700">
-                  {cat.name} ({cat.value}/{cat.total})
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Achievements */}
-      <div className="card">
-        <h3 className="text-2xl font-subheader text-midnight-purple mb-6 uppercase flex items-center space-x-2">
-          <Award size={24} className="text-electric-blue" />
-          <span>Achievements</span>
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {achievements.map((achievement) => (
+          <p className="font-subheader text-xs uppercase tracking-[0.2em] text-electric-blue/90">
+            Overall Completion
+          </p>
+          <p className="mt-2 font-body text-base text-white/85">
+            {stats.completedExercises} of {totalTrackableExercises} trackable exercises logged.
+          </p>
+          <div className="mt-6 h-3 rounded-full bg-white/15">
             <div
-              key={achievement.id}
-              className={`card border-2 transition-all hover-lift ${
-                achievement.unlocked
-                  ? 'border-lime-green bg-lime-green bg-opacity-5'
-                  : 'border-gray-200 opacity-50 grayscale'
+              className="h-3 rounded-full bg-lime-green transition-all duration-700"
+              style={{ width: `${completionRate}%` }}
+            />
+          </div>
+          <div className="mt-8 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-[1.5rem] border border-white/10 bg-white/10 p-4">
+              <p className="font-subheader text-[11px] uppercase tracking-[0.18em] text-white/70">
+                This week
+              </p>
+              <p className="mt-2 font-subheader text-sm uppercase">
+                {stats.completedThisWeek} practice reps
+              </p>
+            </div>
+            <div className="rounded-[1.5rem] border border-white/10 bg-white/10 p-4">
+              <p className="font-subheader text-[11px] uppercase tracking-[0.18em] text-white/70">
+                Practice days
+              </p>
+              <p className="mt-2 font-subheader text-sm uppercase">
+                {stats.practiceDays} days logged
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-[1.75rem] border border-midnight-purple/10 bg-white p-2 shadow-lg sm:p-3">
+        <div className="flex flex-wrap gap-2">
+          {progressTabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={`rounded-2xl px-4 py-3 font-subheader text-xs uppercase tracking-[0.18em] transition ${
+                activeTab === tab.id
+                  ? 'bg-midnight-purple text-white shadow-lg shadow-midnight-purple/15'
+                  : 'text-gray-500 hover:bg-midnight-purple/5 hover:text-midnight-purple'
               }`}
             >
-              <div className="text-center">
-                <div className="text-5xl mb-3">{achievement.icon}</div>
-                <h4 className="font-subheader uppercase text-midnight-purple mb-1">
-                  {achievement.title}
-                </h4>
-                <p className="text-sm text-gray-600 font-body">{achievement.description}</p>
-                {achievement.unlocked && (
-                  <div className="mt-3 text-lime-green font-subheader text-sm uppercase flex items-center justify-center space-x-1">
-                    <span>✓</span>
-                    <span>Unlocked</span>
-                  </div>
-                )}
-              </div>
-            </div>
+              {tab.label}
+            </button>
           ))}
         </div>
-      </div>
+      </section>
 
-      {/* Motivational Quote */}
-      <div className="card bg-midnight-purple text-white text-center py-12">
-        <p className="text-2xl md:text-3xl font-alt-header mb-4">
-          "The curious paradox is that when I accept myself just as I am, then I can change."
-        </p>
-        <p className="font-body opacity-90">— Carl Rogers</p>
-      </div>
+      {activeTab === 'overview' && (
+        <div className="space-y-6">
+          <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+            <div className="card bg-electric-blue text-white shadow-xl shadow-electric-blue/15">
+              <div className="mb-4 flex items-center justify-between">
+                <TrendingUp size={28} />
+                <span className="font-header text-4xl">{completionRate}%</span>
+              </div>
+              <p className="font-subheader text-xs uppercase tracking-[0.18em] text-white/80">
+                Completion
+              </p>
+              <p className="mt-1 font-body text-sm text-white/85">
+                {stats.completedExercises}/{totalTrackableExercises} complete
+              </p>
+            </div>
+
+            <div className="card bg-inferno-red text-white shadow-xl shadow-inferno-red/15">
+              <div className="mb-4 flex items-center justify-between">
+                <Flame size={28} />
+                <span className="font-header text-4xl">{stats.currentStreak}</span>
+              </div>
+              <p className="font-subheader text-xs uppercase tracking-[0.18em] text-white/80">
+                Current Streak
+              </p>
+              <p className="mt-1 font-body text-sm text-white/85">
+                Longest streak: {stats.longestStreak} days
+              </p>
+            </div>
+
+            <div className="card bg-lime-green text-white shadow-xl shadow-lime-green/15">
+              <div className="mb-4 flex items-center justify-between">
+                <Calendar size={28} />
+                <span className="font-header text-4xl">{stats.completedThisWeek}</span>
+              </div>
+              <p className="font-subheader text-xs uppercase tracking-[0.18em] text-white/80">
+                This Week
+              </p>
+              <p className="mt-1 font-body text-sm text-white/85">
+                Completion reps in the last 7 days
+              </p>
+            </div>
+
+            <div className="card bg-white shadow-xl">
+              <div className="mb-4 flex items-center justify-between">
+                <Award size={28} className="text-electric-blue" />
+                <span className="font-header text-4xl text-midnight-purple">{stats.practiceDays}</span>
+              </div>
+              <p className="font-subheader text-xs uppercase tracking-[0.18em] text-gray-500">
+                Practice Days
+              </p>
+              <p className="mt-1 font-body text-sm text-gray-600">
+                {stats.lastCompletedAt
+                  ? `Last completion ${new Date(stats.lastCompletedAt).toLocaleDateString()}`
+                  : 'Your active days will build as you log more reps.'}
+              </p>
+            </div>
+          </section>
+
+          <section className="grid gap-6 lg:grid-cols-[0.92fr_1.08fr]">
+            <div className="card">
+              <h2 className="mb-5 font-subheader text-xl uppercase text-midnight-purple">
+                Recent Momentum
+              </h2>
+              {recentCompletions.length === 0 ? (
+                <div className="rounded-[1.5rem] border border-dashed border-midnight-purple/15 bg-midnight-purple/5 px-5 py-8 text-center">
+                  <CheckCircle2 className="mx-auto mb-3 text-lime-green" size={32} />
+                  <p className="font-body text-gray-700">
+                    Completed exercises will appear here once you start logging progress.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {recentCompletions.map(({ entry, exercise }) => (
+                    <div
+                      key={entry.id}
+                      className="rounded-[1.5rem] border border-midnight-purple/10 bg-white px-4 py-4 shadow-sm"
+                    >
+                      <div className="mb-2 flex items-center justify-between gap-4">
+                        <h3 className="font-subheader text-sm uppercase text-midnight-purple">
+                          {exercise.title}
+                        </h3>
+                        <CheckCircle2 size={18} className="text-lime-green" />
+                      </div>
+                      <p className="font-body text-sm text-gray-600">
+                        {new Date(entry.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-6">
+              <div className="card">
+                <h2 className="font-subheader text-xl uppercase text-midnight-purple">
+                  Skill Balance
+                </h2>
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  {categoryData.map((category) => (
+                    <div key={category.name} className="rounded-2xl border border-midnight-purple/10 bg-white px-4 py-4">
+                      <div className="mb-2 flex items-center gap-3">
+                        <div className="h-3 w-3 rounded-full" style={{ backgroundColor: category.color }} />
+                        <p className="font-subheader text-xs uppercase tracking-[0.18em] text-midnight-purple">
+                          {category.name}
+                        </p>
+                      </div>
+                      <p className="font-body text-sm text-gray-600">
+                        {category.value} of {category.total} completed
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="card">
+                <div className="mb-5 flex items-center justify-between">
+                  <h2 className="font-subheader text-xl uppercase text-midnight-purple">
+                    Latest Wins
+                  </h2>
+                  <span className="rounded-full bg-lime-green/10 px-3 py-1 font-subheader text-[11px] uppercase tracking-[0.18em] text-lime-green">
+                    {unlockedAchievements.length} unlocked
+                  </span>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  {achievements.slice(0, 3).map((achievement) => (
+                    <AchievementCard key={achievement.id} achievement={achievement} />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {activeTab === 'trends' && (
+        <ProgressTrendsPanel weeklyData={weeklyData} categoryData={categoryData} />
+      )}
+
+      {activeTab === 'achievements' && (
+        <section className="card">
+          <div className="mb-5 flex items-center justify-between">
+            <div>
+              <p className="font-subheader text-xs uppercase tracking-[0.2em] text-gray-500">
+                Achievements
+              </p>
+              <h2 className="mt-2 font-header text-2xl text-midnight-purple">
+                Milestones that reflect consistency
+              </h2>
+            </div>
+            <span className="rounded-full bg-electric-blue/10 px-3 py-1 font-subheader text-[11px] uppercase tracking-[0.18em] text-electric-blue">
+              {unlockedAchievements.length} unlocked
+            </span>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {achievements.map((achievement) => (
+              <AchievementCard key={achievement.id} achievement={achievement} />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

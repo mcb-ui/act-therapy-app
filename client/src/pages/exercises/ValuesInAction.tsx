@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
 import { Zap, Plus, Trash2, CheckCircle } from 'lucide-react';
-import ExerciseHeader from '../../components/ExerciseHeader';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 interface ValueAction {
   id: string;
@@ -14,8 +13,6 @@ export default function ValuesInAction() {
     { id: '1', value: '', actions: [''] },
   ]);
   const [completed, setCompleted] = useState(false);
-
-  useEffect(() => { document.title = 'Values in Action | ACT Therapy'; }, []);
 
   const updateValue = (id: string, value: string) => {
     setValueActions(valueActions.map(va =>
@@ -127,22 +124,22 @@ export default function ValuesInAction() {
           </ul>
         </div>
 
-        <Link to="/" className="btn-primary w-full">
-          Complete Exercise
-        </Link>
+        <ExerciseBackButton label="Complete Exercise" variant="primary" />
       </div>
     );
   }
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-      <ExerciseHeader
-        icon={<Zap size={24} className="text-white" />}
-        title="Values in Action"
-        subtitle="Connect values to concrete actions"
-        exerciseId="values-in-action"
-        exerciseName="Values in Action"
-      />
+      <div className="flex items-center space-x-3">
+        <div className="w-12 h-12 rounded-xl bg-electric-blue flex items-center justify-center">
+          <Zap size={24} className="text-white" />
+        </div>
+        <div>
+          <h1 className="text-3xl font-header text-midnight-purple">Values in Action</h1>
+          <p className="text-gray-600 font-body">Connect values to concrete actions</p>
+        </div>
+      </div>
 
       <div className="card bg-electric-blue bg-opacity-10 border-2 border-electric-blue">
         <h3 className="font-subheader text-midnight-purple mb-2 uppercase">Instructions</h3>

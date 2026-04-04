@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { Ear, Play, Pause, Volume2 } from 'lucide-react';
-import ExerciseHeader from '../../components/ExerciseHeader';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 interface Sound {
   id: string;
@@ -11,7 +10,6 @@ interface Sound {
 }
 
 export default function SoundAwareness() {
-  useEffect(() => { document.title = 'Sound Awareness | ACT Therapy'; }, []);
   const [isListening, setIsListening] = useState(false);
   const [sessionTime, setSessionTime] = useState(0);
   const [sounds, setSounds] = useState<Sound[]>([]);
@@ -56,7 +54,15 @@ export default function SoundAwareness() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-      <ExerciseHeader icon={<Ear size={24} className="text-white" />} title="Sound Awareness" subtitle="Tune into the soundscape around you" exerciseId="sound-awareness" exerciseName="Sound Awareness" />
+      <div className="flex items-center space-x-3">
+        <div className="w-12 h-12 rounded-xl bg-electric-blue flex items-center justify-center">
+          <Ear size={24} className="text-white" />
+        </div>
+        <div>
+          <h1 className="text-3xl font-header text-midnight-purple">Sound Awareness</h1>
+          <p className="text-gray-600 font-body">Tune into the soundscape around you</p>
+        </div>
+      </div>
 
       <div className="card bg-electric-blue bg-opacity-10 border-2 border-electric-blue">
         <h3 className="font-subheader text-midnight-purple mb-2 uppercase">Practice Instructions</h3>
@@ -241,7 +247,7 @@ export default function SoundAwareness() {
         </div>
       )}
 
-      <Link to="/" className="btn-secondary w-full">Back to Dashboard</Link>
+      <ExerciseBackButton label="Back to Modules" />
     </div>
   );
 }

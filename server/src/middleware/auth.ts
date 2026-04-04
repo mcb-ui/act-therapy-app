@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import { JWT_SECRET } from '../config/jwt.js';
+import { verifyAuthToken } from '../lib/auth.js';
 
 export interface AuthRequest extends Request {
   userId?: string;
@@ -8,13 +7,14 @@ export interface AuthRequest extends Request {
 
 export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const token = req.headers.authorization?.replace('Bearer ', '');
+    const authHeader = req.headers.authorization;
 
-    if (!token) {
-      return res.status(401).json({ error: 'No token provided' });
+    if (!authHeader?.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'A valid Bearer token is required' });
     }
 
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
+    const token = authHeader.slice('Bearer '.length).trim();
+    const decoded = verifyAuthToken(token);
     req.userId = decoded.userId;
     next();
   } catch (error) {

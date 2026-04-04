@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Heart, Star, Check } from 'lucide-react';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 interface Value {
   id: string;
@@ -141,9 +142,7 @@ export default function WhatMatters() {
           </ul>
         </div>
 
-        <button onClick={() => window.history.back()} className="btn-primary w-full">
-          Complete Exercise
-        </button>
+        <ExerciseBackButton label="Complete Exercise" variant="primary" />
       </div>
     );
   }

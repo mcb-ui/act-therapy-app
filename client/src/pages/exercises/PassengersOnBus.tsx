@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { Bus, MapPin, Plus, X } from 'lucide-react';
-import ExerciseHeader from '../../components/ExerciseHeader';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 interface Passenger {
   id: string;
@@ -11,7 +10,6 @@ interface Passenger {
 }
 
 export default function PassengersOnBus() {
-  useEffect(() => { document.title = 'Passengers on the Bus | ACT Therapy'; }, []);
   const [passengers, setPassengers] = useState<Passenger[]>([]);
   const [newPassenger, setNewPassenger] = useState({ name: '', message: '' });
   const [destination, setDestination] = useState('');
@@ -45,17 +43,26 @@ export default function PassengersOnBus() {
 
   const startJourney = () => {
     setIsJourneyStarted(true);
-    // Simulate journey progress
-    const interval = setInterval(() => {
-      setJourneyProgress(prev => {
+  };
+
+  useEffect(() => {
+    if (!isJourneyStarted) {
+      return;
+    }
+
+    const interval = window.setInterval(() => {
+      setJourneyProgress((prev) => {
         if (prev >= 100) {
-          clearInterval(interval);
-          return 100;
+          window.clearInterval(interval);
+          return prev;
         }
+
         return prev + 1;
       });
     }, 100);
-  };
+
+    return () => window.clearInterval(interval);
+  }, [isJourneyStarted]);
 
   if (journeyProgress === 100) {
     return (
@@ -105,7 +112,7 @@ export default function PassengersOnBus() {
           </div>
         </div>
 
-        <Link to="/" className="btn-primary w-full">Back to Dashboard</Link>
+        <ExerciseBackButton label="Complete Exercise" variant="primary" />
       </div>
     );
   }
@@ -167,7 +174,15 @@ export default function PassengersOnBus() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-      <ExerciseHeader icon={<Bus size={24} className="text-white" />} title="Passengers on the Bus" subtitle="An ACT metaphor for defusion" exerciseId="passengers-on-bus" exerciseName="Passengers on the Bus" />
+      <div className="flex items-center space-x-3">
+        <div className="w-12 h-12 rounded-xl bg-electric-blue flex items-center justify-center">
+          <Bus size={24} className="text-white" />
+        </div>
+        <div>
+          <h1 className="text-3xl font-header text-midnight-purple">Passengers on the Bus</h1>
+          <p className="text-gray-600 font-body">An ACT metaphor for defusion</p>
+        </div>
+      </div>
 
       <div className="card bg-electric-blue bg-opacity-10 border-2 border-electric-blue">
         <h3 className="font-subheader text-midnight-purple mb-2 uppercase">The Metaphor</h3>

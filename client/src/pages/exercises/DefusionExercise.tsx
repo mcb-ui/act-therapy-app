@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Brain, RefreshCw } from 'lucide-react';
-import { markExerciseComplete } from '../../utils/exerciseTracking';
-import ExerciseHeader from '../../components/ExerciseHeader';
+import { useAppToast } from '../../contexts/ToastContext';
+import { markExerciseComplete, saveExerciseData } from '../../utils/exerciseTracking';
 
 export default function DefusionExercise() {
-  useEffect(() => { document.title = 'Defusion Exercise | ACT Therapy'; }, []);
   const [thought, setThought] = useState('');
   const [currentExercise, setCurrentExercise] = useState<number | null>(null);
   const [defusedThought, setDefusedThought] = useState('');
+  const toast = useAppToast();
 
   const exercises = [
     {
@@ -50,7 +50,7 @@ export default function DefusionExercise() {
 
   const handleExercise = async (exerciseId: number) => {
     if (!thought.trim()) {
-      alert('Please enter a thought first!');
+      toast.error('Enter a thought before trying a defusion technique.');
       return;
     }
 
@@ -61,16 +61,29 @@ export default function DefusionExercise() {
 
       // Save progress
       try {
+        await saveExerciseData(`defusion-${exerciseId}`, exercise.title, {
+          originalThought: thought,
+          defusedThought: exercise.transform(thought),
+        });
         await markExerciseComplete(`defusion-${exerciseId}`, undefined, thought);
       } catch (error) {
         console.error('Failed to save progress:', error);
+        toast.error('We could not save this exercise right now.');
       }
     }
   };
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <ExerciseHeader icon={<Brain size={24} className="text-white" />} title="Cognitive Defusion" subtitle="Change your relationship with difficult thoughts" exerciseId="defusion" exerciseName="Defusion Exercise" />
+      <div className="flex items-center space-x-3">
+        <div className="w-12 h-12 rounded-xl bg-midnight-purple flex items-center justify-center">
+          <Brain size={24} className="text-white" />
+        </div>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Cognitive Defusion</h1>
+          <p className="text-gray-600">Change your relationship with difficult thoughts</p>
+        </div>
+      </div>
 
       <div className="card bg-purple-50 border-purple-200">
         <h3 className="font-semibold text-purple-900 mb-2">What is Cognitive Defusion?</h3>

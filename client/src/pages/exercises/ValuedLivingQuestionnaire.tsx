@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
 import { ClipboardList, TrendingUp, TrendingDown } from 'lucide-react';
-import ExerciseHeader from '../../components/ExerciseHeader';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 interface Domain {
   name: string;
@@ -35,8 +34,6 @@ export default function ValuedLivingQuestionnaire() {
   const getAvgConsistency = () => (domains.reduce((sum, d) => sum + d.consistency, 0) / domains.length).toFixed(1);
   const getBiggestGaps = () => domains.map((d, i) => ({ ...d, index: i })).sort((a, b) => getGap(b) - getGap(a)).slice(0, 3);
   const getStrongest = () => domains.filter(d => d.consistency >= 8 && d.importance >= 8);
-
-  useEffect(() => { document.title = 'Valued Living Questionnaire | ACT Therapy'; }, []);
 
   if (completed) {
     return (
@@ -109,22 +106,22 @@ export default function ValuedLivingQuestionnaire() {
           </ul>
         </div>
 
-        <Link to="/" className="btn-primary w-full">
-          Complete Exercise
-        </Link>
+        <ExerciseBackButton label="Complete Exercise" variant="primary" />
       </div>
     );
   }
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-      <ExerciseHeader
-        icon={<ClipboardList size={24} className="text-white" />}
-        title="Valued Living Questionnaire"
-        subtitle="Assess importance vs. consistency"
-        exerciseId="valued-living-questionnaire"
-        exerciseName="Valued Living Questionnaire"
-      />
+      <div className="flex items-center space-x-3">
+        <div className="w-12 h-12 rounded-xl bg-electric-blue flex items-center justify-center">
+          <ClipboardList size={24} className="text-white" />
+        </div>
+        <div>
+          <h1 className="text-3xl font-header text-midnight-purple">Valued Living Questionnaire</h1>
+          <p className="text-gray-600 font-body">Assess importance vs. consistency</p>
+        </div>
+      </div>
 
       <div className="card bg-electric-blue bg-opacity-10 border-2 border-electric-blue">
         <h3 className="font-subheader text-midnight-purple mb-2 uppercase">Instructions</h3>

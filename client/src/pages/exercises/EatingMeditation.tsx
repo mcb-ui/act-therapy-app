@@ -1,10 +1,8 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
 import { Apple, ChevronRight, CheckCircle } from 'lucide-react';
-import ExerciseHeader from '../../components/ExerciseHeader';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 export default function EatingMeditation() {
-  useEffect(() => { document.title = 'Eating Meditation | ACT Therapy'; }, []);
   const [currentStep, setCurrentStep] = useState(0);
   const [completed, setCompleted] = useState(false);
 
@@ -136,7 +134,7 @@ export default function EatingMeditation() {
           </p>
         </div>
 
-        <Link to="/" className="btn-primary w-full">Back to Dashboard</Link>
+        <ExerciseBackButton label="Complete Exercise" variant="primary" />
       </div>
     );
   }
@@ -145,7 +143,15 @@ export default function EatingMeditation() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
-      <ExerciseHeader icon={<Apple size={24} className="text-white" />} title="Eating Meditation" subtitle="Experience one mindful bite" exerciseId="eating-meditation" exerciseName="Eating Meditation" />
+      <div className="flex items-center space-x-3">
+        <div className="w-12 h-12 rounded-xl bg-midnight-purple flex items-center justify-center">
+          <Apple size={24} className="text-white" />
+        </div>
+        <div>
+          <h1 className="text-3xl font-header text-midnight-purple">Eating Meditation</h1>
+          <p className="text-gray-600 font-body">Experience one mindful bite</p>
+        </div>
+      </div>
 
       <div className="card bg-electric-blue bg-opacity-10 border-2 border-electric-blue">
         <h3 className="font-subheader text-midnight-purple mb-2 uppercase">Preparation</h3>

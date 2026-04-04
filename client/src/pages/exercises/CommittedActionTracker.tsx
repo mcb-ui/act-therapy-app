@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ListChecks, Plus, Check } from 'lucide-react';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 interface Action {
   id: string;
@@ -83,7 +84,7 @@ export default function CommittedActionTracker() {
             type="text"
             value={newAction.action}
             onChange={(e) => setNewAction({ ...newAction, action: e.target.value })}
-            onKeyPress={(e) => e.key === 'Enter' && addAction()}
+            onKeyDown={(e) => e.key === 'Enter' && addAction()}
             placeholder="Specific action you'll take (e.g., 'Call an old friend')"
             className="input-field w-full"
           />
@@ -149,9 +150,7 @@ export default function CommittedActionTracker() {
         </div>
       )}
 
-      <button onClick={() => window.history.back()} className="btn-secondary w-full">
-        Back to Exercises
-      </button>
+      <ExerciseBackButton label="Back to Modules" />
     </div>
   );
 }

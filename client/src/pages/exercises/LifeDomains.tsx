@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { LayoutGrid, TrendingUp, TrendingDown } from 'lucide-react';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 interface Domain {
   id: string;
@@ -202,9 +203,7 @@ export default function LifeDomains() {
           </ul>
         </div>
 
-        <button onClick={() => window.history.back()} className="btn-primary w-full">
-          Complete Exercise
-        </button>
+        <ExerciseBackButton label="Complete Exercise" variant="primary" />
       </div>
     );
   }
@@ -256,7 +255,7 @@ export default function LifeDomains() {
                     onChange={(e) => handleSliderChange(domain.id, parseInt(e.target.value))}
                     className="flex-1 h-3 rounded-lg appearance-none cursor-pointer"
                     style={{
-                      background: `linear-gradient(to right, #2344E7 0%, #2344E7 ${domain.satisfaction * 10}%, #e5e7eb ${domain.satisfaction * 10}%, #e5e7eb 100%)`
+                      background: `linear-gradient(to right, #1F8996 0%, #1F8996 ${domain.satisfaction * 10}%, #DED8DD ${domain.satisfaction * 10}%, #DED8DD 100%)`
                     }}
                   />
                   <span className="text-xs text-gray-500 font-body">10</span>

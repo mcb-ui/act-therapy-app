@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
 import { Calendar } from 'lucide-react';
-import ExerciseHeader from '../../components/ExerciseHeader';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 interface ScheduledAction {
   id: string;
@@ -26,17 +25,17 @@ export default function ValuesBasedScheduling() {
     }
   };
 
-  useEffect(() => { document.title = 'Values-Based Scheduling | ACT Therapy'; }, []);
-
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-      <ExerciseHeader
-        icon={<Calendar size={24} className="text-white" />}
-        title="Values-Based Scheduling"
-        subtitle="Schedule what matters most"
-        exerciseId="values-based-scheduling"
-        exerciseName="Values-Based Scheduling"
-      />
+      <div className="flex items-center space-x-3">
+        <div className="w-12 h-12 rounded-xl bg-electric-blue flex items-center justify-center">
+          <Calendar size={24} className="text-white" />
+        </div>
+        <div>
+          <h1 className="text-3xl font-header text-midnight-purple">Values-Based Scheduling</h1>
+          <p className="text-gray-600 font-body">Schedule what matters most</p>
+        </div>
+      </div>
 
       <div className="card bg-electric-blue bg-opacity-10 border-2 border-electric-blue">
         <p className="text-gray-700 font-body">
@@ -127,9 +126,7 @@ export default function ValuesBasedScheduling() {
         </div>
       )}
 
-      <Link to="/" className="btn-secondary w-full">
-        Back to Dashboard
-      </Link>
+      <ExerciseBackButton label="Back to Modules" />
     </div>
   );
 }

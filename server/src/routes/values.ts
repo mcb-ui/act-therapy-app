@@ -1,6 +1,7 @@
 import express from 'express';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
 import { prisma } from '../lib/prisma.js';
+import { handleRouteError, requireInteger, requireString } from '../lib/validation.js';
 
 const router = express.Router();
 
@@ -20,7 +21,26 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
 // Create value
 router.post('/', authMiddleware, async (req: AuthRequest, res) => {
   try {
-    const { category, description, importance, alignment } = req.body;
+    const category = requireString(req.body.category, {
+      minLength: 2,
+      maxLength: 80,
+      fieldName: 'category',
+    });
+    const description = requireString(req.body.description, {
+      minLength: 5,
+      maxLength: 500,
+      fieldName: 'description',
+    });
+    const importance = requireInteger(req.body.importance, {
+      min: 1,
+      max: 10,
+      fieldName: 'importance',
+    });
+    const alignment = requireInteger(req.body.alignment, {
+      min: 1,
+      max: 10,
+      fieldName: 'alignment',
+    });
 
     const value = await prisma.value.create({
       data: {
@@ -34,7 +54,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
 
     res.json(value);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to create value' });
+    return handleRouteError(res, error, 'Failed to create value');
   }
 });
 
@@ -42,7 +62,26 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
 router.put('/:id', authMiddleware, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
-    const { category, description, importance, alignment } = req.body;
+    const category = requireString(req.body.category, {
+      minLength: 2,
+      maxLength: 80,
+      fieldName: 'category',
+    });
+    const description = requireString(req.body.description, {
+      minLength: 5,
+      maxLength: 500,
+      fieldName: 'description',
+    });
+    const importance = requireInteger(req.body.importance, {
+      min: 1,
+      max: 10,
+      fieldName: 'importance',
+    });
+    const alignment = requireInteger(req.body.alignment, {
+      min: 1,
+      max: 10,
+      fieldName: 'alignment',
+    });
     const existingValue = await prisma.value.findFirst({
       where: {
         id,
@@ -61,7 +100,7 @@ router.put('/:id', authMiddleware, async (req: AuthRequest, res) => {
 
     res.json(value);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to update value' });
+    return handleRouteError(res, error, 'Failed to update value');
   }
 });
 
@@ -83,7 +122,7 @@ router.delete('/:id', authMiddleware, async (req: AuthRequest, res) => {
     await prisma.value.delete({ where: { id } });
     res.json({ message: 'Value deleted' });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to delete value' });
+    return handleRouteError(res, error, 'Failed to delete value');
   }
 });
 

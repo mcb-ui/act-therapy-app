@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
 import { Sparkles, Play, ChevronRight, CheckCircle } from 'lucide-react';
-import ExerciseHeader from '../../components/ExerciseHeader';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 interface MuscleGroup {
   name: string;
@@ -12,7 +11,6 @@ interface MuscleGroup {
 }
 
 export default function ProgressiveMuscleRelaxation() {
-  useEffect(() => { document.title = 'Progressive Muscle Relaxation | ACT Therapy'; }, []);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [phase, setPhase] = useState<'intro' | 'tense' | 'release' | 'complete'>('intro');
   const [completedGroups, setCompletedGroups] = useState<number[]>([]);
@@ -179,7 +177,7 @@ export default function ProgressiveMuscleRelaxation() {
           </div>
         </div>
 
-        <Link to="/" className="btn-primary w-full">Back to Dashboard</Link>
+        <ExerciseBackButton label="Complete Exercise" variant="primary" />
       </div>
     );
   }
@@ -188,7 +186,15 @@ export default function ProgressiveMuscleRelaxation() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
-      <ExerciseHeader icon={<Sparkles size={24} className="text-white" />} title="Progressive Muscle Relaxation" subtitle="Release tension throughout your body" exerciseId="progressive-muscle-relaxation" exerciseName="Progressive Muscle Relaxation" />
+      <div className="flex items-center space-x-3">
+        <div className="w-12 h-12 rounded-xl bg-lime-green flex items-center justify-center">
+          <Sparkles size={24} className="text-white" />
+        </div>
+        <div>
+          <h1 className="text-3xl font-header text-midnight-purple">Progressive Muscle Relaxation</h1>
+          <p className="text-gray-600 font-body">Release tension throughout your body</p>
+        </div>
+      </div>
 
       {currentIndex === 0 && phase === 'intro' && (
         <div className="card bg-electric-blue bg-opacity-10 border-2 border-electric-blue">
@@ -297,7 +303,7 @@ export default function ProgressiveMuscleRelaxation() {
         )}
       </div>
 
-      <Link to="/" className="btn-secondary w-full">Back to Dashboard</Link>
+      <ExerciseBackButton label="Back to Modules" />
     </div>
   );
 }

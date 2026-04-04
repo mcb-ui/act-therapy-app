@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Target } from 'lucide-react';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 interface DomainRating {
   domain: string;
@@ -140,9 +141,7 @@ export default function BullsEye() {
           </p>
         </div>
 
-        <button onClick={() => window.history.back()} className="btn-primary w-full">
-          Complete Exercise
-        </button>
+        <ExerciseBackButton label="Complete Exercise" variant="primary" />
       </div>
     );
   }
