@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Target, CheckCircle } from 'lucide-react';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 export default function SMARTGoals() {
   const [goal, setGoal] = useState({ specific: '', measurable: '', achievable: '', relevant: '', timeBound: '' });
@@ -34,7 +35,7 @@ export default function SMARTGoals() {
           </ul>
         </div>
 
-        <button onClick={() => window.history.back()} className="btn-primary w-full">Complete Exercise</button>
+        <ExerciseBackButton label="Complete Exercise" variant="primary" />
       </div>
     );
   }

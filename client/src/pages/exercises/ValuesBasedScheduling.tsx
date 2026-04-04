@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Calendar } from 'lucide-react';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 interface ScheduledAction {
   id: string;
@@ -125,9 +126,7 @@ export default function ValuesBasedScheduling() {
         </div>
       )}
 
-      <button onClick={() => window.history.back()} className="btn-secondary w-full">
-        Back to Exercises
-      </button>
+      <ExerciseBackButton label="Back to Modules" />
     </div>
   );
 }

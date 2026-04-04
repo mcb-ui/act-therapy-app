@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Apple, ChevronRight, CheckCircle } from 'lucide-react';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 export default function EatingMeditation() {
   const [currentStep, setCurrentStep] = useState(0);
@@ -133,9 +134,7 @@ export default function EatingMeditation() {
           </p>
         </div>
 
-        <button onClick={() => window.history.back()} className="btn-primary w-full">
-          Complete Exercise
-        </button>
+        <ExerciseBackButton label="Complete Exercise" variant="primary" />
       </div>
     );
   }

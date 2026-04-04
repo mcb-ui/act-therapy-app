@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Zap, Plus, Trash2, CheckCircle } from 'lucide-react';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 interface ValueAction {
   id: string;
@@ -123,9 +124,7 @@ export default function ValuesInAction() {
           </ul>
         </div>
 
-        <button onClick={() => window.history.back()} className="btn-primary w-full">
-          Complete Exercise
-        </button>
+        <ExerciseBackButton label="Complete Exercise" variant="primary" />
       </div>
     );
   }

@@ -1,236 +1,331 @@
 import { Link } from 'react-router-dom';
-import { BookOpen, CheckCircle, PlayCircle } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { getProgress } from '../utils/exerciseTracking';
+import { BookOpen, CheckCircle2, PlayCircle, Sparkles } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import AppLoader from '../components/AppLoader';
+import {
+  getCompletedExerciseIds,
+  getExerciseCompletionMap,
+  getExercisesByIds,
+  learningModules,
+  totalTrackableExercises,
+} from '../data/exerciseCatalog';
+import { api } from '../lib/api';
+import { buildPracticeFlowModel } from '../lib/practiceFlow';
+import { getFavorites, getProgress, type Favorite, type ProgressEntry } from '../utils/exerciseTracking';
 
-const modules = [
-  {
-    id: 1,
-    title: 'Foundation: Understanding ACT',
-    description: 'Learn the basics of Acceptance and Commitment Therapy',
-    duration: '45 mins',
-    exercises: [
-      { id: 'intro-act', name: 'Introduction to ACT', path: '/exercises/intro-act' },
-      { id: 'values-duel', name: 'Values Duel', path: '/exercises/values-duel' },
-      { id: 'values-compass', name: 'Values Compass', path: '/exercises/values-compass' },
-      { id: 'life-domains', name: 'Life Domains Assessment', path: '/exercises/life-domains' },
-      { id: 'hexaflex', name: 'The ACT Hexaflex', path: '/hexaflex' },
-    ],
-    color: 'from-electric-blue to-midnight-purple',
-    icon: '📚',
-  },
-  {
-    id: 2,
-    title: 'Module 1: Present Moment Awareness',
-    description: 'Develop mindfulness and stay grounded in the now',
-    duration: '60 mins',
-    exercises: [
-      { id: 'breath-counting', name: 'Breath Counting', path: '/exercises/breath-counting' },
-      { id: 'sound-awareness', name: 'Sound Awareness', path: '/exercises/sound-awareness' },
-      { id: 'mindful-walking', name: 'Mindful Walking', path: '/exercises/mindful-walking' },
-      { id: 'eating-meditation', name: 'Eating Meditation', path: '/exercises/eating-meditation' },
-      { id: 'progressive-muscle-relaxation', name: 'Progressive Muscle Relaxation', path: '/exercises/progressive-muscle-relaxation' },
-    ],
-    color: 'from-lime-green to-electric-blue',
-    icon: '🧘',
-  },
-  {
-    id: 3,
-    title: 'Module 2: Cognitive Defusion',
-    description: 'Learn to observe thoughts without being controlled',
-    duration: '55 mins',
-    exercises: [
-      { id: 'silly-voice', name: 'Silly Voice Technique', path: '/exercises/silly-voice' },
-      { id: 'thought-labels', name: 'Thought Labels', path: '/exercises/thought-labels' },
-      { id: 'thank-your-mind', name: 'Thank Your Mind', path: '/exercises/thank-your-mind' },
-      { id: 'leaves-stream', name: 'Leaves on a Stream', path: '/exercises/leaves-stream' },
-      { id: 'passengers-on-bus', name: 'Passengers on the Bus', path: '/exercises/passengers-on-bus' },
-      { id: 'clouds-in-sky', name: 'Clouds in the Sky', path: '/exercises/clouds-in-sky' },
-    ],
-    color: 'from-midnight-purple to-brand-pink',
-    icon: '🧠',
-  },
-  {
-    id: 4,
-    title: 'Module 3: Acceptance & Willingness',
-    description: 'Open up to difficult experiences with compassion',
-    duration: '50 mins',
-    exercises: [
-      { id: 'tug-of-war', name: 'Tug of War with a Monster', path: '/exercises/tug-of-war' },
-      { id: 'expansion', name: 'Expansion Exercise', path: '/exercises/expansion' },
-      { id: 'willingness-scale', name: 'Willingness Scale', path: '/exercises/willingness-scale' },
-      { id: 'emotional-surfing', name: 'Emotional Surfing', path: '/exercises/emotional-surfing' },
-      { id: 'guest-house', name: 'The Guest House', path: '/exercises/guest-house' },
-    ],
-    color: 'from-brand-pink to-inferno-red',
-    icon: '❤️',
-  },
-  {
-    id: 5,
-    title: 'Module 4: Values & Committed Action',
-    description: 'Clarify values and take meaningful action',
-    duration: '65 mins',
-    exercises: [
-      { id: 'what-matters', name: 'What Matters Most', path: '/exercises/what-matters' },
-      { id: 'bulls-eye', name: 'Bull\'s Eye Exercise', path: '/exercises/bulls-eye' },
-      { id: 'values-in-action', name: 'Values in Action', path: '/exercises/values-in-action' },
-      { id: 'smart-goals', name: 'SMART Goals', path: '/exercises/smart-goals' },
-      { id: 'barrier-busting', name: 'Barrier Busting', path: '/exercises/barrier-busting' },
-      { id: 'values-based-scheduling', name: 'Values-Based Scheduling', path: '/exercises/values-based-scheduling' },
-      { id: 'committed-action-tracker', name: 'Committed Action Tracker', path: '/exercises/committed-action-tracker' },
-    ],
-    color: 'from-inferno-red to-lime-green',
-    icon: '🎯',
-  },
-];
+interface ValueRecord {
+  id: string;
+  category: string;
+  description: string;
+  importance: number;
+  alignment: number;
+}
+
+interface ActionRecord {
+  id: string;
+  title: string;
+  description: string | null;
+  completed: boolean;
+  dueDate: string | null;
+  valueId?: string | null;
+}
 
 export default function Modules() {
-  const [completedExerciseIds, setCompletedExerciseIds] = useState<string[]>([]);
+  const [progressEntries, setProgressEntries] = useState<ProgressEntry[]>([]);
+  const [favorites, setFavorites] = useState<Favorite[]>([]);
+  const [values, setValues] = useState<ValueRecord[]>([]);
+  const [actions, setActions] = useState<ActionRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
-    void fetchCompletedExercises();
+    void (async () => {
+      setIsLoading(true);
+      setErrorMessage('');
+
+      const [progressResult, favoritesResult, valuesResult, actionsResult] = await Promise.allSettled([
+        getProgress(),
+        getFavorites(),
+        api.get<ValueRecord[]>('/values'),
+        api.get<ActionRecord[]>('/actions'),
+      ]);
+
+      if (progressResult.status === 'fulfilled') {
+        setProgressEntries(progressResult.value);
+      }
+
+      if (favoritesResult.status === 'fulfilled') {
+        setFavorites(favoritesResult.value);
+      }
+
+      if (valuesResult.status === 'fulfilled') {
+        setValues(valuesResult.value.data);
+      }
+
+      if (actionsResult.status === 'fulfilled') {
+        setActions(actionsResult.value.data);
+      }
+
+      if (
+        progressResult.status === 'rejected' ||
+        favoritesResult.status === 'rejected' ||
+        valuesResult.status === 'rejected' ||
+        actionsResult.status === 'rejected'
+      ) {
+        setErrorMessage('Some learning data failed to load. The module path is still usable, but parts of it may be incomplete until refresh.');
+      }
+
+      setIsLoading(false);
+    })();
   }, []);
 
-  const fetchCompletedExercises = async () => {
-    const progress = await getProgress();
-    const completed = progress
-      .filter((entry) => entry.completed)
-      .map((entry) => entry.exerciseId);
-    setCompletedExerciseIds(completed);
-  };
+  const completionMap = useMemo(
+    () => getExerciseCompletionMap(progressEntries),
+    [progressEntries]
+  );
+  const completedExerciseIds = useMemo(
+    () => getCompletedExerciseIds(progressEntries),
+    [progressEntries]
+  );
+  const totalCompleted = completedExerciseIds.size;
 
-  const completedExerciseIdSet = new Set(completedExerciseIds);
-  const totalExercises = modules.reduce((sum, module) => sum + module.exercises.length, 0);
+  const practiceFlow = useMemo(
+    () => buildPracticeFlowModel(progressEntries, favorites, values, actions),
+    [progressEntries, favorites, values, actions]
+  );
+
+  const recommendedModule = useMemo(
+    () => practiceFlow.moduleRecommendation?.module ?? learningModules[0],
+    [practiceFlow.moduleRecommendation]
+  );
+  const recommendedStartExercise =
+    practiceFlow.moduleRecommendation?.nextExercise ?? getExercisesByIds(recommendedModule.exerciseIds)[0];
+
+  if (isLoading) {
+    return <AppLoader label="Loading your learning modules..." />;
+  }
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      <div className="text-center">
-        <h1 className="text-4xl md:text-5xl font-header text-midnight-purple mb-2 hover-glow">
-          Learning Modules
-        </h1>
-        <p className="text-xl text-gray-600 font-body">
-          Structured pathways to master ACT skills
-        </p>
-      </div>
-
-      <div className="card bg-midnight-purple text-white">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-header mb-2">Your Learning Journey</h2>
-            <p className="text-white opacity-90 font-body mb-4">
-              {completedExerciseIds.length} of {totalExercises} exercises completed
-            </p>
-            <div className="w-full bg-white bg-opacity-20 rounded-full h-3">
-              <div
-                className="bg-lime-green h-3 rounded-full transition-all duration-500"
-                style={{ width: `${(completedExerciseIds.length / totalExercises) * 100}%` }}
-              ></div>
-            </div>
-          </div>
-          <BookOpen size={80} className="hidden md:block opacity-20" />
+    <div className="space-y-8 pb-28 md:pb-0">
+      {errorMessage && (
+        <div className="rounded-2xl border border-inferno-red/20 bg-inferno-red/5 px-5 py-4 text-sm text-inferno-red">
+          {errorMessage}
         </div>
-      </div>
+      )}
 
-      <div className="space-y-6">
-        {modules.map((module, index) => {
-          const completedCount = module.exercises.filter((exercise) =>
-            completedExerciseIdSet.has(exercise.id)
+      <section className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+        <div className="rounded-[2rem] border border-midnight-purple/10 bg-white p-6 shadow-xl sm:p-8">
+          <p className="font-subheader text-xs uppercase tracking-[0.2em] text-electric-blue">
+            Learning Journey
+          </p>
+          <h1 className="mt-3 font-header text-4xl text-midnight-purple md:text-5xl">
+            Structured ACT pathways, not just a pile of exercises.
+          </h1>
+          <p className="mt-4 max-w-2xl font-body text-base leading-7 text-gray-600">
+            These modules group practices into meaningful sequences so you can deepen one ACT skill
+            set at a time instead of bouncing randomly between tools.
+          </p>
+          {practiceFlow.moduleRecommendation && (
+            <div className="mt-6 rounded-[1.5rem] border border-midnight-purple/10 bg-midnight-purple/5 px-4 py-4">
+              <p className="font-subheader text-[11px] uppercase tracking-[0.18em] text-electric-blue">
+                Why this path
+              </p>
+              <p className="mt-2 font-body text-sm leading-6 text-gray-700">
+                {practiceFlow.moduleRecommendation.reason}
+              </p>
+              <p className="mt-3 font-subheader text-[11px] uppercase tracking-[0.18em] text-gray-500">
+                {practiceFlow.moduleRecommendation.progressLabel}
+              </p>
+            </div>
+          )}
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link to={recommendedStartExercise?.route ?? '/'} className="btn-primary">
+              {practiceFlow.moduleRecommendation?.progressLabel?.startsWith('0/')
+                ? 'Start Recommended Module'
+                : 'Continue Recommended Module'}
+            </Link>
+            <Link
+              to="/progress"
+              className="inline-flex items-center gap-2 rounded-2xl border border-midnight-purple/10 px-5 py-3 font-subheader text-xs uppercase tracking-[0.18em] text-midnight-purple transition hover:bg-midnight-purple hover:text-white"
+            >
+              <span>View Progress</span>
+              <Sparkles size={16} />
+            </Link>
+          </div>
+        </div>
+
+        <div className="rounded-[2rem] border border-midnight-purple/10 bg-midnight-purple p-8 text-white shadow-xl shadow-midnight-purple/15">
+          <div className="mb-6 flex items-center justify-between">
+            <BookOpen size={40} className="text-electric-blue" />
+            <span className="font-header text-5xl">
+              {Math.round((totalCompleted / Math.max(totalTrackableExercises, 1)) * 100)}%
+            </span>
+          </div>
+          <p className="font-subheader text-xs uppercase tracking-[0.2em] text-electric-blue/90">
+            Total Completion
+          </p>
+          <p className="mt-2 font-body text-lg text-white/90">
+            {totalCompleted} of {totalTrackableExercises} exercises are complete.
+          </p>
+          <div className="mt-6 h-3 rounded-full bg-white/15">
+            <div
+              className="h-3 rounded-full bg-lime-green transition-all duration-700"
+              style={{ width: `${(totalCompleted / Math.max(totalTrackableExercises, 1)) * 100}%` }}
+            />
+          </div>
+          <div className="mt-8 rounded-[1.5rem] border border-white/10 bg-white/10 p-5">
+            <p className="font-subheader text-[11px] uppercase tracking-[0.18em] text-white/70">
+              Recommended next module
+            </p>
+            <h2 className="mt-2 font-subheader text-lg uppercase">{recommendedModule.title}</h2>
+            <p className="mt-2 font-body text-sm leading-6 text-white/80">
+              {recommendedModule.description}
+            </p>
+            {practiceFlow.moduleRecommendation && (
+              <p className="mt-4 font-body text-sm leading-6 text-white/80">
+                {practiceFlow.moduleRecommendation.reason}
+              </p>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className="space-y-6">
+        {learningModules.map((module, index) => {
+          const exercises = getExercisesByIds(module.exerciseIds);
+          const completedCount = exercises.filter(
+            (exercise) => completionMap.get(exercise.id)?.isCompleted
           ).length;
-          const isCompleted = completedCount === module.exercises.length;
+          const continueExercise =
+            exercises.find((exercise) => {
+              const completion = completionMap.get(exercise.id);
+
+              return Boolean(
+                completion?.isStarted && !completion.isFullyCompleted
+              );
+            }) ?? null;
+          const nextExercise =
+            exercises.find((exercise) => !completionMap.get(exercise.id)?.isCompleted) ?? null;
+          const ctaExercise = continueExercise ?? nextExercise;
+          const isCompleted = completedCount === exercises.length;
 
           return (
             <div
               key={module.id}
-              className="card hover-lift animate-slide-in-up"
-              style={{ animationDelay: `${index * 0.1}s` }}
+              className="card overflow-hidden"
+              style={{ animationDelay: `${index * 0.08}s` }}
             >
-              <div className="flex items-start space-x-4">
-                <div className={`w-20 h-20 rounded-2xl ${module.color} flex items-center justify-center flex-shrink-0 shadow-lg`}>
-                  {isCompleted ? (
-                    <CheckCircle size={32} className="text-white" />
-                  ) : (
-                    <span className="text-4xl">{module.icon}</span>
-                  )}
-                </div>
-
-                <div className="flex-1">
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <h3 className="text-2xl font-subheader text-midnight-purple uppercase">
-                        {module.title}
-                      </h3>
-                      <p className="text-gray-600 font-body mt-1">{module.description}</p>
-                    </div>
-                    <span className="text-sm text-gray-500 font-body whitespace-nowrap ml-4">
+              <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+                <div className={`rounded-[1.75rem] bg-gradient-to-br ${module.colorClass} p-6 text-white shadow-xl`}>
+                  <div className="mb-5 flex items-start justify-between gap-4">
+                    <div className="text-5xl">{isCompleted ? '✅' : module.emoji}</div>
+                    <span className="rounded-full bg-white/15 px-4 py-2 font-subheader text-[11px] uppercase tracking-[0.18em] text-white/80">
                       {module.duration}
                     </span>
                   </div>
 
-                  <div className="mb-4">
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="font-subheader text-gray-700 uppercase text-xs">
-                        Progress
-                      </span>
-                      <span className="font-body text-gray-600">
-                        {completedCount}/{module.exercises.length} exercises
-                      </span>
+                  <h2 className="font-subheader text-2xl uppercase">{module.title}</h2>
+                  <p className="mt-3 font-body text-sm leading-6 text-white/85">{module.description}</p>
+
+                  <div className="mt-6">
+                    <div className="mb-2 flex items-center justify-between font-body text-sm text-white/80">
+                      <span>{completedCount} complete</span>
+                      <span>{exercises.length} total</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="h-3 rounded-full bg-white/15">
                       <div
-                        className={`${module.color} h-2 rounded-full transition-all duration-500`}
-                        style={{
-                          width: `${(completedCount / module.exercises.length) * 100}%`,
-                        }}
-                      ></div>
+                        className="h-3 rounded-full bg-white transition-all duration-700"
+                        style={{ width: `${(completedCount / Math.max(exercises.length, 1)) * 100}%` }}
+                      />
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    {module.exercises.map((exercise) => {
-                      const isExerciseCompleted = completedExerciseIdSet.has(exercise.id);
-                      return (
-                        <Link
-                          key={exercise.id}
-                          to={exercise.path}
-                          className="flex items-center space-x-3 p-3 rounded-lg transition-all hover:bg-parchment hover:scale-102 cursor-pointer"
-                        >
-                          {isExerciseCompleted ? (
-                            <CheckCircle size={20} className="text-lime-green flex-shrink-0" />
-                          ) : (
-                            <PlayCircle size={20} className="text-electric-blue flex-shrink-0" />
-                          )}
-                          <span className={`font-body ${
-                            isExerciseCompleted
-                              ? 'text-gray-500 line-through'
-                              : 'text-gray-800'
-                          }`}>
-                            {exercise.name}
+                  {ctaExercise ? (
+                    <Link
+                      to={ctaExercise.route}
+                      className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-3 font-subheader text-xs uppercase tracking-[0.18em] text-midnight-purple transition hover:scale-[1.02]"
+                    >
+                      <span>{continueExercise ? `Resume ${ctaExercise.title}` : `Continue with ${ctaExercise.title}`}</span>
+                      <PlayCircle size={16} />
+                    </Link>
+                  ) : (
+                    <div className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-white/10 px-5 py-3 font-subheader text-xs uppercase tracking-[0.18em] text-white">
+                      <CheckCircle2 size={16} />
+                      <span>Module Complete</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-3">
+                  {exercises.map((exercise) => {
+                    const completion = completionMap.get(exercise.id);
+                    const isComplete = Boolean(completion?.isCompleted);
+                    const isInProgress = Boolean(
+                      completion?.isStarted && !completion.isFullyCompleted
+                    );
+                    const progressLabel = isInProgress
+                      ? `${completion?.completedTrackCount ?? 0}/${completion?.totalTrackCount ?? 0} reps`
+                      : isComplete
+                        ? 'Complete'
+                        : 'Open';
+
+                    return (
+                      <Link
+                        key={exercise.id}
+                        to={exercise.route}
+                        className="flex items-start justify-between gap-4 rounded-[1.5rem] border border-midnight-purple/10 bg-white px-4 py-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:px-5"
+                      >
+                        <div className="pr-4">
+                          <p className="font-subheader text-sm uppercase text-midnight-purple">
+                            {exercise.title}
+                          </p>
+                          <p className="mt-2 font-body text-sm leading-6 text-gray-600">
+                            {exercise.description}
+                          </p>
+                        </div>
+                        <div className="mt-1 flex shrink-0 items-center gap-2">
+                          <span className="hidden rounded-full bg-midnight-purple/5 px-3 py-1 font-subheader text-[10px] uppercase tracking-[0.16em] text-gray-500 sm:inline-flex">
+                            {isInProgress ? 'In progress' : isComplete ? 'Review' : 'Open'}
                           </span>
-                          {!isExerciseCompleted && (
-                            <span className="text-xs text-electric-blue font-subheader uppercase ml-auto">
-                              Start →
+                          {isInProgress && (
+                            <span className="hidden rounded-full bg-electric-blue/10 px-3 py-1 font-subheader text-[10px] uppercase tracking-[0.16em] text-electric-blue lg:inline-flex">
+                              {progressLabel}
                             </span>
                           )}
-                        </Link>
-                      );
-                    })}
-                  </div>
+                          {isComplete ? (
+                            <CheckCircle2 size={20} className="text-lime-green" />
+                          ) : (
+                            <PlayCircle size={20} className="text-electric-blue" />
+                          )}
+                        </div>
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
             </div>
           );
         })}
-      </div>
+      </section>
 
-      <div className="card bg-parchment border-2 border-midnight-purple text-center py-8">
-        <h3 className="text-xl font-subheader text-midnight-purple mb-2 uppercase">
-          🎓 Keep Going!
-        </h3>
-        <p className="text-gray-700 font-body max-w-2xl mx-auto">
-          Work through the modules at your own pace to build a strong foundation in ACT.
-          Progress updates as exercises save completion, and consistency matters more than speed.
-        </p>
-      </div>
+      {recommendedStartExercise && (
+        <div className="fixed inset-x-4 bottom-[5.25rem] z-20 md:hidden">
+          <Link
+            to={recommendedStartExercise.route}
+            className="flex items-center justify-between rounded-[1.5rem] border border-midnight-purple/10 bg-white px-4 py-4 shadow-2xl"
+          >
+            <div>
+              <p className="font-subheader text-[11px] uppercase tracking-[0.18em] text-electric-blue">
+                Recommended next
+              </p>
+              <p className="mt-1 font-subheader text-sm uppercase text-midnight-purple">
+                {recommendedStartExercise.title}
+              </p>
+            </div>
+            <PlayCircle size={18} className="text-electric-blue" />
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

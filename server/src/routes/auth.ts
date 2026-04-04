@@ -1,14 +1,26 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 import { prisma } from '../lib/prisma.js';
+import { authMiddleware, AuthRequest } from '../middleware/auth.js';
+import { createAuthToken } from '../lib/auth.js';
+import { handleRouteError, normalizeEmail, requireString } from '../lib/validation.js';
 
 const router = express.Router();
 
 // Register
 router.post('/register', async (req, res) => {
   try {
-    const { email, password, name } = req.body;
+    const email = normalizeEmail(req.body.email);
+    const password = requireString(req.body.password, {
+      minLength: 8,
+      maxLength: 128,
+      fieldName: 'password',
+    });
+    const name = requireString(req.body.name, {
+      minLength: 2,
+      maxLength: 80,
+      fieldName: 'name',
+    });
 
     // Check if user exists
     const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -29,9 +41,7 @@ router.post('/register', async (req, res) => {
     });
 
     // Generate token
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, {
-      expiresIn: '7d',
-    });
+    const token = createAuthToken(user.id);
 
     res.json({
       token,
@@ -42,14 +52,19 @@ router.post('/register', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ error: 'Registration failed' });
+    return handleRouteError(res, error, 'Registration failed');
   }
 });
 
 // Login
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const email = normalizeEmail(req.body.email);
+    const password = requireString(req.body.password, {
+      minLength: 1,
+      maxLength: 128,
+      fieldName: 'password',
+    });
 
     // Find user
     const user = await prisma.user.findUnique({ where: { email } });
@@ -64,9 +79,7 @@ router.post('/login', async (req, res) => {
     }
 
     // Generate token
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, {
-      expiresIn: '7d',
-    });
+    const token = createAuthToken(user.id);
 
     res.json({
       token,
@@ -77,7 +90,28 @@ router.post('/login', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ error: 'Login failed' });
+    return handleRouteError(res, error, 'Login failed');
+  }
+});
+
+router.get('/me', authMiddleware, async (req: AuthRequest, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId! },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    return res.json({ user });
+  } catch (error) {
+    return handleRouteError(res, error, 'Failed to fetch user');
   }
 });
 

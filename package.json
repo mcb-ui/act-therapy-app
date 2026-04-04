@@ -9,6 +9,7 @@
     "build": "npm run build:client && npm run build:server",
     "build:client": "cd client && npm run build",
     "build:server": "cd server && npm run build",
+    "clean": "rm -rf client/dist server/dist client/node_modules/.vite",
     "install:all": "npm install && cd client && npm install && cd ../server && npm install"
   },
   "keywords": ["ACT", "therapy", "mental-health", "interactive"],

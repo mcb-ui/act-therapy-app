@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Smile, Volume2, RefreshCw } from 'lucide-react';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 export default function SillyVoice() {
   const [thought, setThought] = useState('');
@@ -184,9 +185,7 @@ export default function SillyVoice() {
         </div>
       )}
 
-      <button onClick={() => window.history.back()} className="btn-secondary w-full">
-        Back to Exercises
-      </button>
+      <ExerciseBackButton label="Back to Modules" />
     </div>
   );
 }

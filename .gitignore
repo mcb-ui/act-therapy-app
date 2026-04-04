@@ -3,8 +3,11 @@ dist
 .env
 *.log
 .DS_Store
+*.swp
+*.swo
 client/dist
 server/dist
 *.sqlite
 *.db
 .vite
+test-results

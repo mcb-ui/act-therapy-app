@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Zap, Play, Pause, RotateCcw } from 'lucide-react';
-import axios from 'axios';
+import { markExerciseComplete, saveExerciseData } from '../../utils/exerciseTracking';
 
 export default function MindfulnessExercise() {
   const [activeExercise, setActiveExercise] = useState<string | null>(null);
@@ -44,18 +44,11 @@ export default function MindfulnessExercise() {
     setIsRunning(false);
     if (activeExercise && timer > 10) {
       try {
-        const token = localStorage.getItem('token');
-        await axios.post(
-          '/api/progress',
-          {
-            exerciseId: `mindfulness-${activeExercise}`,
-            completed: true,
-            score: timer,
-          },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        await saveExerciseData(`mindfulness-${activeExercise}`, 'Mindfulness Practice', {
+          practice: activeExercise,
+          seconds: timer,
+        });
+        await markExerciseComplete(`mindfulness-${activeExercise}`, timer);
       } catch (error) {
         console.error('Failed to save progress:', error);
       }

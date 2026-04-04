@@ -1,50 +1,52 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import { useAuth } from '../contexts/AuthContext';
+import { useAppToast } from '../contexts/ToastContext';
+import { getApiErrorMessage } from '../lib/api';
 
-interface RegisterProps {
-  setAuth: (value: boolean) => void;
-}
-
-export default function Register({ setAuth }: RegisterProps) {
+export default function Register() {
+  const { register } = useAuth();
+  const { success } = useAppToast();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setIsSubmitting(true);
 
     try {
-      const response = await axios.post('/api/auth/register', { name, email, password });
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
-      setAuth(true);
+      await register({ name, email, password });
+      success('Account created. Start with one small step today.');
       navigate('/');
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Registration failed');
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'Registration failed'));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Decorative circles */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-midnight-purple opacity-5 rounded-full -ml-48 -mt-48"></div>
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-electric-blue opacity-5 rounded-full -mr-48 -mb-48"></div>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(31,137,150,0.10),_transparent_30%),radial-gradient(circle_at_bottom_right,_rgba(68,37,103,0.10),_transparent_28%),linear-gradient(180deg,#fcfafb_0%,#f5f2f4_100%)] p-4">
+      <div className="absolute -left-32 top-0 h-72 w-72 rounded-full bg-electric-blue/10 blur-3xl" />
+      <div className="absolute -right-24 bottom-0 h-72 w-72 rounded-full bg-midnight-purple/10 blur-3xl" />
 
-      <div className="card max-w-md w-full animate-slide-in-up shadow-2xl relative z-10">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-electric-blue rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg animate-bounce-subtle">
-            <span className="text-3xl">✨</span>
-          </div>
-          <h1 className="text-3xl md:text-4xl font-header text-midnight-purple mb-2">Get Started</h1>
-          <p className="text-gray-600 font-body">Create your account to begin your ACT journey</p>
+      <div className="card relative z-10 w-full max-w-md animate-slide-in-up border-brand-pink/40">
+        <div className="mb-8 text-center">
+          <img src="/logos/logo.png" alt="Dr. MCB Logo" className="mx-auto mb-5 h-16 w-auto" />
+          <p className="font-subheader text-[10px] uppercase tracking-[0.22em] text-electric-blue">
+            Dr. MCB Practice Space
+          </p>
+          <h1 className="mb-3 mt-3 text-3xl font-header text-midnight-purple md:text-4xl">Create Your Account</h1>
+          <p className="font-body text-[#4e3f5e]">Start with one grounded step and build from there.</p>
         </div>
 
         {error && (
-          <div className="bg-white border-2 border-inferno-red text-inferno-red px-4 py-3 rounded-lg mb-4 font-body animate-slide-in-right flex items-center space-x-2">
+          <div className="mb-4 flex items-center space-x-2 rounded-xl border border-inferno-red/35 bg-inferno-red/5 px-4 py-3 font-body text-inferno-red animate-slide-in-right">
             <span>⚠️</span>
             <span>{error}</span>
           </div>
@@ -61,6 +63,7 @@ export default function Register({ setAuth }: RegisterProps) {
               onChange={(e) => setName(e.target.value)}
               className="input-field"
               placeholder="Your Name"
+              autoComplete="name"
               required
             />
           </div>
@@ -75,6 +78,7 @@ export default function Register({ setAuth }: RegisterProps) {
               onChange={(e) => setEmail(e.target.value)}
               className="input-field"
               placeholder="your@email.com"
+              autoComplete="email"
               required
             />
           </div>
@@ -89,21 +93,26 @@ export default function Register({ setAuth }: RegisterProps) {
               onChange={(e) => setPassword(e.target.value)}
               className="input-field"
               placeholder="••••••••"
-              minLength={6}
+              minLength={8}
+              autoComplete="new-password"
               required
             />
-            <p className="text-xs text-gray-500 mt-1 font-body">Minimum 6 characters</p>
+            <p className="mt-1 text-xs font-body text-[#8c8199]">Minimum 8 characters</p>
           </div>
 
-          <button type="submit" className="btn-primary w-full mt-6 shadow-lg">
-            Create Account
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="btn-primary mt-6 w-full shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isSubmitting ? 'Creating Account...' : 'Create Account'}
           </button>
         </form>
 
-        <div className="mt-8 pt-6 border-t-2 border-gray-100">
-          <p className="text-center text-gray-600 font-body">
+        <div className="mt-8 border-t border-brand-pink/35 pt-6">
+          <p className="text-center font-body text-[#4e3f5e]">
             Already have an account?{' '}
-            <Link to="/login" className="text-electric-blue font-semibold hover:text-midnight-purple transition-colors underline decoration-2 underline-offset-2">
+            <Link to="/login" className="font-semibold text-electric-blue transition-colors hover:text-inferno-red underline decoration-2 underline-offset-2">
               Sign in
             </Link>
           </p>

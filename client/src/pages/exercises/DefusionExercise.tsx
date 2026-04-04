@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Brain, RefreshCw } from 'lucide-react';
-import axios from 'axios';
+import { useAppToast } from '../../contexts/ToastContext';
+import { markExerciseComplete, saveExerciseData } from '../../utils/exerciseTracking';
 
 export default function DefusionExercise() {
   const [thought, setThought] = useState('');
   const [currentExercise, setCurrentExercise] = useState<number | null>(null);
   const [defusedThought, setDefusedThought] = useState('');
+  const toast = useAppToast();
 
   const exercises = [
     {
@@ -48,7 +50,7 @@ export default function DefusionExercise() {
 
   const handleExercise = async (exerciseId: number) => {
     if (!thought.trim()) {
-      alert('Please enter a thought first!');
+      toast.error('Enter a thought before trying a defusion technique.');
       return;
     }
 
@@ -59,20 +61,14 @@ export default function DefusionExercise() {
 
       // Save progress
       try {
-        const token = localStorage.getItem('token');
-        await axios.post(
-          '/api/progress',
-          {
-            exerciseId: `defusion-${exerciseId}`,
-            completed: true,
-            notes: thought,
-          },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        await saveExerciseData(`defusion-${exerciseId}`, exercise.title, {
+          originalThought: thought,
+          defusedThought: exercise.transform(thought),
+        });
+        await markExerciseComplete(`defusion-${exerciseId}`, undefined, thought);
       } catch (error) {
         console.error('Failed to save progress:', error);
+        toast.error('We could not save this exercise right now.');
       }
     }
   };

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Tag, X } from 'lucide-react';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 interface LabeledThought {
   id: string;
@@ -161,9 +162,7 @@ export default function ThoughtLabels() {
         </div>
       )}
 
-      <button onClick={() => window.history.back()} className="btn-secondary w-full">
-        Back to Exercises
-      </button>
+      <ExerciseBackButton label="Back to Modules" />
     </div>
   );
 }

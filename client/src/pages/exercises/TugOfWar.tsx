@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Anchor, AlertCircle } from 'lucide-react';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 export default function TugOfWar() {
   const [struggle, setStruggle] = useState('');
@@ -101,9 +102,7 @@ export default function TugOfWar() {
           </p>
         </div>
 
-        <button onClick={() => window.history.back()} className="btn-primary w-full">
-          Complete Exercise
-        </button>
+        <ExerciseBackButton label="Complete Exercise" variant="primary" />
       </div>
     );
   }

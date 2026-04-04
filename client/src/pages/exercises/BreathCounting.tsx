@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Wind, Play, Pause, RotateCcw } from 'lucide-react';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 export default function BreathCounting() {
   const [isBreathing, setIsBreathing] = useState(false);
@@ -201,9 +202,7 @@ export default function BreathCounting() {
         </div>
       )}
 
-      <button onClick={() => window.history.back()} className="btn-secondary w-full">
-        Back to Exercises
-      </button>
+      <ExerciseBackButton label="Back to Modules" />
     </div>
   );
 }

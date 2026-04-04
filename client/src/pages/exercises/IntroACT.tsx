@@ -1,5 +1,6 @@
 import { BookOpen, CheckCircle } from 'lucide-react';
 import { useState } from 'react';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 export default function IntroACT() {
   const [currentSection, setCurrentSection] = useState(0);
@@ -45,12 +46,11 @@ export default function IntroACT() {
           <p className="text-xl font-body mb-8 opacity-90">
             You've completed the introduction to ACT
           </p>
-          <button
-            onClick={() => window.history.back()}
-            className="bg-white text-electric-blue px-8 py-3 rounded-lg font-subheader uppercase hover:scale-105 transition-all"
-          >
-            Continue Learning
-          </button>
+          <ExerciseBackButton
+            label="Continue Learning"
+            variant="primary"
+            className="w-full sm:w-auto"
+          />
         </div>
       </div>
     );

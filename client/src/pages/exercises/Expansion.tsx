@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Maximize2 } from 'lucide-react';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 export default function Expansion() {
   const [step, setStep] = useState(0);
@@ -87,9 +88,11 @@ export default function Expansion() {
               Next Step →
             </button>
           ) : (
-            <button onClick={() => window.history.back()} className="btn-primary flex-1">
-              Complete Exercise
-            </button>
+            <ExerciseBackButton
+              label="Complete Exercise"
+              variant="primary"
+              className="flex-1"
+            />
           )}
         </div>
       </div>

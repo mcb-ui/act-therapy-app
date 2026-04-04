@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Sparkles, Play, ChevronRight, CheckCircle } from 'lucide-react';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 interface MuscleGroup {
   name: string;
@@ -176,9 +177,7 @@ export default function ProgressiveMuscleRelaxation() {
           </div>
         </div>
 
-        <button onClick={() => window.history.back()} className="btn-primary w-full">
-          Complete Exercise
-        </button>
+        <ExerciseBackButton label="Complete Exercise" variant="primary" />
       </div>
     );
   }
@@ -304,9 +303,7 @@ export default function ProgressiveMuscleRelaxation() {
         )}
       </div>
 
-      <button onClick={() => window.history.back()} className="btn-secondary w-full">
-        Back to Exercises
-      </button>
+      <ExerciseBackButton label="Back to Modules" />
     </div>
   );
 }

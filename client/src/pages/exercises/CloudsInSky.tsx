@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Cloud, Play, Pause, Wind } from 'lucide-react';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 interface CloudThought {
   id: number;
@@ -130,7 +131,7 @@ export default function CloudsInSky() {
             type="text"
             value={thought}
             onChange={(e) => setThought(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && addCloud()}
+            onKeyDown={(e) => e.key === 'Enter' && addCloud()}
             placeholder="Type a thought to release into the sky..."
             className="input-field flex-1"
           />
@@ -217,9 +218,7 @@ export default function CloudsInSky() {
         </div>
       )}
 
-      <button onClick={() => window.history.back()} className="btn-secondary w-full">
-        Back to Exercises
-      </button>
+      <ExerciseBackButton label="Back to Modules" />
     </div>
   );
 }

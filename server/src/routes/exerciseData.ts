@@ -1,6 +1,7 @@
 import express from 'express';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
 import { prisma } from '../lib/prisma.js';
+import { handleRouteError, requireString } from '../lib/validation.js';
 
 const router = express.Router();
 
@@ -27,21 +28,33 @@ router.get('/:exerciseId', authMiddleware, async (req: AuthRequest, res) => {
 // Save exercise data
 router.post('/', authMiddleware, async (req: AuthRequest, res) => {
   try {
-    const { exerciseId, exerciseName, data } = req.body;
+    const exerciseId = requireString(req.body.exerciseId, {
+      minLength: 2,
+      maxLength: 120,
+      fieldName: 'exerciseId',
+    });
+    const exerciseName = requireString(req.body.exerciseName, {
+      minLength: 2,
+      maxLength: 120,
+      fieldName: 'exerciseName',
+    });
+
+    if (typeof req.body.data === 'undefined') {
+      return res.status(400).json({ error: 'data is required' });
+    }
 
     const exerciseData = await prisma.exerciseData.create({
       data: {
         userId: req.userId!,
         exerciseId,
         exerciseName,
-        data: JSON.stringify(data),
+        data: JSON.stringify(req.body.data),
       },
     });
 
     res.json(exerciseData);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to save exercise data' });
+    return handleRouteError(res, error, 'Failed to save exercise data');
   }
 });
 

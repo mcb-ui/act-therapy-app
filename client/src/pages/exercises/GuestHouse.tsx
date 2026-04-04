@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Home, Plus } from 'lucide-react';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 interface Guest {
   id: string;
@@ -70,7 +71,7 @@ export default function GuestHouse() {
             type="text"
             value={newGuest.message}
             onChange={(e) => setNewGuest({ ...newGuest, message: e.target.value })}
-            onKeyPress={(e) => e.key === 'Enter' && addGuest()}
+            onKeyDown={(e) => e.key === 'Enter' && addGuest()}
             placeholder="What is this guest bringing? (optional)"
             className="input-field w-full"
           />
@@ -125,9 +126,7 @@ export default function GuestHouse() {
         </div>
       )}
 
-      <button onClick={() => window.history.back()} className="btn-secondary w-full">
-        Back to Exercises
-      </button>
+      <ExerciseBackButton label="Back to Modules" />
     </div>
   );
 }

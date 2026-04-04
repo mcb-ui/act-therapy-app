@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Footprints, Play, Pause, CheckCircle } from 'lucide-react';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 export default function MindfulWalking() {
   const [currentStep, setCurrentStep] = useState(0);
@@ -226,9 +227,7 @@ export default function MindfulWalking() {
         </div>
       )}
 
-      <button onClick={() => window.history.back()} className="btn-secondary w-full">
-        Back to Exercises
-      </button>
+      <ExerciseBackButton label="Back to Modules" />
     </div>
   );
 }

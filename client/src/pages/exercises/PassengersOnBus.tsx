@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Bus, MapPin, Plus, X } from 'lucide-react';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 interface Passenger {
   id: string;
@@ -42,17 +43,26 @@ export default function PassengersOnBus() {
 
   const startJourney = () => {
     setIsJourneyStarted(true);
-    // Simulate journey progress
-    const interval = setInterval(() => {
-      setJourneyProgress(prev => {
+  };
+
+  useEffect(() => {
+    if (!isJourneyStarted) {
+      return;
+    }
+
+    const interval = window.setInterval(() => {
+      setJourneyProgress((prev) => {
         if (prev >= 100) {
-          clearInterval(interval);
-          return 100;
+          window.clearInterval(interval);
+          return prev;
         }
+
         return prev + 1;
       });
     }, 100);
-  };
+
+    return () => window.clearInterval(interval);
+  }, [isJourneyStarted]);
 
   if (journeyProgress === 100) {
     return (
@@ -102,9 +112,7 @@ export default function PassengersOnBus() {
           </div>
         </div>
 
-        <button onClick={() => window.history.back()} className="btn-primary w-full">
-          Complete Exercise
-        </button>
+        <ExerciseBackButton label="Complete Exercise" variant="primary" />
       </div>
     );
   }
@@ -225,7 +233,7 @@ export default function PassengersOnBus() {
             type="text"
             value={newPassenger.message}
             onChange={(e) => setNewPassenger({ ...newPassenger, message: e.target.value })}
-            onKeyPress={(e) => e.key === 'Enter' && addPassenger()}
+            onKeyDown={(e) => e.key === 'Enter' && addPassenger()}
             placeholder="What does this passenger say? (e.g., 'You'll fail!', 'Turn back!')"
             className="input-field w-full"
           />

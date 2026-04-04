@@ -21,7 +21,7 @@ export default function LeavesStream() {
 
       return () => clearInterval(interval);
     }
-  }, [isRunning, leaves]);
+  }, [isRunning, leaves.length]);
 
   const addLeaf = () => {
     if (thought.trim()) {
@@ -90,7 +90,7 @@ export default function LeavesStream() {
             type="text"
             value={thought}
             onChange={(e) => setThought(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && addLeaf()}
+            onKeyDown={(e) => e.key === 'Enter' && addLeaf()}
             placeholder="Type a thought..."
             className="input-field flex-1"
           />

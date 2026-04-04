@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Heart, ChevronRight } from 'lucide-react';
-import axios from 'axios';
+import { markExerciseComplete, saveExerciseData } from '../../utils/exerciseTracking';
 
 export default function AcceptanceExercise() {
   const [currentStep, setCurrentStep] = useState(0);
@@ -130,18 +130,13 @@ export default function AcceptanceExercise() {
   const handleComplete = async () => {
     setCompleted(true);
     try {
-      const token = localStorage.getItem('token');
-      await axios.post(
-        '/api/progress',
-        {
-          exerciseId: 'acceptance-exercise',
-          completed: true,
-          notes: `Emotion: ${emotion}, Resistance: ${resistance}, Willingness: ${willingness}`,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const notes = `Emotion: ${emotion}, Resistance: ${resistance}, Willingness: ${willingness}`;
+      await saveExerciseData('acceptance-exercise', 'Acceptance', {
+        emotion,
+        resistance,
+        willingness,
+      });
+      await markExerciseComplete('acceptance-exercise', undefined, notes);
     } catch (error) {
       console.error('Failed to save progress:', error);
     }

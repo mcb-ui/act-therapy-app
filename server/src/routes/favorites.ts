@@ -1,6 +1,7 @@
 import express from 'express';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
 import { prisma } from '../lib/prisma.js';
+import { handleRouteError, requireString } from '../lib/validation.js';
 
 const router = express.Router();
 
@@ -20,7 +21,16 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
 // Add favorite
 router.post('/', authMiddleware, async (req: AuthRequest, res) => {
   try {
-    const { exerciseId, exerciseName } = req.body;
+    const exerciseId = requireString(req.body.exerciseId, {
+      minLength: 2,
+      maxLength: 120,
+      fieldName: 'exerciseId',
+    });
+    const exerciseName = requireString(req.body.exerciseName, {
+      minLength: 2,
+      maxLength: 120,
+      fieldName: 'exerciseName',
+    });
 
     const favorite = await prisma.favorite.upsert({
       where: {
@@ -41,7 +51,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
 
     res.json(favorite);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to add favorite' });
+    return handleRouteError(res, error, 'Failed to add favorite');
   }
 });
 

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { MessageCircle, ThumbsUp } from 'lucide-react';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 interface ThankYouMessage {
   id: string;
@@ -69,7 +70,7 @@ export default function ThankYourMind() {
             type="text"
             value={thought}
             onChange={(e) => setThought(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleThankMind()}
+            onKeyDown={(e) => e.key === 'Enter' && handleThankMind()}
             placeholder="e.g., 'You're going to mess this up' or 'Nobody likes you'"
             className="input-field flex-1"
           />
@@ -170,9 +171,7 @@ export default function ThankYourMind() {
         </div>
       )}
 
-      <button onClick={() => window.history.back()} className="btn-secondary w-full">
-        Back to Exercises
-      </button>
+      <ExerciseBackButton label="Back to Modules" />
     </div>
   );
 }

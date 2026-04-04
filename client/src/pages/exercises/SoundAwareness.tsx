@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Ear, Play, Pause, Volume2 } from 'lucide-react';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 interface Sound {
   id: string;
@@ -139,7 +140,7 @@ export default function SoundAwareness() {
               type="text"
               value={newSound}
               onChange={(e) => setNewSound(e.target.value)}
-              onKeyPress={(e) => {
+              onKeyDown={(e) => {
                 if (e.key === 'Enter' && newSound.trim()) {
                   addSound('medium');
                 }
@@ -246,9 +247,7 @@ export default function SoundAwareness() {
         </div>
       )}
 
-      <button onClick={() => window.history.back()} className="btn-secondary w-full">
-        Back to Exercises
-      </button>
+      <ExerciseBackButton label="Back to Modules" />
     </div>
   );
 }

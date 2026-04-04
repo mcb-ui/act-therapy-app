@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Gauge } from 'lucide-react';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 export default function WillingnessScale() {
   const [situation, setSituation] = useState('');
@@ -104,9 +105,7 @@ export default function WillingnessScale() {
           )}
         </div>
 
-        <button onClick={() => window.history.back()} className="btn-primary w-full">
-          Complete Exercise
-        </button>
+        <ExerciseBackButton label="Complete Exercise" variant="primary" />
       </div>
     );
   }

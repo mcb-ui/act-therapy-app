@@ -1,277 +1,700 @@
 import { Link } from 'react-router-dom';
-import { Target, Brain, Heart, Zap, CheckSquare, Hexagon, Sparkles, CheckCircle } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { getProgress } from '../utils/exerciseTracking';
+import {
+  ArrowRight,
+  CheckCircle2,
+  Clock3,
+  Heart,
+  ListTodo,
+  Sparkles,
+  Target,
+} from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import FavoriteButton from '../components/FavoriteButton';
+import { useAuth } from '../contexts/AuthContext';
+import {
+  exerciseCatalog,
+  exerciseById,
+  getCompletedExerciseIds,
+  totalTrackableExercises,
+} from '../data/exerciseCatalog';
+import { usePracticeSession } from '../hooks/usePracticeSession';
+import { api } from '../lib/api';
+import { buildPracticeFlowModel } from '../lib/practiceFlow';
+import { formatPracticeSessionAge, getPracticeSessionExercise } from '../lib/practiceSession';
+import {
+  getFavorites,
+  getProgress,
+  getProgressStats,
+  type Favorite,
+  type ProgressEntry,
+  type ProgressStats,
+} from '../utils/exerciseTracking';
 
-interface Value {
-  name: string;
+interface ValueRecord {
+  id: string;
+  category: string;
   description: string;
-  example: string;
+  importance: number;
+  alignment: number;
 }
 
+interface ActionRecord {
+  id: string;
+  title: string;
+  description: string | null;
+  completed: boolean;
+  dueDate: string | null;
+}
+
+const readStoredTopValues = () => {
+  try {
+    const raw = window.localStorage.getItem('topFiveValues');
+    if (!raw) {
+      return [];
+    }
+
+    return JSON.parse(raw) as Array<{ name: string; description: string }>;
+  } catch {
+    return [];
+  }
+};
+
+const formatDueDate = (dueDate: string | null) => {
+  if (!dueDate) {
+    return 'No due date';
+  }
+
+  return new Date(dueDate).toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+  });
+};
+
+const getMostRecentExercise = (entry: ProgressEntry) =>
+  exerciseCatalog.find((exercise) => exercise.trackIds.includes(entry.exerciseId));
+
+const trimDescription = (description: string, maxLength = 84) =>
+  description.length > maxLength ? `${description.slice(0, maxLength).trimEnd()}...` : description;
+
 export default function Dashboard() {
-  const [userName, setUserName] = useState('');
-  const [topFiveValues, setTopFiveValues] = useState<Value[]>([]);
-  const [completedExerciseIds, setCompletedExerciseIds] = useState<string[]>([]);
+  const { user } = useAuth();
+  const [stats, setStats] = useState<ProgressStats | null>(null);
+  const [progressEntries, setProgressEntries] = useState<ProgressEntry[]>([]);
+  const [favorites, setFavorites] = useState<Favorite[]>([]);
+  const [values, setValues] = useState<ValueRecord[]>([]);
+  const [actions, setActions] = useState<ActionRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
+  const practiceSession = usePracticeSession();
 
   useEffect(() => {
-    const user = localStorage.getItem('user');
-    if (user) {
-      const userData = JSON.parse(user);
-      setUserName(userData.name);
-    }
+    void (async () => {
+      setIsLoading(true);
+      setErrorMessage('');
 
-    // Load top 5 values if they exist
-    const savedValues = localStorage.getItem('topFiveValues');
-    if (savedValues) {
-      setTopFiveValues(JSON.parse(savedValues));
-    }
+      const [progressStatsResult, progressResult, favoriteResult, valuesResult, actionsResult] =
+        await Promise.allSettled([
+          getProgressStats(),
+          getProgress(),
+          getFavorites(),
+          api.get<ValueRecord[]>('/values'),
+          api.get<ActionRecord[]>('/actions'),
+        ]);
 
-    loadProgress();
+      if (progressStatsResult.status === 'fulfilled') {
+        setStats(progressStatsResult.value);
+      }
+
+      if (progressResult.status === 'fulfilled') {
+        setProgressEntries(progressResult.value);
+      }
+
+      if (favoriteResult.status === 'fulfilled') {
+        setFavorites(favoriteResult.value);
+      }
+
+      if (valuesResult.status === 'fulfilled') {
+        setValues(valuesResult.value.data);
+      }
+
+      if (actionsResult.status === 'fulfilled') {
+        setActions(actionsResult.value.data);
+      }
+
+      const hasFailedRequest = [
+        progressStatsResult,
+        progressResult,
+        favoriteResult,
+        valuesResult,
+        actionsResult,
+      ].some((result) => result.status === 'rejected');
+
+      if (hasFailedRequest) {
+        setErrorMessage('Some dashboard data could not be loaded. You can still continue practicing.');
+      }
+
+      setIsLoading(false);
+    })();
   }, []);
 
-  const loadProgress = async () => {
-    const progress = await getProgress();
-    const completed = progress
-      .filter((entry) => entry.completed)
-      .map((entry) => entry.exerciseId);
-    setCompletedExerciseIds(completed);
-  };
+  const completedExerciseIds = useMemo(
+    () => getCompletedExerciseIds(progressEntries),
+    [progressEntries]
+  );
 
-  const exerciseCategories = [
-    {
-      id: 'values',
-      title: 'Values Clarification',
-      description: 'Identify and explore what truly matters to you in life',
-      icon: Target,
-      color: 'bg-electric-blue',
-      accent: '#2344E7',
-      exercises: [
-        { name: 'Values Duel', path: '/exercises/values-duel', description: 'Discover your top 5 core values through choices' },
-        { name: 'Values Compass', path: '/exercises/values-compass', description: 'Rate 8 life directions with interactive compass' },
-        { name: 'Bull\'s Eye', path: '/exercises/bulls-eye', description: 'Visualize your values alignment on a target' },
-        { name: 'Life Domains', path: '/exercises/life-domains', description: 'Assess satisfaction across 10 life areas' },
-        { name: 'What Matters Most', path: '/exercises/what-matters', description: 'Select and rank your core values' },
-        { name: 'Values in Action', path: '/exercises/values-in-action', description: 'Connect values to concrete actions' },
-      ],
-    },
-    {
-      id: 'defusion',
-      title: 'Cognitive Defusion',
-      description: 'Learn to observe thoughts without being controlled by them',
-      icon: Brain,
-      color: 'bg-midnight-purple',
-      accent: '#784A9F',
-      exercises: [
-        { name: 'Silly Voice', path: '/exercises/silly-voice', description: 'Transform thoughts with playful voices' },
-        { name: 'Thought Labels', path: '/exercises/thought-labels', description: 'Categorize thoughts to create distance' },
-        { name: 'Thank Your Mind', path: '/exercises/thank-your-mind', description: 'Gratitude practice for difficult thoughts' },
-        { name: 'Passengers on Bus', path: '/exercises/passengers-on-bus', description: 'ACT metaphor with animated journey' },
-        { name: 'Clouds in Sky', path: '/exercises/clouds-in-sky', description: 'Watch thoughts drift like clouds' },
-      ],
-    },
-    {
-      id: 'mindfulness',
-      title: 'Present Moment',
-      description: 'Develop awareness and connection to the here and now',
-      icon: Zap,
-      color: 'bg-lime-green',
-      accent: '#93F357',
-      exercises: [
-        { name: 'Mindful Walking', path: '/exercises/mindful-walking', description: 'Step-by-step walking meditation' },
-        { name: 'Eating Meditation', path: '/exercises/eating-meditation', description: '8-phase sensory eating practice' },
-        { name: 'Sound Awareness', path: '/exercises/sound-awareness', description: 'Notice and log sounds around you' },
-        { name: 'Breath Counting', path: '/exercises/breath-counting', description: 'Count breaths with animated circle' },
-        { name: 'Progressive Muscle Relaxation', path: '/exercises/progressive-muscle-relaxation', description: 'Tense and release 12 muscle groups' },
-      ],
-    },
-    {
-      id: 'acceptance',
-      title: 'Acceptance',
-      description: 'Practice opening up to difficult emotions and experiences',
-      icon: Heart,
-      color: 'bg-brand-pink',
-      accent: '#FE97BB',
-      exercises: [
-        { name: 'Tug of War', path: '/exercises/tug-of-war', description: 'Interactive metaphor about dropping struggle' },
-        { name: 'Willingness Scale', path: '/exercises/willingness-scale', description: 'Assess willingness to feel for values' },
-        { name: 'Expansion', path: '/exercises/expansion', description: '4-step process to make space for emotions' },
-        { name: 'Emotional Surfing', path: '/exercises/emotional-surfing', description: 'Ride the wave of emotion' },
-        { name: 'Guest House', path: '/exercises/guest-house', description: 'Welcome all emotional visitors' },
-      ],
-    },
-    {
-      id: 'action',
-      title: 'Committed Action',
-      description: 'Set goals and take steps aligned with your values',
-      icon: CheckSquare,
-      color: 'bg-inferno-red',
-      accent: '#EC4625',
-      exercises: [
-        { name: 'SMART Goals', path: '/exercises/smart-goals', description: 'Create specific, measurable goals' },
-        { name: 'Barrier Busting', path: '/exercises/barrier-busting', description: 'Plan for obstacles with if-then strategies' },
-        { name: 'Values-Based Scheduling', path: '/exercises/values-based-scheduling', description: 'Schedule time for what matters' },
-        { name: 'Committed Action Tracker', path: '/exercises/committed-action-tracker', description: 'Track valued actions and celebrate progress' },
-        { name: 'Valued Living Questionnaire', path: '/exercises/valued-living-questionnaire', description: 'Assess importance vs. consistency' },
-      ],
-    },
-  ];
+  const completionRate = Math.round(
+    (completedExerciseIds.size / Math.max(totalTrackableExercises, 1)) * 100
+  );
+
+  const topValues = useMemo(() => {
+    if (values.length > 0) {
+      return [...values]
+        .sort((left, right) => {
+          if (right.importance !== left.importance) {
+            return right.importance - left.importance;
+          }
+
+          return left.alignment - right.alignment;
+        })
+        .slice(0, 5)
+        .map((value) => ({
+          name: value.category,
+          description: value.description,
+          importance: value.importance,
+          alignment: value.alignment,
+        }));
+    }
+
+    return readStoredTopValues().map((value) => ({
+      ...value,
+      importance: null,
+      alignment: null,
+    }));
+  }, [values]);
+
+  const favoriteExercises = useMemo(
+    () =>
+      favorites
+        .map((favorite) => exerciseById.get(favorite.exerciseId))
+        .filter((exercise): exercise is NonNullable<(typeof exerciseCatalog)[number]> => Boolean(exercise)),
+    [favorites]
+  );
+
+  const recentExercises = useMemo(
+    () =>
+      progressEntries
+        .filter((entry) => entry.completed)
+        .sort(
+          (left, right) =>
+            new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
+        )
+        .map((entry) => ({ entry, exercise: getMostRecentExercise(entry) }))
+        .filter(
+          (
+            item
+          ): item is {
+            entry: ProgressEntry;
+            exercise: NonNullable<ReturnType<typeof getMostRecentExercise>>;
+          } => Boolean(item.exercise)
+        )
+        .slice(0, 3),
+    [progressEntries]
+  );
+
+  const activeActions = useMemo(
+    () =>
+      actions
+        .filter((action) => !action.completed)
+        .sort((left, right) => {
+          if (!left.dueDate) {
+            return 1;
+          }
+
+          if (!right.dueDate) {
+            return -1;
+          }
+
+          return new Date(left.dueDate).getTime() - new Date(right.dueDate).getTime();
+        })
+        .slice(0, 4),
+    [actions]
+  );
+
+  const practiceFlow = useMemo(
+    () => buildPracticeFlowModel(progressEntries, favorites, values, actions),
+    [progressEntries, favorites, values, actions]
+  );
+
+  const streak = stats?.currentStreak ?? 0;
+  const longestStreak = stats?.longestStreak ?? 0;
+  const practiceDays = stats?.practiceDays ?? 0;
+  const completedThisWeek = stats?.completedThisWeek ?? 0;
+  const primaryRecommendation = practiceFlow.primaryRecommendation;
+  const quickResumeRecommendation = practiceFlow.quickResumeRecommendation;
+  const moduleRecommendation = practiceFlow.moduleRecommendation;
+  const primaryFocus = primaryRecommendation?.exercise ?? null;
+  const quickResume = quickResumeRecommendation?.exercise ?? null;
+  const anchorValue = topValues[0] ?? null;
+  const todayAction = activeActions[0] ?? null;
+  const lastSessionExercise = getPracticeSessionExercise(practiceSession);
+  const lastSessionCard =
+    practiceSession &&
+    lastSessionExercise &&
+    practiceSession.exerciseId !== primaryFocus?.id &&
+    practiceSession.exerciseId !== quickResume?.id
+      ? {
+          exercise: lastSessionExercise,
+          relativeTime: formatPracticeSessionAge(practiceSession.visitedAt),
+        }
+      : null;
+  const primaryFocusButtonLabel =
+    practiceSession?.exerciseId === primaryFocus?.id ? 'Resume This Practice' : 'Start This Practice';
+
+  const processCards = practiceFlow.rankedProcesses;
 
   return (
     <div className="space-y-8">
-      <div className="text-center animate-fade-in">
-        <h1 className="text-4xl md:text-5xl font-header text-midnight-purple mb-2 hover-glow">
-          Welcome back, {userName}!
-        </h1>
-        <p className="text-xl text-gray-600 font-body">
-          Continue your journey toward psychological flexibility
-        </p>
-      </div>
+      <section className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+        <div className="overflow-hidden rounded-[2rem] border border-midnight-purple/10 bg-midnight-purple px-6 py-8 text-white shadow-2xl shadow-midnight-purple/15 sm:px-8 sm:py-10">
+          <div className="relative">
+            <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-electric-blue/20 blur-3xl" />
+            <p className="relative z-10 mb-3 font-subheader text-xs uppercase tracking-[0.24em] text-electric-blue/90">
+              Today&apos;s Focus
+            </p>
+            <h1 className="relative z-10 mb-3 font-header text-4xl md:text-5xl">
+              {user?.name ? `${user.name}, keep moving toward what matters.` : 'Keep moving toward what matters.'}
+            </h1>
+            <p className="relative z-10 max-w-2xl font-body text-base text-white/80 md:text-lg">
+              {primaryFocus
+                ? primaryRecommendation?.reason ?? `Start with ${primaryFocus.title}. One focused rep is more useful than trying to do everything at once.`
+                : 'Start with one small practice today. Momentum matters more than intensity.'}
+            </p>
 
-      {/* Top 5 Core Values Display */}
-      {topFiveValues.length === 5 && (
-        <div className="card bg-midnight-purple text-white hover-lift animate-slide-in-up">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-                <Sparkles size={24} className="text-white" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-header">Your Core Values</h2>
-                <p className="text-white/80 text-sm">What matters most to you</p>
-              </div>
-            </div>
-            <Link
-              to="/exercises/values-duel"
-              className="text-sm bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-all"
-            >
-              Retake
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            {topFiveValues.map((value, index) => (
-              <div
-                key={value.name}
-                className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/20 transition-all group"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-bold text-white/60">#{index + 1}</span>
-                  <Target size={16} className="text-lime-green group-hover:scale-110 transition-transform" />
+            {primaryFocus && (
+              <div className="relative z-10 mt-8 rounded-[1.75rem] border border-white/10 bg-white/10 p-5">
+                <p className="font-subheader text-[11px] uppercase tracking-[0.18em] text-electric-blue/90">
+                  {primaryRecommendation?.label ?? 'Best next exercise'}
+                </p>
+                <h2 className="mt-2 font-subheader text-2xl uppercase">{primaryFocus.title}</h2>
+                <p className="mt-3 max-w-2xl font-body text-sm leading-6 text-white/80">
+                  {primaryFocus.description}
+                </p>
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <Link to={primaryFocus.route} className="btn-primary bg-white text-midnight-purple hover:bg-parchment">
+                    {primaryFocusButtonLabel}
+                  </Link>
+                  <Link
+                    to="/coach"
+                    className="inline-flex items-center gap-2 rounded-2xl border border-white/20 px-5 py-3 font-subheader text-xs uppercase tracking-[0.18em] text-white transition hover:bg-white/10"
+                  >
+                    <span>Talk to Coach</span>
+                    <Sparkles size={16} />
+                  </Link>
                 </div>
-                <h3 className="text-lg font-bold text-white mb-1">{value.name}</h3>
-                <p className="text-xs text-white/70 line-clamp-2">{value.description}</p>
               </div>
-            ))}
+            )}
           </div>
+        </div>
+
+        <div className="card">
+          <div className="mb-5 flex items-center justify-between">
+            <div>
+              <p className="font-subheader text-xs uppercase tracking-[0.2em] text-gray-500">
+                Today Plan
+              </p>
+              <h2 className="mt-2 font-header text-2xl text-midnight-purple">Three things worth attention</h2>
+            </div>
+            <span className="rounded-full bg-electric-blue/10 px-3 py-1 font-subheader text-[11px] uppercase tracking-[0.18em] text-electric-blue">
+              {completionRate}% done
+            </span>
+          </div>
+
+          <div className="space-y-3">
+            <div className="rounded-[1.5rem] border border-midnight-purple/10 bg-midnight-purple/5 px-4 py-4">
+              <p className="font-subheader text-[11px] uppercase tracking-[0.18em] text-gray-500">Practice</p>
+              <p className="mt-2 font-subheader text-sm uppercase text-midnight-purple">
+                {primaryFocus?.title ?? 'Choose a first exercise'}
+              </p>
+              <p className="mt-2 font-body text-sm leading-6 text-gray-600">
+                {primaryRecommendation?.reason ??
+                  'Start your first exercise and momentum will begin to show up here.'}
+              </p>
+            </div>
+
+            <div className="rounded-[1.5rem] border border-midnight-purple/10 bg-white px-4 py-4">
+              <p className="font-subheader text-[11px] uppercase tracking-[0.18em] text-gray-500">Commitment</p>
+              <p className="mt-2 font-subheader text-sm uppercase text-midnight-purple">
+                {todayAction?.title ?? 'Create one committed action'}
+              </p>
+              <p className="mt-2 font-body text-sm leading-6 text-gray-600">
+                {todayAction
+                  ? `Due ${formatDueDate(todayAction.dueDate)}. ${trimDescription(todayAction.description ?? 'Keep this action small enough to complete this week.', 72)}`
+                  : 'Turn one value into a concrete move so the day has an intentional direction.'}
+              </p>
+            </div>
+
+            <div className="rounded-[1.5rem] border border-midnight-purple/10 bg-white px-4 py-4">
+              <p className="font-subheader text-[11px] uppercase tracking-[0.18em] text-gray-500">Anchor Value</p>
+              <p className="mt-2 font-subheader text-sm uppercase text-midnight-purple">
+                {anchorValue?.name ?? 'Clarify a value'}
+              </p>
+              <p className="mt-2 font-body text-sm leading-6 text-gray-600">
+                {anchorValue
+                  ? trimDescription(anchorValue.description)
+                  : 'Your values will appear here once you define what you want to stand for.'}
+              </p>
+            </div>
+
+            <div className="rounded-[1.5rem] border border-midnight-purple/10 bg-white px-4 py-4">
+              <p className="font-subheader text-[11px] uppercase tracking-[0.18em] text-gray-500">Practice Rhythm</p>
+              <p className="mt-2 font-subheader text-sm uppercase text-midnight-purple">
+                {completedThisWeek} reps this week across {practiceDays} practice days
+              </p>
+              <p className="mt-2 font-body text-sm leading-6 text-gray-600">
+                Consistency matters more than intensity. Keep the streak alive with one useful rep today.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {errorMessage && (
+        <div className="rounded-2xl border border-inferno-red/20 bg-inferno-red/5 px-5 py-4 text-sm text-inferno-red">
+          {errorMessage}
         </div>
       )}
 
-      <div className="card bg-midnight-purple text-white hover-lift animate-slide-in-up overflow-hidden relative">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-electric-blue opacity-10 rounded-full -mr-32 -mt-32"></div>
-        <div className="flex items-center justify-between relative z-10">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-header mb-2">ACT Hexaflex Model</h2>
-            <p className="text-white mb-4 font-body opacity-90">
-              Explore the six core processes of ACT
-            </p>
-            <Link
-              to="/hexaflex"
-              className="inline-flex items-center space-x-2 bg-white text-midnight-purple px-6 py-3 rounded-lg font-subheader uppercase tracking-wide hover:bg-parchment hover:scale-105 active:scale-95 transition-all shadow-lg"
-            >
-              <Hexagon size={20} />
-              <span>View Hexaflex</span>
-            </Link>
-          </div>
-          <Hexagon size={120} className="text-white opacity-20 hidden md:block animate-pulse-slow" />
+      {isLoading ? (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div
+              key={index}
+              className="h-40 animate-pulse rounded-[1.5rem] bg-white/70 shadow-lg"
+            />
+          ))}
         </div>
-      </div>
-
-      <div>
-        <h2 className="text-2xl font-header text-midnight-purple mb-6 animate-slide-in-up">Interactive Exercises</h2>
-        <div className="space-y-8">
-          {exerciseCategories.map((category, catIndex) => {
-            const Icon = category.icon;
-            return (
-              <div
-                key={category.id}
-                className="animate-slide-in-up"
-                style={{ animationDelay: `${catIndex * 0.1}s` }}
-              >
-                {/* Category Header */}
-                <div className="flex items-center space-x-3 mb-4">
-                  <div className={`w-12 h-12 rounded-xl ${category.color} flex items-center justify-center shadow-lg`}>
-                    <Icon size={24} className="text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-subheader text-midnight-purple uppercase">{category.title}</h3>
-                    <p className="text-sm text-gray-600 font-body">{category.description}</p>
-                  </div>
+      ) : (
+        <>
+          <section className="grid gap-6 lg:grid-cols-2">
+            <div className="card">
+              <div className="mb-5 flex items-center justify-between">
+                <div>
+                  <p className="font-subheader text-xs uppercase tracking-[0.2em] text-gray-500">
+                    Quick Resume
+                  </p>
+                  <h2 className="mt-2 font-header text-2xl text-midnight-purple">Return to what already works</h2>
                 </div>
-
-                {/* Exercise Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ml-0 md:ml-15">
-                  {category.exercises.map((exercise, exIndex) => {
-                    const exerciseId = exercise.path.replace('/exercises/', '');
-                    const isCompleted = completedExerciseIds.includes(exerciseId);
-
-                    return (
-                      <div
-                        key={exercise.path}
-                        className="card hover-lift group bg-white border-l-4 transition-all relative"
-                        style={{
-                          borderColor: category.accent,
-                          animationDelay: `${(catIndex * 0.1) + (exIndex * 0.05)}s`
-                        }}
-                      >
-                        {/* Favorite & Completed Icons */}
-                        <div className="absolute top-3 right-3 flex items-center space-x-2">
-                          {isCompleted && (
-                            <span title="Completed">
-                              <CheckCircle size={18} className="text-lime-green" />
-                            </span>
-                          )}
-                          <div onClick={(e) => e.preventDefault()}>
-                            <FavoriteButton
-                              exerciseId={exerciseId}
-                              exerciseName={exercise.name}
-                            />
-                          </div>
-                        </div>
-
-                        <Link to={exercise.path} className="block">
-                          <h4 className="font-subheader text-midnight-purple mb-2 uppercase text-sm group-hover:text-electric-blue transition-colors pr-16">
-                            {exercise.name}
-                          </h4>
-                          <p className="text-xs text-gray-600 font-body leading-relaxed">
-                            {exercise.description}
-                          </p>
-                          <div className="mt-3 text-electric-blue font-subheader text-xs uppercase flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <span>{isCompleted ? 'Redo' : 'Start'}</span>
-                            <span>→</span>
-                          </div>
-                        </Link>
-                      </div>
-                    );
-                  })}
-                </div>
+                <Link to="/modules" className="font-subheader text-xs uppercase tracking-[0.18em] text-electric-blue">
+                  All modules
+                </Link>
               </div>
-            );
-          })}
-        </div>
-      </div>
 
-      <div className="card bg-parchment border-2 border-midnight-purple animate-slide-in-up">
-        <h3 className="text-lg font-subheader text-midnight-purple mb-3 uppercase flex items-center space-x-2">
-          <span className="w-2 h-2 bg-midnight-purple rounded-full"></span>
-          <span>About ACT</span>
-        </h3>
-        <p className="text-gray-700 font-body leading-relaxed">
-          Acceptance and Commitment Therapy (ACT) helps you build psychological flexibility
-          through six core processes. Each exercise on this platform is designed to help you
-          develop these skills and live a more valued life.
-        </p>
-      </div>
+              <div className="space-y-3">
+                {lastSessionCard && practiceSession && (
+                  <Link
+                    to={practiceSession.route}
+                    className="group flex items-start justify-between rounded-[1.5rem] border border-electric-blue/15 bg-electric-blue/5 px-4 py-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                  >
+                    <div className="pr-4">
+                      <p className="font-subheader text-[11px] uppercase tracking-[0.18em] text-electric-blue">
+                        Last session
+                      </p>
+                      <h3 className="mt-2 font-subheader text-sm uppercase text-midnight-purple">
+                        {lastSessionCard.exercise.title}
+                      </h3>
+                      <p className="mt-2 font-body text-sm leading-6 text-gray-600">
+                        You last opened this {lastSessionCard.relativeTime}. If you were interrupted, this is the cleanest place to pick back up.
+                      </p>
+                    </div>
+                    <ArrowRight
+                      size={18}
+                      className="mt-1 text-electric-blue transition group-hover:translate-x-1"
+                    />
+                  </Link>
+                )}
+
+                {moduleRecommendation && (
+                  <div className="rounded-[1.5rem] border border-midnight-purple/10 bg-midnight-purple/5 px-4 py-4">
+                    <p className="font-subheader text-[11px] uppercase tracking-[0.18em] text-electric-blue">
+                      Recommended pathway
+                    </p>
+                    <p className="mt-2 font-subheader text-sm uppercase text-midnight-purple">
+                      {moduleRecommendation.module.title}
+                    </p>
+                    <p className="mt-2 font-body text-sm leading-6 text-gray-600">
+                      {moduleRecommendation.reason}
+                    </p>
+                    <p className="mt-3 font-subheader text-[11px] uppercase tracking-[0.18em] text-gray-500">
+                      {moduleRecommendation.progressLabel}
+                    </p>
+                  </div>
+                )}
+
+                {quickResume ? (
+                  <Link
+                    to={quickResume.route}
+                    className="group flex items-start justify-between rounded-[1.5rem] border border-midnight-purple/10 bg-white px-4 py-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                  >
+                    <div className="pr-4">
+                      <p className="font-subheader text-[11px] uppercase tracking-[0.18em] text-gray-500">
+                        {quickResumeRecommendation?.label ?? 'Resume next'}
+                      </p>
+                      <h3 className="mt-2 font-subheader text-sm uppercase text-midnight-purple">
+                        {quickResume.title}
+                      </h3>
+                      <p className="mt-2 font-body text-sm leading-6 text-gray-600">
+                        {quickResumeRecommendation?.reason ?? quickResume.description}
+                      </p>
+                    </div>
+                    <ArrowRight
+                      size={18}
+                      className="mt-1 text-electric-blue transition group-hover:translate-x-1"
+                    />
+                  </Link>
+                ) : (
+                  <div className="rounded-[1.5rem] border border-dashed border-midnight-purple/15 bg-midnight-purple/5 px-5 py-6 text-center">
+                    <CheckCircle2 className="mx-auto mb-3 text-lime-green" size={32} />
+                    <p className="font-body text-gray-700">
+                      Pick your first exercise and your dashboard will start adapting around it.
+                    </p>
+                  </div>
+                )}
+
+                {favoriteExercises.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-midnight-purple/15 bg-midnight-purple/5 px-4 py-6 text-center">
+                    <Heart className="mx-auto mb-2 text-brand-pink" size={28} />
+                    <p className="font-body text-sm text-gray-700">
+                      Tap hearts on exercises you want fast access to later.
+                    </p>
+                  </div>
+                ) : (
+                  favoriteExercises.slice(0, 2).map((exercise) => (
+                    <div
+                      key={exercise.id}
+                      className="flex items-start justify-between rounded-2xl border border-midnight-purple/10 bg-white px-4 py-4 shadow-sm"
+                    >
+                      <Link to={exercise.route} className="block flex-1 pr-4">
+                        <h3 className="font-subheader text-sm uppercase text-midnight-purple">
+                          {exercise.title}
+                        </h3>
+                        <p className="mt-2 font-body text-sm leading-6 text-gray-600">
+                          {exercise.description}
+                        </p>
+                      </Link>
+                      <FavoriteButton exerciseId={exercise.id} exerciseName={exercise.title} />
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="card">
+              <div className="mb-5 flex items-center justify-between">
+                <div>
+                  <p className="font-subheader text-xs uppercase tracking-[0.2em] text-gray-500">
+                    Active Commitments
+                  </p>
+                  <h2 className="mt-2 font-header text-2xl text-midnight-purple">Keep behavior moving</h2>
+                </div>
+                <Link to="/exercises/action" className="font-subheader text-xs uppercase tracking-[0.18em] text-electric-blue">
+                  Open planner
+                </Link>
+              </div>
+
+              {activeActions.length === 0 ? (
+                <div className="rounded-[1.5rem] border border-dashed border-midnight-purple/15 bg-midnight-purple/5 px-5 py-8 text-center">
+                  <ListTodo className="mx-auto mb-3 text-lime-green" size={32} />
+                  <p className="font-body text-gray-700">
+                    Turn a value into one small move. A useful dashboard starts with a useful commitment.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {activeActions.map((action) => (
+                    <div
+                      key={action.id}
+                      className="rounded-2xl border border-midnight-purple/10 bg-white px-4 py-4 shadow-sm"
+                    >
+                      <div className="mb-2 flex items-start justify-between gap-4">
+                        <div>
+                          <h3 className="font-subheader text-sm uppercase text-midnight-purple">
+                            {action.title}
+                          </h3>
+                          {action.description && (
+                            <p className="mt-2 font-body text-sm leading-6 text-gray-600">
+                              {action.description}
+                            </p>
+                          )}
+                        </div>
+                        <div className="rounded-full bg-lime-green/10 p-2 text-lime-green">
+                          <Clock3 size={16} />
+                        </div>
+                      </div>
+                      <p className="font-subheader text-[11px] uppercase tracking-[0.18em] text-gray-500">
+                        Due {formatDueDate(action.dueDate)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+            <div className="card">
+              <div className="mb-5 flex items-center justify-between">
+                <div>
+                  <p className="font-subheader text-xs uppercase tracking-[0.2em] text-gray-500">
+                    Values Anchor
+                  </p>
+                  <h2 className="mt-2 font-header text-2xl text-midnight-purple">
+                    What matters most right now
+                  </h2>
+                </div>
+                <Link to="/exercises/values" className="font-subheader text-xs uppercase tracking-[0.18em] text-electric-blue">
+                  Clarify values
+                </Link>
+              </div>
+
+              {topValues.length === 0 ? (
+                <div className="rounded-[1.5rem] border border-dashed border-midnight-purple/15 bg-midnight-purple/5 px-5 py-8 text-center">
+                  <Target className="mx-auto mb-3 text-electric-blue" size={32} />
+                  <p className="font-body text-gray-700">
+                    Start a values exercise to surface the directions you want your life to move toward.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {topValues.slice(0, 3).map((value, index) => (
+                    <div
+                      key={`${value.name}-${index}`}
+                      className="rounded-2xl border border-midnight-purple/10 bg-white px-4 py-4"
+                    >
+                      <div className="mb-2 flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-midnight-purple text-sm font-subheader text-white">
+                            {index + 1}
+                          </div>
+                          <h3 className="font-subheader text-sm uppercase text-midnight-purple">
+                            {value.name}
+                          </h3>
+                        </div>
+                        {'importance' in value && value.importance != null && (
+                          <span className="rounded-full bg-electric-blue/10 px-3 py-1 text-[11px] font-subheader uppercase tracking-[0.16em] text-electric-blue">
+                            {value.importance}/10
+                          </span>
+                        )}
+                      </div>
+                      <p className="font-body text-sm leading-6 text-gray-600">{value.description}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="card">
+              <div className="mb-5 flex items-center justify-between">
+                <div>
+                  <p className="font-subheader text-xs uppercase tracking-[0.2em] text-gray-500">
+                    Recent Wins
+                  </p>
+                  <h2 className="mt-2 font-header text-2xl text-midnight-purple">Momentum worth keeping</h2>
+                </div>
+                <Link to="/progress" className="font-subheader text-xs uppercase tracking-[0.18em] text-electric-blue">
+                  Full progress
+                </Link>
+              </div>
+
+              {recentExercises.length === 0 ? (
+                <div className="rounded-[1.5rem] border border-dashed border-midnight-purple/15 bg-midnight-purple/5 px-4 py-6 text-center">
+                  <CheckCircle2 className="mx-auto mb-2 text-lime-green" size={28} />
+                  <p className="font-body text-sm text-gray-700">
+                    Completed exercises will appear here once you start logging progress.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  {recentExercises.map(({ entry, exercise }) => (
+                    <div
+                      key={entry.id}
+                      className="rounded-2xl border border-midnight-purple/10 bg-white px-4 py-4 shadow-sm"
+                    >
+                      <div className="mb-2 flex items-center justify-between gap-4">
+                        <h3 className="font-subheader text-sm uppercase text-midnight-purple">
+                          {exercise.title}
+                        </h3>
+                        <CheckCircle2 size={18} className="text-lime-green" />
+                      </div>
+                      <p className="font-body text-sm text-gray-600">
+                        Completed {new Date(entry.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section className="space-y-4">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <p className="font-subheader text-xs uppercase tracking-[0.2em] text-gray-500">
+                  Strengthen By Process
+                </p>
+                <h2 className="mt-2 font-header text-2xl text-midnight-purple">
+                  Choose the ACT skill that needs attention next
+                </h2>
+              </div>
+              <div className="rounded-full bg-midnight-purple/5 px-4 py-2 text-center">
+                <p className="font-subheader text-[11px] uppercase tracking-[0.18em] text-gray-500">
+                  Streak
+                </p>
+                <p className="font-body text-sm font-semibold text-midnight-purple">
+                  {streak} days, best {longestStreak}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+              {processCards.map((process) => (
+                <Link
+                  key={process.id}
+                  to={process.continueExercise?.route ?? process.nextExercise?.route ?? '/modules'}
+                  className="card-hover group bg-white"
+                >
+                  <div className="mb-4 flex items-center justify-between">
+                    <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${process.colorClass} shadow-lg`}>
+                      <process.icon size={24} className="text-white" />
+                    </div>
+                    <ArrowRight size={16} className="text-electric-blue transition group-hover:translate-x-1" />
+                  </div>
+                  <h3 className="font-subheader text-sm uppercase text-midnight-purple">
+                    {process.title}
+                  </h3>
+                  <p className="mt-2 font-body text-sm leading-6 text-gray-600">
+                    {process.description}
+                  </p>
+                  <div className="mt-4">
+                    <div className="mb-2 flex items-center justify-between font-body text-sm text-gray-600">
+                      <span>{process.completedCount} complete</span>
+                      <span>{process.totalCount} total</span>
+                    </div>
+                    <div className="h-2 rounded-full bg-gray-100">
+                      <div
+                        className="h-2 rounded-full bg-electric-blue transition-all duration-700"
+                        style={{ width: `${(process.completedCount / Math.max(process.totalCount, 1)) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                  <p className="mt-4 font-subheader text-[11px] uppercase tracking-[0.18em] text-electric-blue">
+                    {process.continueExercise ? `Continue ${process.continueExercise.title}` : process.nextExercise ? `Start ${process.nextExercise.title}` : 'Review module'}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </section>
+        </>
+      )}
     </div>
   );
 }

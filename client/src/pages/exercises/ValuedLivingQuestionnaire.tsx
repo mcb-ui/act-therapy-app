@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ClipboardList, TrendingUp, TrendingDown } from 'lucide-react';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 interface Domain {
   name: string;
@@ -105,9 +106,7 @@ export default function ValuedLivingQuestionnaire() {
           </ul>
         </div>
 
-        <button onClick={() => window.history.back()} className="btn-primary w-full">
-          Complete Exercise
-        </button>
+        <ExerciseBackButton label="Complete Exercise" variant="primary" />
       </div>
     );
   }

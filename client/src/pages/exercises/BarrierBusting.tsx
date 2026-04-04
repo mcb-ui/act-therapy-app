@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Shield, Zap } from 'lucide-react';
+import ExerciseBackButton from '../../components/ExerciseBackButton';
 
 export default function BarrierBusting() {
   const [valuedAction, setValuedAction] = useState('');
@@ -61,7 +62,7 @@ export default function BarrierBusting() {
             type="text"
             value={currentSolution}
             onChange={(e) => setCurrentSolution(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && addBarrier()}
+            onKeyDown={(e) => e.key === 'Enter' && addBarrier()}
             placeholder="Solution (e.g., 'Lay out workout clothes the night before')"
             className="input-field w-full"
           />
@@ -111,9 +112,7 @@ export default function BarrierBusting() {
         </div>
       )}
 
-      <button onClick={() => window.history.back()} className="btn-secondary w-full">
-        Back to Exercises
-      </button>
+      <ExerciseBackButton label="Back to Modules" />
     </div>
   );
 }
